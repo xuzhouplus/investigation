@@ -11,9 +11,11 @@ use yii\db\ActiveRecord;
  * Class Approve
  * @package common\models
  * @property $id
- * @property $user_id int 用户id
- * @property $incarnation_id int 化身id
- * @property $order int 排序
+ * @property $user_id 用户id
+ * @property $incarnation_id 化身id
+ * @property $order 排序
+ * @property User $user 提交用户
+ * @property Incarnation $incarnation 化身
  */
 class Approve extends ActiveRecord
 {

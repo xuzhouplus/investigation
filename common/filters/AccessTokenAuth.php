@@ -25,7 +25,6 @@ class AccessTokenAuth extends AuthMethod
 	 */
 	public function authenticate($user, $request, $response)
 	{
-		\Yii::error($request->getHeaders()->toArray());
 		if ($request->isGet) {
 			$accessToken = $request->getQueryParam($this->tokenParam);
 		} else {

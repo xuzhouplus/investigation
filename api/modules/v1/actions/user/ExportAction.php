@@ -5,7 +5,6 @@ namespace api\modules\v1\actions\user;
 
 
 use api\modules\v1\models\User;
-use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 

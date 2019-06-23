@@ -25,12 +25,12 @@ class IndexAction extends Action
 			/* @var $modelClass User */
 			$modelClass = $this->modelClass;
 
-			$query = $modelClass::find()->select(['id', 'username', 'role', 'mobile', 'id_card', 'gender', 'age', 'department', 'created_at', 'updated_at', 'logged_at']);
+			$query = $modelClass::find()->select(['id', 'username', 'role', 'mobile', 'email', 'gender', 'age', 'department', 'created_at', 'updated_at', 'logged_at']);
 			$query->andFilterWhere(['id' => ArrayHelper::getValue($requestParams, 'id')]);
 			$query->andFilterWhere(['like', 'username', ArrayHelper::getValue($requestParams, 'username')]);
 			$query->andFilterWhere(['like', 'mobile', ArrayHelper::getValue($requestParams, 'mobile')]);
 			$query->andFilterWhere(['gender' => ArrayHelper::getValue($requestParams, 'gender')]);
-			$query->andFilterWhere(['like', 'id_card', ArrayHelper::getValue($requestParams, 'id_card')]);
+			$query->andFilterWhere(['like', 'email', ArrayHelper::getValue($requestParams, 'email')]);
 			$query->andFilterWhere(['like', 'department', ArrayHelper::getValue($requestParams, 'department')]);
 			$query->andFilterWhere(['age' => ArrayHelper::getValue($requestParams, 'age')]);
 			if (ArrayHelper::getValue($requestParams, 'role')) {

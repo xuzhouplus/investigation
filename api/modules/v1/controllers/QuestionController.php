@@ -8,6 +8,7 @@ use api\modules\v1\actions\question\CreateAction;
 use api\modules\v1\actions\question\DeleteAction;
 use api\modules\v1\actions\question\IndexAction;
 use api\modules\v1\actions\question\UpdateAction;
+use api\modules\v1\models\Question;
 use common\filters\AccessTokenAuth;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
@@ -16,7 +17,7 @@ use yii\rest\ActiveController;
 
 class QuestionController extends ActiveController
 {
-	public $modelClass = Type::class;
+	public $modelClass = Question::class;
 	public $optional = [
 	];
 

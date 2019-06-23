@@ -7,20 +7,21 @@ namespace api\modules\v1\actions\type;
 use api\modules\v1\models\Type;
 use yii\rest\Action;
 
+/**
+ * Class DeleteAction
+ * @package api\modules\v1\actions\type
+ * @property Type $modelClass
+ */
 class DeleteAction extends Action
 {
 	public function run()
 	{
 		try {
-			if (!Yii::$app->getUser()->getIdentity()->administrator()) {
+			if (!\Yii::$app->getUser()->getIdentity()->administrator()) {
 				throw new \Exception('你没有权限调用此接口');
 			}
 			$request = \Yii::$app->request;
-			/**
-			 * @var $model Type
-			 */
-			$model = $this->modelClass;
-			$result = $model::deleteType($request->getBodyParam('id'));
+			$result=call_user_func_array([$this->modelClass,'deleteType'],['data'=>$request->getBodyParams()]);
 			if ($result) {
 				return [
 					'code' => 200,

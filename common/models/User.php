@@ -20,8 +20,8 @@ use yii\web\IdentityInterface;
  * @property integer $id
  * @property string $username
  * @property string $password
+ * @property string $email
  * @property string $mobile
- * @property string $id_card
  * @property string $department
  * @property string $gender
  * @property string $age
@@ -121,7 +121,7 @@ class User extends ActiveRecord implements IdentityInterface
 	public static function findByLogin($login)
 	{
 		return static::find()->active()
-			->andWhere(['or', ['username' => $login], ['mobile' => $login]])
+			->andWhere(['or', ['username' => $login], ['mobile' => $login], ['email' => $login]])
 			->one();
 	}
 
@@ -149,25 +149,13 @@ class User extends ActiveRecord implements IdentityInterface
 	{
 		return [
 			['id', 'required', 'on' => ['update']],
-			[['username', 'mobile', 'password', 'id_card'], 'required', 'on' => ['create', 'update']],
-			[['username', 'mobile'], 'unique'],
-			[['username', 'mobile'], 'trim'],
+			[['username', 'mobile', 'email', 'password'], 'required', 'on' => ['create', 'update']],
+			[['username', 'mobile', 'email'], 'unique'],
+			[['username', 'mobile', 'email'], 'trim'],
 			[['username', 'department'], 'filter', 'filter' => '\yii\helpers\Html::encode'],
-			['id_card', IDCardValidate::class],
 			['mobile', 'match', 'pattern' => '/^1[3-9][0-9]{9}$/'],
-			['age', 'default', 'value' => function (User $model, $attribute) {
-				$IDCard = $model->getAttribute('id_card');
-				$year = substr($IDCard, 6, 4);
-				$monthDay = substr($IDCard, 10, 4);
-
-				$age = date('Y') - $year;
-				if ($monthDay > date('md')) {
-					$age--;
-				}
-				return $age;
-			}],
-			['age', 'integer'],
-			['age', 'compare', 'compareValue' => 0, 'operator' => '>='],
+			['age', 'required', 'on' => ['create']],
+			['age', 'integer', 'min' => 0],
 			['gender', 'default', 'value' => self::GENDER_MALE],
 			['gender', 'in', 'range' => [self::GENDER_MALE, self::GENDER_FEMALE]],
 			['role', 'default', 'value' => self::ROLE_USER],

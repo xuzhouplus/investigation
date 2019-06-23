@@ -6,6 +6,7 @@ namespace api\modules\v1\actions\user;
 
 use api\modules\v1\models\User;
 use yii\rest\Action;
+use Yii;
 
 class AuditAction extends Action
 {

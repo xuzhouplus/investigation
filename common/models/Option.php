@@ -13,6 +13,7 @@ use yii\helpers\ArrayHelper;
  * @package common\models
  * @property $id int
  * @property $question_id int 问题id
+ * @property string $description 描述
  * @property $name string 选项
  * @property $grades int 分值
  */
@@ -26,8 +27,8 @@ class Option extends ActiveRecord
 	public function rules()
 	{
 		return [
-			[['question_id', 'key', 'description', 'grades'], 'required', 'on' => ['create', 'update']],
-			[['key', 'description'], 'string', 'max' => 255],
+			[['question_id', 'name', 'description', 'grades'], 'required', 'on' => ['create', 'update']],
+			[['name', 'description'], 'string', 'max' => 255],
 			['grades', 'integer', 'min' => 0]
 		];
 	}
@@ -44,6 +45,7 @@ class Option extends ActiveRecord
 			$result = [];
 			foreach ($records as $record) {
 				$option = new Option();
+				$option->setScenario('create');
 				$option->load($record, '');
 				if ($option->validate()) {
 					$option->save();
@@ -66,32 +68,8 @@ class Option extends ActiveRecord
 		}
 	}
 
-	public static function batchUpdate($records, $index = null)
+	public static function batchDelete($questionID)
 	{
-		$transaction = self::getDb()->beginTransaction();
-		try {
-			$result = [];
-			foreach ($records as $record) {
-				$option = self::findOne(ArrayHelper::getValue($record, 'id'));
-				$option->load($record, '');
-				if ($option->validate()) {
-					$option->save();
-					if ($index && property_exists($option, $index)) {
-						$result[$option->getAttribute($index)] = $option;
-					} else {
-						$result[] = $option;
-					}
-				} else {
-					$errors = $option->getFirstErrors();
-					$error = reset($errors);
-					throw new \Exception($error);
-				}
-			}
-			$transaction->commit();
-			return $result;
-		} catch (\Exception $exception) {
-			$transaction->rollBack();
-			throw new \Exception($exception);
-		}
+		return self::deleteAll(['question_id' => $questionID]);
 	}
 }

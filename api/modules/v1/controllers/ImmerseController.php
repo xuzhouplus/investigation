@@ -4,10 +4,8 @@
 namespace api\modules\v1\controllers;
 
 
-use api\modules\v1\actions\immerse\CreateAction;
-use api\modules\v1\actions\immerse\DeleteAction;
 use api\modules\v1\actions\immerse\IndexAction;
-use api\modules\v1\actions\immerse\UpdateAction;
+use api\modules\v1\actions\immerse\SubmitAction;
 use api\modules\v1\models\Immerse;
 use common\filters\AccessTokenAuth;
 use yii\filters\auth\CompositeAuth;
@@ -32,10 +30,8 @@ class ImmerseController extends ActiveController
 	protected function verbs()
 	{
 		return [
-			'create' => ['POST'],
-			'update' => ['POST', 'PUT', 'PATCH'],
-			'delete' => ['POST', 'DELETE'],
 			'index' => ['GET', 'POST', 'HEAD'],
+			'submit' => ['POST', 'PUT', 'PATCH'],
 		];
 	}
 
@@ -61,16 +57,8 @@ class ImmerseController extends ActiveController
 				'class' => IndexAction::class,
 				'modelClass' => $this->modelClass,
 			],
-			'delete' => [
-				'class' => DeleteAction::class,
-				'modelClass' => $this->modelClass,
-			],
-			'create' => [
-				'class' => CreateAction::class,
-				'modelClass' => $this->modelClass,
-			],
-			'update' => [
-				'class' => UpdateAction::class,
+			'submit' => [
+				'class' => SubmitAction::class,
 				'modelClass' => $this->modelClass,
 			]
 		]);

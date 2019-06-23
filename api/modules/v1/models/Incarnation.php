@@ -45,7 +45,11 @@ class Incarnation extends CommonIncarnation
 			if ($incarnation->save()) {
 				return $incarnation;
 			}
+			throw new \Exception('保存失败');
 		}
+		$errors = $incarnation->getFirstErrors();
+		$error = reset($errors);
+		throw new \Exception($error);
 	}
 
 	public static function remove($data)

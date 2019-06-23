@@ -5,7 +5,6 @@ namespace api\modules\v1\actions\incarnation;
 
 
 use api\modules\v1\models\Incarnation;
-use common\models\File;
 use yii\rest\Action;
 
 class UpdateAction extends Action

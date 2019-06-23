@@ -10,10 +10,12 @@ use yii\db\ActiveRecord;
  * 化身沉浸
  * Class Immerse
  * @package common\models
- * @property $id int
- * @property $user_id int 用户id
- * @property $incarnation_id int 化身id
- * @property $order int 排序
+ * @property int $id
+ * @property int $user_id 用户id
+ * @property int $incarnation_id 化身id
+ * @property int $order 排序
+ * @property Incarnation $incarnation 化身
+ * @property User $user 用户
  */
 class Immerse extends ActiveRecord
 {
