@@ -11,7 +11,7 @@
  Target Server Version : 50725
  File Encoding         : 65001
 
- Date: 21/06/2019 14:47:28
+ Date: 23/06/2019 22:09:50
 */
 
 SET NAMES utf8mb4;
@@ -24,11 +24,11 @@ DROP TABLE IF EXISTS `inv_advertisement`;
 CREATE TABLE `inv_advertisement`  (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '广告id',
   `incarnation_id` int(11) NOT NULL COMMENT '化身id',
-  `file_id` int(11) NOT NULL COMMENT '图片文件id',
+  `on_file_id` int(11) NOT NULL COMMENT '广告在化身上的图片文件id',
+  `side_file_id` int(11) NOT NULL COMMENT '广告在化身旁边的图片文件id',
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '广告描述',
-  `grades` int(1) NOT NULL COMMENT '分值',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for inv_answer
@@ -53,7 +53,12 @@ CREATE TABLE `inv_approve`  (
   `incarnation_id` int(10) NOT NULL COMMENT '化身id',
   `order` int(1) NULL DEFAULT NULL COMMENT '排序',
   PRIMARY KEY (`id`, `user_id`, `incarnation_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inv_approve
+-- ----------------------------
+INSERT INTO `inv_approve` VALUES (1, 10, 5, 6);
 
 -- ----------------------------
 -- Table structure for inv_file
@@ -67,7 +72,16 @@ CREATE TABLE `inv_file`  (
   `size` int(11) NULL DEFAULT NULL,
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inv_file
+-- ----------------------------
+INSERT INTO `inv_file` VALUES (15, 'http://inv.test/storage', '/1/9fJeKWi-OCY4l78Lq-RiOMTtilyLY6k-.png', 'image/png', 533781, 'QQ截图20161108124455.png');
+INSERT INTO `inv_file` VALUES (24, 'http://inv.test/storage', '/1/coNRWtx6Udmxdj2SoUhms4Jr5TksDoS3.png', 'image/png', 12137, 'recommend.png');
+INSERT INTO `inv_file` VALUES (25, 'http://inv.test/storage', '/1/jOHxKLn8SQ6GKHGzcMWDBEfjZrRJaCxe.png', 'image/png', 11956, 'audit.png');
+INSERT INTO `inv_file` VALUES (26, 'http://inv.test/storage', '/1/6rhHN8Qg6hY1mvsYtJhlNRaW-SPydZ6r.png', 'image/png', 12137, 'recommend.png');
+INSERT INTO `inv_file` VALUES (27, 'http://inv.test/storage', '/1/D0ltGCx7_weoAm1V85NxWoV9vJ0hHt_u.png', 'image/png', 11956, 'audit.png');
 
 -- ----------------------------
 -- Table structure for inv_immerse
@@ -79,7 +93,12 @@ CREATE TABLE `inv_immerse`  (
   `incarnation_id` int(11) NOT NULL COMMENT '化身id',
   `order` int(1) NULL DEFAULT NULL COMMENT '排序',
   PRIMARY KEY (`id`, `user_id`, `incarnation_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inv_immerse
+-- ----------------------------
+INSERT INTO `inv_immerse` VALUES (1, 10, 5, 6);
 
 -- ----------------------------
 -- Table structure for inv_incarnation
@@ -93,6 +112,11 @@ CREATE TABLE `inv_incarnation`  (
   `gender` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '性别',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inv_incarnation
+-- ----------------------------
+INSERT INTO `inv_incarnation` VALUES (5, 'xuzhou', '15', '123456', 'male');
 
 -- ----------------------------
 -- Table structure for inv_log
@@ -119,8 +143,33 @@ CREATE TABLE `inv_option`  (
   `question_id` int(11) NOT NULL,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `grades` int(11) NOT NULL DEFAULT 0,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inv_option
+-- ----------------------------
+INSERT INTO `inv_option` VALUES (1, 12, 'option', 6, 'desc');
+
+-- ----------------------------
+-- Table structure for inv_question
+-- ----------------------------
+DROP TABLE IF EXISTS `inv_question`;
+CREATE TABLE `inv_question`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '标题',
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '描述',
+  `type_id` int(11) NOT NULL COMMENT '类型id',
+  `incarnation_id` int(11) NULL DEFAULT NULL COMMENT '化身id',
+  `reverse` int(11) NOT NULL DEFAULT 1 COMMENT '答案分支是否反转,1否，2是',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inv_question
+-- ----------------------------
+INSERT INTO `inv_question` VALUES (12, '10asdasdasd', 'des', 1, NULL, 1);
 
 -- ----------------------------
 -- Table structure for inv_realistic_self
@@ -159,7 +208,12 @@ CREATE TABLE `inv_type`  (
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '问题类型',
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inv_type
+-- ----------------------------
+INSERT INTO `inv_type` VALUES (1, 'type', 'description');
 
 -- ----------------------------
 -- Table structure for inv_user
@@ -170,6 +224,7 @@ CREATE TABLE `inv_user`  (
   `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '用户名',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '密码',
   `auth_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
   `mobile` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机',
   `id_card` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '身份证',
   `gender` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '性别',
@@ -182,6 +237,16 @@ CREATE TABLE `inv_user`  (
   `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '用户状态，0待审核，1启用，2禁用',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of inv_user
+-- ----------------------------
+INSERT INTO `inv_user` VALUES (10, 'xuzhou', '$2y$13$LFT8x8uZRpLpRo91IblZ7.CdxVxKEyyNHcEjZjn6eXaURq1Rxdgo6', 'YKfHNcxpoY1qzVwQQbkxXuTWRxWuRLAW', NULL, '13288888889', '511111199911119999', 'male', 'cmc', 19, 'admin', '1560578345', '1560578345', '1561298498', '1');
+INSERT INTO `inv_user` VALUES (11, '许超password', '$2y$13$UH7T6q9OCBUDngS.8.KbjeEXditXdaVwAr0jr6fyhJVEbLMPOkvui', 'ws-vtd5reEzKCqfBE444LUfIL2MvpT9G', NULL, '13795699480', '513001199308310815', 'male', '华栖云', 25, 'admin', '1560856999', '1560856999', NULL, '1');
+INSERT INTO `inv_user` VALUES (12, '许超2', '$2y$13$opO/120rnCek5aw3b0Q.uOqZUxvUfVW5lhy5VphHZTsXWzlL5FnEW', 'hjVRmxJdVrnLzp8X4-Z4eibwlvdXpIce', NULL, '13795699481', '513001199308310815', 'male', '野鸡', 25, 'user', '1560859224', '1560859224', NULL, '1');
+INSERT INTO `inv_user` VALUES (13, '许超3', '$2y$13$yB7IoMFcsnB0VRpWXCmjVev3qNgDJTIgMsuI0ZQI4qvNPdXsSC0eS', 'KY2vwhkSorwSyqwUxcSZTYrygrussrDS', NULL, '13795699483', '513001199308310815', 'male', '野鸡', 25, 'user', '1560859251', '1560859251', NULL, '1');
+INSERT INTO `inv_user` VALUES (14, 'xuchao', '$2y$13$oUY61gRKEyTbJ1lnd6gI3.tP/zhwmssVYcenYMwbkX83id.rJDkwi', 'qDWSCwQeDBKGvoaAF4ZRqXVpN4hXYxiX', NULL, '13795699484', '513001199308310815', 'male', '野鸡', 25, 'user', '1560859348', '1560859348', '1560862615', '1');
+INSERT INTO `inv_user` VALUES (15, 'niubi', '$2y$13$Vn7htzsTPhoPcLzYu/WS4uR3RRUmCIEdfn1qLZYZem40IsSXyZB42', 'iMYCoyf0dB5F9HhUjjwcTpgvLoB55eaU', NULL, '13795699486', '513001199308310815', 'male', '野鸡', 25, 'user', '1560860447', '1560860447', NULL, '0');
 
 -- ----------------------------
 -- Table structure for inv_virtual_self
