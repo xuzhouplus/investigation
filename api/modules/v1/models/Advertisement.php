@@ -7,6 +7,7 @@ use common\models\Advertisement as CommonAdvertisement;
 use common\models\File;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 
 class Advertisement extends CommonAdvertisement
@@ -17,12 +18,12 @@ class Advertisement extends CommonAdvertisement
 		$query->andFilterWhere([self::tableName() . '.id' => ArrayHelper::getValue($data, 'id')]);
 		$query->andFilterWhere([self::tableName() . '.incarnation_id' => ArrayHelper::getValue($data, 'incarnation_id')]);
 		$query->andFilterWhere(['like', self::tableName() . '.description', ArrayHelper::getValue($data, 'description')]);
+		$page = ArrayHelper::getValue($data, 'page') ?: 1;
+		$pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => ArrayHelper::getValue($data, 'size', 10), 'page' => $page - 1]);
 		$dataProvider = Yii::createObject([
 			'class' => ActiveDataProvider::class,
 			'query' => $query,
-			'pagination' => [
-				'params' => $data,
-			],
+			'pagination' => $pagination,
 			'sort' => [
 				'params' => $data,
 			],

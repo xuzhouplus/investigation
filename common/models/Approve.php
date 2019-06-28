@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  * @property $id
  * @property $user_id 用户id
  * @property $incarnation_id 化身id
- * @property $order 排序
+ * @property $grades 得分
  * @property User $user 提交用户
  * @property Incarnation $incarnation 化身
  */
@@ -27,9 +27,10 @@ class Approve extends ActiveRecord
 	public function rules()
 	{
 		return [
-			[['user_id', 'incarnation_id', 'order'], 'required', 'on' => ['create', 'update']],
+			[['user_id', 'incarnation_id', 'grades'], 'required', 'on' => ['create', 'update']],
 			['id', 'required', 'on' => ['update']],
-			['order', 'integer', 'min' => 0]
+			['grades', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+			['grades', 'integer', 'min' => 0]
 		];
 	}
 

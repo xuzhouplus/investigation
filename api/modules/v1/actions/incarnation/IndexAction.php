@@ -6,6 +6,7 @@ namespace api\modules\v1\actions\incarnation;
 use api\modules\v1\models\Incarnation;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 
@@ -27,16 +28,19 @@ class IndexAction extends Action
 			$query->andFilterWhere(['id' => ArrayHelper::getValue($requestParams, 'id')]);
 			$query->andFilterWhere(['like', 'name', ArrayHelper::getValue($requestParams, 'username')]);
 			$query->andFilterWhere(['gender' => ArrayHelper::getValue($requestParams, 'gender')]);
+			$page = ArrayHelper::getValue($requestParams, 'page') ?: 1;
+			$pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => ArrayHelper::getValue($requestParams, 'size', 10), 'page' => $page - 1]);
 			$dataProvider = Yii::createObject([
 				'class' => ActiveDataProvider::class,
 				'query' => $query,
-				'pagination' => [
-					'params' => $requestParams,
-				],
+				'pagination' => $pagination,
 				'sort' => [
 					'params' => $requestParams,
 				],
 			]);
+			/**
+			 * @var $incarnations Incarnation[]
+			 */
 			$incarnations = $dataProvider->getModels();
 			$result = [];
 			foreach ($incarnations as $incarnation) {
@@ -44,6 +48,7 @@ class IndexAction extends Action
 					'id' => $incarnation->id,
 					'name' => $incarnation->name,
 					'description' => $incarnation->description,
+					'gender' => $incarnation->gender,
 					'file' => $incarnation->file->fileUrl()
 				];
 			}

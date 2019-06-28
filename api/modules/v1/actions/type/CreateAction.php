@@ -6,6 +6,7 @@ namespace api\modules\v1\actions\type;
 
 use api\modules\v1\models\Type;
 use yii\rest\Action;
+use Yii;
 
 /**
  * Class CreateAction
@@ -14,6 +15,8 @@ use yii\rest\Action;
  */
 class CreateAction extends Action
 {
+	public $scenario = 'create';
+
 	public function run()
 	{
 		$request = \Yii::$app->request;

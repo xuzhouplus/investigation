@@ -8,6 +8,11 @@ use api\modules\v1\models\Incarnation;
 use yii\rest\Action;
 use Yii;
 
+/**
+ * Class DeleteAction
+ * @package api\modules\v1\actions\incarnation
+ * @property Incarnation $modelClass
+ */
 class DeleteAction extends Action
 {
 	public function run()
@@ -16,11 +21,7 @@ class DeleteAction extends Action
 			if (!Yii::$app->getUser()->getIdentity()->administrator()) {
 				throw new \Exception('你没有权限调用此接口');
 			}
-			/**
-			 * @var $model Incarnation
-			 */
-			$model = $this->modelClass;
-			$result = $model::remove(\Yii::$app->request->getBodyParams());
+			$result = call_user_func_array([$this->modelClass, 'remove'], ['data' => Yii::$app->request->getBodyParam('id')]);
 			if ($result) {
 				return [
 					'code' => 200,

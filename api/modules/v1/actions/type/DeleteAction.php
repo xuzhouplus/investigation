@@ -21,7 +21,7 @@ class DeleteAction extends Action
 				throw new \Exception('你没有权限调用此接口');
 			}
 			$request = \Yii::$app->request;
-			$result=call_user_func_array([$this->modelClass,'deleteType'],['data'=>$request->getBodyParams()]);
+			$result=call_user_func_array([$this->modelClass,'deleteType'],['data'=>$request->getBodyParam('id')]);
 			if ($result) {
 				return [
 					'code' => 200,

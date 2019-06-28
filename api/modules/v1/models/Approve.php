@@ -54,7 +54,7 @@ class Approve extends CommonApprove
 				'incarnation_file' => $approve->incarnation->file->fileUrl(),
 				'user_id' => $approve->user->id,
 				'user_name' => $approve->user->username,
-				'order' => $approve->order
+				'grades' => $approve->grades
 			];
 		}
 		$pagination = $dataProvider->getPagination();
@@ -82,7 +82,7 @@ class Approve extends CommonApprove
 		 */
 		$exists = self::find()->where(['user_id' => $userID])->indexBy('incarnation_id')->all();
 
-		$order = ArrayHelper::getValue($data, 'order');
+		$order = ArrayHelper::getValue($data, 'grades');
 		if (is_string($order)) {
 			$order = json_decode($order, 'true');
 		}
@@ -91,25 +91,25 @@ class Approve extends CommonApprove
 			$result = [];
 			foreach ($order as $item) {
 				$incarnationID = ArrayHelper::getValue($item, 'incarnation_id');
-				$orderIndex = ArrayHelper::getValue($item, 'order');
+				$grades = ArrayHelper::getValue($item, 'grades');
 				if (isset($exists[$incarnationID])) {
-					$immerse = $exists[$incarnationID];
-					$immerse->setScenario('update');
+					$approve = $exists[$incarnationID];
+					$approve->setScenario('update');
 				} else {
-					$immerse = new Immerse();
-					$immerse->setScenario('create');
+					$approve = new Approve();
+					$approve->setScenario('create');
 				}
-				$immerse->user_id = $userID;
-				$immerse->incarnation_id = $incarnationID;
-				$immerse->order = $orderIndex;
-				if ($immerse->validate()) {
-					if ($immerse->save()) {
-						$result[] = $immerse;
-					}else {
+				$approve->user_id = $userID;
+				$approve->incarnation_id = $incarnationID;
+				$approve->grades = $grades;
+				if ($approve->validate()) {
+					if ($approve->save()) {
+						$result[$approve->incarnation_id] = $approve;
+					} else {
 						throw new \Exception('保存失败');
 					}
-				}else {
-					$errors = $immerse->getFirstErrors();
+				} else {
+					$errors = $approve->getFirstErrors();
 					$error = reset($errors);
 					throw new \Exception($error);
 				}

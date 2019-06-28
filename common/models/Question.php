@@ -42,11 +42,17 @@ class Question extends ActiveRecord
 		];
 	}
 
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
 	public function getType()
 	{
 		return $this->hasOne(Type::class, ['id' => 'type_id']);
 	}
 
+	/**
+	 * @return \yii\db\ActiveQuery
+	 */
 	public function getIncarnation()
 	{
 		return $this->hasOne(Incarnation::class, ['id' => 'incarnation_id']);

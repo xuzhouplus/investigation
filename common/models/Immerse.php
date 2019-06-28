@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  * @property int $id
  * @property int $user_id 用户id
  * @property int $incarnation_id 化身id
- * @property int $order 排序
+ * @property int $grades 得分
  * @property Incarnation $incarnation 化身
  * @property User $user 用户
  */
@@ -28,9 +28,10 @@ class Immerse extends ActiveRecord
 	public function rules()
 	{
 		return [
-			[['user_id', 'incarnation_id', 'order'], 'required', 'on' => ['create', 'update']],
+			[['user_id', 'incarnation_id', 'grades'], 'required', 'on' => ['create', 'update']],
 			['id', 'required', 'on' => ['update']],
-			['order', 'integer', 'min' => 0]
+			['grades', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+			['grades', 'integer', 'min' => 0]
 		];
 	}
 

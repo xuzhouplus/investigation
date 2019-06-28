@@ -6,6 +6,7 @@ namespace api\modules\v1\controllers;
 
 use api\modules\v1\actions\incarnation\CreateAction;
 use api\modules\v1\actions\incarnation\DeleteAction;
+use api\modules\v1\actions\incarnation\GradesAction;
 use api\modules\v1\actions\incarnation\IndexAction;
 use api\modules\v1\actions\incarnation\UpdateAction;
 use api\modules\v1\models\Incarnation;
@@ -31,6 +32,7 @@ class IncarnationController extends ActiveController
 			'update' => ['POST', 'PUT', 'PATCH'],
 			'delete' => ['POST', 'DELETE'],
 			'index' => ['GET', 'POST', 'HEAD'],
+			'grades' => ['GET', 'POST', 'PUT']
 		];
 	}
 
@@ -63,11 +65,14 @@ class IncarnationController extends ActiveController
 			'create' => [
 				'class' => CreateAction::class,
 				'modelClass' => $this->modelClass,
-				'checkAccess' => [$this, 'checkAccess']
 			],
 			'update' => [
 				'class' => UpdateAction::class,
 				'modelClass' => $this->modelClass,
+			],
+			'grades' => [
+				'class' => GradesAction::class,
+				'modelClass' => $this->modelClass
 			]
 		]);
 		return $parentActions;

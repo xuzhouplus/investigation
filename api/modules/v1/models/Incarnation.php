@@ -52,12 +52,12 @@ class Incarnation extends CommonIncarnation
 		throw new \Exception($error);
 	}
 
-	public static function remove($data)
+	public static function remove($id)
 	{
 		/**
 		 * @var $incarnation Incarnation
 		 */
-		$incarnation = self::find()->joinWith(['file'])->where([self::tableName() . '.id' => ArrayHelper::getValue($data, 'id')])->one();
+		$incarnation = self::find()->joinWith(['file'])->where([self::tableName() . '.id' => $id])->one();
 		return $incarnation->file->deleteFile() && $incarnation->delete();
 	}
 }

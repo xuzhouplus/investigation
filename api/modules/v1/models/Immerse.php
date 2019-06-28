@@ -55,7 +55,7 @@ class Immerse extends CommonImmerse
 				'incarnation_file' => $immerse->incarnation->file->fileUrl(),
 				'user_id' => $immerse->user->id,
 				'user_name' => $immerse->user->username,
-				'order' => $immerse->order
+				'grades' => $immerse->grades
 			];
 		}
 		$pagination = $dataProvider->getPagination();
@@ -83,7 +83,7 @@ class Immerse extends CommonImmerse
 		 */
 		$exists = self::find()->where(['user_id' => $userID])->indexBy('incarnation_id')->all();
 
-		$order = ArrayHelper::getValue($data, 'order');
+		$order = ArrayHelper::getValue($data, 'grades');
 		if (is_string($order)) {
 			$order = json_decode($order, 'true');
 		}
@@ -92,7 +92,7 @@ class Immerse extends CommonImmerse
 			$result = [];
 			foreach ($order as $item) {
 				$incarnationID = ArrayHelper::getValue($item, 'incarnation_id');
-				$orderIndex = ArrayHelper::getValue($item, 'order');
+				$grades = ArrayHelper::getValue($item, 'grades');
 				if (isset($exists[$incarnationID])) {
 					$immerse = $exists[$incarnationID];
 					$immerse->setScenario('update');
@@ -102,14 +102,14 @@ class Immerse extends CommonImmerse
 				}
 				$immerse->user_id = $userID;
 				$immerse->incarnation_id = $incarnationID;
-				$immerse->order = $orderIndex;
+				$immerse->grades = $grades;
 				if ($immerse->validate()) {
 					if ($immerse->save()) {
-						$result[] = $immerse;
-					}else {
+						$result[$immerse->incarnation_id] = $immerse;
+					} else {
 						throw new \Exception('保存失败');
 					}
-				}else {
+				} else {
 					$errors = $immerse->getFirstErrors();
 					$error = reset($errors);
 					throw new \Exception($error);

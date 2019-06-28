@@ -14,6 +14,8 @@ use yii\rest\Action;
  */
 class UpdateAction extends Action
 {
+	public $scenario = 'update';
+
 	public function run()
 	{
 		try {

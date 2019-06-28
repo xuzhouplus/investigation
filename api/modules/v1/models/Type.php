@@ -4,6 +4,8 @@
 namespace api\modules\v1\models;
 
 use common\models\Type as CommonType;
+use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -12,6 +14,29 @@ use yii\helpers\ArrayHelper;
  */
 class Type extends CommonType
 {
+	public static function getList($data)
+	{
+		$query = self::find();
+		$query->andFilterWhere(['id' => ArrayHelper::getValue($data, 'id')]);
+		$query->andFilterWhere(['like', 'name', ArrayHelper::getValue($data, 'username')]);
+		$page = ArrayHelper::getValue($data, 'page') ?: 1;
+		$pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => ArrayHelper::getValue($data, 'size') ?: 10, 'page' => $page - 1]);
+		$dataProvider = new ActiveDataProvider([
+				'query' => $query,
+				'pagination' => $pagination
+			]
+		);
+		$pagination = $dataProvider->getPagination();
+		return [
+			'size' => $pagination->getPageSize(),
+			'count' => $pagination->getPageCount(),
+			'page' => ($pagination->getPage() + 1),
+			'total' => $pagination->totalCount,
+			'offset' => $pagination->getOffset(),
+			'types' => $dataProvider->getModels(),
+		];
+	}
+
 	/**
 	 * @param $data
 	 * @return Type
@@ -42,7 +67,7 @@ class Type extends CommonType
 			throw new \Exception('类型不存在');
 		}
 		$type->setScenario('update');
-		if ($type->load($data) && $type->validate()) {
+		if ($type->load($data, '') && $type->validate()) {
 			$type->save();
 			return $type;
 		}

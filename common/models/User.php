@@ -159,7 +159,9 @@ class User extends ActiveRecord implements IdentityInterface
 			['gender', 'default', 'value' => self::GENDER_MALE],
 			['gender', 'in', 'range' => [self::GENDER_MALE, self::GENDER_FEMALE]],
 			['role', 'default', 'value' => self::ROLE_USER],
-			['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMINISTRATOR]]
+			['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMINISTRATOR]],
+			['status', 'default', 'value' => self::STATUS_INACTIVE],
+			['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]]
 		];
 	}
 

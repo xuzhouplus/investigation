@@ -226,7 +226,6 @@ CREATE TABLE `inv_user`  (
   `auth_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
   `mobile` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机',
-  `id_card` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '身份证',
   `gender` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '性别',
   `department` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '单位',
   `age` int(3) NULL DEFAULT NULL COMMENT '年龄',
@@ -241,12 +240,12 @@ CREATE TABLE `inv_user`  (
 -- ----------------------------
 -- Records of inv_user
 -- ----------------------------
-INSERT INTO `inv_user` VALUES (10, 'xuzhou', '$2y$13$LFT8x8uZRpLpRo91IblZ7.CdxVxKEyyNHcEjZjn6eXaURq1Rxdgo6', 'YKfHNcxpoY1qzVwQQbkxXuTWRxWuRLAW', NULL, '13288888889', '511111199911119999', 'male', 'cmc', 19, 'admin', '1560578345', '1560578345', '1561298498', '1');
-INSERT INTO `inv_user` VALUES (11, '许超password', '$2y$13$UH7T6q9OCBUDngS.8.KbjeEXditXdaVwAr0jr6fyhJVEbLMPOkvui', 'ws-vtd5reEzKCqfBE444LUfIL2MvpT9G', NULL, '13795699480', '513001199308310815', 'male', '华栖云', 25, 'admin', '1560856999', '1560856999', NULL, '1');
-INSERT INTO `inv_user` VALUES (12, '许超2', '$2y$13$opO/120rnCek5aw3b0Q.uOqZUxvUfVW5lhy5VphHZTsXWzlL5FnEW', 'hjVRmxJdVrnLzp8X4-Z4eibwlvdXpIce', NULL, '13795699481', '513001199308310815', 'male', '野鸡', 25, 'user', '1560859224', '1560859224', NULL, '1');
-INSERT INTO `inv_user` VALUES (13, '许超3', '$2y$13$yB7IoMFcsnB0VRpWXCmjVev3qNgDJTIgMsuI0ZQI4qvNPdXsSC0eS', 'KY2vwhkSorwSyqwUxcSZTYrygrussrDS', NULL, '13795699483', '513001199308310815', 'male', '野鸡', 25, 'user', '1560859251', '1560859251', NULL, '1');
-INSERT INTO `inv_user` VALUES (14, 'xuchao', '$2y$13$oUY61gRKEyTbJ1lnd6gI3.tP/zhwmssVYcenYMwbkX83id.rJDkwi', 'qDWSCwQeDBKGvoaAF4ZRqXVpN4hXYxiX', NULL, '13795699484', '513001199308310815', 'male', '野鸡', 25, 'user', '1560859348', '1560859348', '1560862615', '1');
-INSERT INTO `inv_user` VALUES (15, 'niubi', '$2y$13$Vn7htzsTPhoPcLzYu/WS4uR3RRUmCIEdfn1qLZYZem40IsSXyZB42', 'iMYCoyf0dB5F9HhUjjwcTpgvLoB55eaU', NULL, '13795699486', '513001199308310815', 'male', '野鸡', 25, 'user', '1560860447', '1560860447', NULL, '0');
+INSERT INTO `inv_user` VALUES (10, 'xuzhou', '$2y$13$LFT8x8uZRpLpRo91IblZ7.CdxVxKEyyNHcEjZjn6eXaURq1Rxdgo6', 'YKfHNcxpoY1qzVwQQbkxXuTWRxWuRLAW', NULL, '13288888889', 'male', 'cmc', 19, 'admin', '1560578345', '1560578345', '1561298498', '1');
+INSERT INTO `inv_user` VALUES (11, '许超password', '$2y$13$UH7T6q9OCBUDngS.8.KbjeEXditXdaVwAr0jr6fyhJVEbLMPOkvui', 'ws-vtd5reEzKCqfBE444LUfIL2MvpT9G', NULL, '13795699480', 'male', '华栖云', 25, 'admin', '1560856999', '1560856999', NULL, '1');
+INSERT INTO `inv_user` VALUES (12, '许超2', '$2y$13$opO/120rnCek5aw3b0Q.uOqZUxvUfVW5lhy5VphHZTsXWzlL5FnEW', 'hjVRmxJdVrnLzp8X4-Z4eibwlvdXpIce', NULL, '13795699481', 'male', '野鸡', 25, 'user', '1560859224', '1560859224', NULL, '1');
+INSERT INTO `inv_user` VALUES (13, '许超3', '$2y$13$yB7IoMFcsnB0VRpWXCmjVev3qNgDJTIgMsuI0ZQI4qvNPdXsSC0eS', 'KY2vwhkSorwSyqwUxcSZTYrygrussrDS', NULL, '13795699483', 'male', '野鸡', 25, 'user', '1560859251', '1560859251', NULL, '1');
+INSERT INTO `inv_user` VALUES (14, 'xuchao', '$2y$13$oUY61gRKEyTbJ1lnd6gI3.tP/zhwmssVYcenYMwbkX83id.rJDkwi', 'qDWSCwQeDBKGvoaAF4ZRqXVpN4hXYxiX', NULL, '13795699484', 'male', '野鸡', 25, 'user', '1560859348', '1560859348', '1560862615', '1');
+INSERT INTO `inv_user` VALUES (15, 'niubi', '$2y$13$Vn7htzsTPhoPcLzYu/WS4uR3RRUmCIEdfn1qLZYZem40IsSXyZB42', 'iMYCoyf0dB5F9HhUjjwcTpgvLoB55eaU', NULL, '13795699486', 'male', '野鸡', 25, 'user', '1560860447', '1560860447', NULL, '0');
 
 -- ----------------------------
 -- Table structure for inv_virtual_self
