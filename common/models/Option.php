@@ -11,11 +11,11 @@ use yii\helpers\ArrayHelper;
  * 调查问题选项
  * Class Option
  * @package common\models
- * @property $id int
- * @property $question_id int 问题id
+ * @property int $id
+ * @property int $question_id 问题id
  * @property string $description 描述
- * @property $name string 选项
- * @property $grades int 分值
+ * @property string $name 选项
+ * @property int $grades 分值
  */
 class Option extends ActiveRecord
 {

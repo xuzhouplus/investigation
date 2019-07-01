@@ -10,11 +10,11 @@ use api\modules\v1\actions\question\DeleteAction;
 use api\modules\v1\actions\question\IndexAction;
 use api\modules\v1\actions\question\UpdateAction;
 use api\modules\v1\actions\question\ViewAction;
+use api\modules\v1\models\Answer;
 use api\modules\v1\models\Question;
 use common\filters\AccessTokenAuth;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
-use yii\helpers\ArrayHelper;
 use yii\rest\ActiveController;
 
 class QuestionController extends ActiveController
@@ -57,27 +57,27 @@ class QuestionController extends ActiveController
 		$parentActions = [
 			'index' => [
 				'class' => IndexAction::class,
-				'modelClass' => $this->modelClass,
+				'modelClass' => Question::class,
 			],
 			'delete' => [
 				'class' => DeleteAction::class,
-				'modelClass' => $this->modelClass,
+				'modelClass' => Question::class,
 			],
 			'create' => [
 				'class' => CreateAction::class,
-				'modelClass' => $this->modelClass,
+				'modelClass' => Question::class,
 			],
 			'update' => [
 				'class' => UpdateAction::class,
-				'modelClass' => $this->modelClass,
+				'modelClass' => Question::class,
 			],
 			'view' => [
 				'class' => ViewAction::class,
-				'modelClass' => $this->modelClass
+				'modelClass' => Question::class
 			],
 			'answer' => [
 				'class' => AnswerAction::class,
-				'modelClass' => $this->modelClass
+				'modelClass' => Answer::class
 			]
 		];
 		return $parentActions;
