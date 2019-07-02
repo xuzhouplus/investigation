@@ -31,6 +31,9 @@ use yii\web\IdentityInterface;
  * @property integer $created_at
  * @property integer $updated_at
  * @property integer $status
+ * @property string $step
+ * @property string $stage
+ * @property string $round
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -50,6 +53,73 @@ class User extends ActiveRecord implements IdentityInterface
 	public static function tableName()
 	{
 		return '{{%user}}';
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function behaviors()
+	{
+		return [
+			TimestampBehavior::class,
+			'auth_key' => [
+				'class' => AttributeBehavior::class,
+				'attributes' => [
+					ActiveRecord::EVENT_BEFORE_INSERT => 'auth_key'
+				],
+				'value' => Yii::$app->getSecurity()->generateRandomString()
+			]
+		];
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function rules()
+	{
+		return [
+			['id', 'required', 'on' => ['update']],
+			[['username', 'mobile', 'email', 'password'], 'required', 'on' => ['create', 'update']],
+			[['username', 'mobile', 'email'], 'unique'],
+			[['username', 'mobile', 'email'], 'trim'],
+			[['username', 'department'], 'filter', 'filter' => '\yii\helpers\Html::encode'],
+			['mobile', 'match', 'pattern' => '/^1[3-9][0-9]{9}$/'],
+			['age', 'required', 'on' => ['create']],
+			['age', 'integer', 'min' => 0],
+			['gender', 'default', 'value' => self::GENDER_MALE],
+			['gender', 'in', 'range' => [self::GENDER_MALE, self::GENDER_FEMALE]],
+			['role', 'default', 'value' => self::ROLE_USER],
+			['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMINISTRATOR]],
+			['status', 'default', 'value' => self::STATUS_INACTIVE],
+			['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
+			[['step', 'round', 'stage'], 'string']
+		];
+	}
+
+	/**
+	 * @return array
+	 */
+	public function attributeLabels()
+	{
+		return [
+			'id' => '用户ID',
+			'username' => '姓名',
+			'password' => '密码',
+			'mobile' => '手机',
+			'email' => '邮箱',
+			'department' => '单位',
+			'gender' => '性别',
+			'age' => '年龄',
+			'role' => '角色',
+			'auth_key' => '授权码',
+			'logged_at' => '登录时间',
+			'created_at' => '创建时间',
+			'updated_at' => '更新时间',
+			'status' => '状态',
+			'step' => '答题步骤',
+			'stage' => '答题阶段',
+			'round' => '答题轮次'
+		];
 	}
 
 	/**
@@ -123,69 +193,6 @@ class User extends ActiveRecord implements IdentityInterface
 		return static::find()->active()
 			->andWhere(['or', ['username' => $login], ['mobile' => $login], ['email' => $login]])
 			->one();
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function behaviors()
-	{
-		return [
-			TimestampBehavior::class,
-			'auth_key' => [
-				'class' => AttributeBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => 'auth_key'
-				],
-				'value' => Yii::$app->getSecurity()->generateRandomString()
-			]
-		];
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function rules()
-	{
-		return [
-			['id', 'required', 'on' => ['update']],
-			[['username', 'mobile', 'email', 'password'], 'required', 'on' => ['create', 'update']],
-			[['username', 'mobile', 'email'], 'unique'],
-			[['username', 'mobile', 'email'], 'trim'],
-			[['username', 'department'], 'filter', 'filter' => '\yii\helpers\Html::encode'],
-			['mobile', 'match', 'pattern' => '/^1[3-9][0-9]{9}$/'],
-			['age', 'required', 'on' => ['create']],
-			['age', 'integer', 'min' => 0],
-			['gender', 'default', 'value' => self::GENDER_MALE],
-			['gender', 'in', 'range' => [self::GENDER_MALE, self::GENDER_FEMALE]],
-			['role', 'default', 'value' => self::ROLE_USER],
-			['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMINISTRATOR]],
-			['status', 'default', 'value' => self::STATUS_INACTIVE],
-			['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]]
-		];
-	}
-
-	/**
-	 * @return array
-	 */
-	public function attributeLabels()
-	{
-		return [
-			'id' => '用户ID',
-			'username' => '姓名',
-			'password' => '密码',
-			'mobile' => '手机',
-			'id_card' => '身份证',
-			'department' => '单位',
-			'gender' => '性别',
-			'age' => '年龄',
-			'role' => '角色',
-			'auth_key' => '授权码',
-			'logged_at' => '登录时间',
-			'created_at' => '创建时间',
-			'updated_at' => '更新时间',
-			'status' => '状态'
-		];
 	}
 
 	/**

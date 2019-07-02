@@ -10,6 +10,7 @@ use api\modules\v1\actions\user\IndexAction;
 use api\modules\v1\actions\user\LoginAction;
 use api\modules\v1\actions\user\RegisterAction;
 use api\modules\v1\actions\user\ResetPasswordAction;
+use api\modules\v1\actions\user\StateAction;
 use api\modules\v1\actions\user\ViewAction;
 use api\modules\v1\models\User;
 use common\filters\AccessTokenAuth;
@@ -93,6 +94,10 @@ class UserController extends ActiveController
 			'export' => [
 				'class' => ExportAction::class,
 				'modelClass' => $this->modelClass,
+			],
+			'state' => [
+				'class' => StateAction::class,
+				'modelClass' => $this->modelClass
 			]
 		];
 		return $parentActions;

@@ -27,12 +27,15 @@ class Question extends CommonQuestion
 		$query->andFilterWhere(['like', self::tableName() . '.title', ArrayHelper::getValue($data, 'title')]);
 		$query->andFilterWhere(['like', Incarnation::tableName() . '.name', ArrayHelper::getValue($data, 'incarnation_name')]);
 		$query->andFilterWhere(['like', Type::tableName() . '.name', ArrayHelper::getValue($data, 'type_name')]);
+		$query->groupBy([self::tableName() . '.id']);
 		$page = ArrayHelper::getValue($data, 'page') ?: 1;
-		$pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => ArrayHelper::getValue($data, 'size', 10), 'page' => $page - 1]);
 		$dataProvider = Yii::createObject([
 			'class' => ActiveDataProvider::class,
 			'query' => $query,
-			'pagination' => $pagination,
+			'pagination' => [
+				'page' => $page - 1,
+				'pageSize' => ArrayHelper::getValue($data, 'size', 10)
+			],
 			'sort' => [
 				'params' => $data,
 			],

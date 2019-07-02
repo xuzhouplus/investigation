@@ -1,6 +1,6 @@
 # 问题类型
 INSERT INTO `inv_type`(`id`, `name`, `description`) VALUES (1, '现实自我', '我认为现实中的自己');
-INSERT INTO `inv_type`(`id`, `name`, `description`) VALUES (2, '虚拟自我', '我任务这一个虚拟化身');
+INSERT INTO `inv_type`(`id`, `name`, `description`) VALUES (2, '虚拟自我', '我认为这一个虚拟化身');
 INSERT INTO `inv_type`(`id`, `name`, `description`) VALUES (3, '情绪量化', '当您在使用该化身时，会出现以下哪些情绪感受');
 
 # 化身文件

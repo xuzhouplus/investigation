@@ -71,7 +71,6 @@ class User extends CommonUser
 			}
 			$query->orderBy($order);
 		}
-		Yii::info($query->createCommand()->getRawSql());
 		$page = ArrayHelper::getValue($data, 'page') ?: 1;
 		$pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => ArrayHelper::getValue($data, 'size', 10), 'page' => $page - 1]);
 		$dataProvider = new ActiveDataProvider([
@@ -182,11 +181,100 @@ class User extends CommonUser
 	}
 
 	/**
-	 * @param $id
+	 * @param null $id
 	 * @return User|null
+	 * @throws \Throwable
 	 */
-	public static function view($id)
+	public static function view($id = null)
 	{
+		if (is_null($id)) {
+			$id = Yii::$app->getUser()->getIdentity()->getId();
+		}
 		return self::findOne($id);
+	}
+
+	/**
+	 * @param $states
+	 * @return User
+	 * @throws \Throwable
+	 */
+	public static function setStates($states)
+	{
+		/**
+		 * @var $loginUser User
+		 */
+		$loginUser = Yii::$app->getUser()->getIdentity();
+		if (is_string($states)) {
+			$states = json_decode($states, true);
+		}
+		$stage = ArrayHelper::getValue($states, 'stage');
+		if ($stage) {
+			$loginUser->stage = $stage;
+		}
+		$status = ArrayHelper::getValue($states, 'status');
+		if ($status) {
+			$loginUser->status = $status;
+		}
+		$step = ArrayHelper::getValue($states, 'step');
+		if ($step) {
+			$loginUser->step = $step;
+		}
+		$round = ArrayHelper::getValue($states, 'round');
+		if ($round) {
+			$loginUser->round = $round;
+		}
+		$loginUser->save();
+		return $loginUser;
+	}
+
+	/**
+	 * 设置用户所属答题阶段
+	 * @param $stage
+	 * @return User
+	 * @throws \Throwable
+	 */
+	public static function setStage($stage)
+	{
+		/**
+		 * @var $loginUser User
+		 */
+		$loginUser = Yii::$app->getUser()->getIdentity();
+		$loginUser->stage = $stage;
+		$loginUser->save();
+		return $loginUser;
+	}
+
+	/**
+	 * 设置用户答题步骤
+	 * @param $step
+	 * @return User
+	 * @throws \Throwable
+	 */
+	public static function setStep($step)
+	{
+		/**
+		 * @var $loginUser User
+		 */
+		$loginUser = Yii::$app->getUser()->getIdentity();
+		$loginUser->step = $step;
+		$loginUser->save();
+		return $loginUser;
+	}
+
+	/**
+	 * 设置用户答题轮次
+	 * @param $round
+	 * @return User
+	 * @throws \Throwable
+	 */
+	public static function setRound($round)
+	{
+		/**
+		 * @var $loginUser User
+		 */
+		$loginUser = Yii::$app->getUser()->getIdentity();
+		$loginUser->round = $round;
+		$loginUser->save();
+		return $loginUser;
 	}
 }
