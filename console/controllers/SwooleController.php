@@ -5,6 +5,8 @@ namespace console\controllers;
 
 use common\models\Answer;
 use common\models\Approve;
+use common\models\EgoAnswer;
+use common\models\EgoDifferences;
 use common\models\Immerse;
 use common\models\EgoQuestion;
 use common\models\User;
@@ -176,13 +178,59 @@ class SwooleController extends Controller
 	 */
 	public static function userEgoDifferences($taskData)
 	{
+		/**
+		 * @var $user User
+		 */
 		$user = ArrayHelper::getValue($taskData, 'user');
 		if (!$user) {
 			throw new \Exception('用户accessToken验证失败');
 		}
-		$inv_virtual_ego = Answer::find()->joinWith(['question'])->where([EgoQuestion::tableName() . '.type_id' => 1, Answer::tableName() . '.user_id' => $user->getId()])->all();
-		$realisticEgo=
-		$result = [];
-		return $result;
+		$virtualEgos = EgoAnswer::find()->joinWith(['question'])->where([EgoAnswer::tableName() . '.user_id' => $user->getId()])->andFilterWhere(['not', [EgoAnswer::tableName() . '.incarnation_id' => -1]])->all();
+		if (!$virtualEgos) {
+			throw new \Exception('虚拟自我答题为空');
+		}
+		$realisticEgos = EgoAnswer::find()->joinWith(['question'])->where([EgoAnswer::tableName() . '.user_id' => $user->getId(), EgoAnswer::tableName() . '.incarnation_id' => -1])->all();
+		if (!$realisticEgos) {
+			throw new \Exception('现实自我答题为空');
+		}
+		$realisticEgoGrades = [];
+		foreach ($realisticEgos as $realisticEgo) {
+			$questionType = $realisticEgo->question->type;
+			if (!isset($realisticEgoGrades[$questionType])) {
+				$realisticEgoGrades[$questionType] = 0;
+			}
+			$realisticEgoGrades[$questionType] = $realisticEgoGrades[$questionType] + $realisticEgo->grades;
+		}
+		$virtualEgoGrades = [];
+		foreach ($virtualEgos as $virtualEgo) {
+			$incarnationID = $virtualEgo->incarnation_id;
+			if (!isset($virtualEgoGrades[$incarnationID])) {
+				$virtualEgoGrades[$incarnationID] = [];
+			}
+			$questionType = $virtualEgo->question->type;
+			if (!isset($virtualEgoGrades[$incarnationID][$questionType])) {
+				$virtualEgoGrades[$incarnationID][$questionType] = 0;
+			}
+			$virtualEgoGrades[$incarnationID][$questionType] = $virtualEgoGrades[$incarnationID][$questionType] + $virtualEgo->grades;
+		}
+		$egoDifference = [];
+		foreach ($virtualEgoGrades as $incarnationID => $virtualEgoGrade) {
+			foreach ($virtualEgoGrade as $questionType => $virtualGrades) {
+				$realisticGrades = $realisticEgoGrades[$questionType];
+				$egoDifference[] = [
+					'user_id' => $user->getId(),
+					'incarnation_id' => $incarnationID,
+					'type' => $questionType,
+					'grades' => $virtualGrades - $realisticGrades
+				];
+			}
+		}
+		EgoDifferences::getDb()->createCommand()->batchInsert(EgoDifferences::tableName(), ['user_id', 'incarnation_id', 'type', 'grades'], $egoDifference)->execute();
+		return $egoDifference;
+	}
+
+	public static function divideIntoGroups($data)
+	{
+
 	}
 }
