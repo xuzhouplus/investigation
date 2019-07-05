@@ -33,6 +33,7 @@ class IndexAction extends Action
 				'data' => $result
 			];
 		} catch (\Exception $exception) {
+			Yii::error($exception->__toString());
 			return [
 				'code' => 300,
 				'message' => $exception->getMessage(),

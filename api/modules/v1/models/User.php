@@ -87,6 +87,22 @@ class User extends CommonUser
 				],
 			]
 		);
+		/**
+		 * @var $users User[]
+		 */
+		$users = $dataProvider->getModels();
+		foreach ($users as $index => $user) {
+			if ($user->incarnation_divide === null || $user->incarnation_divide == '') {
+				$user->incarnation_divide = Yii::$app->cache->get('incarnation_divide_' . $user->id) ?: '';
+			}
+			if ($user->ego_divide === null || $user->ego_divide == '') {
+				$user->ego_divide = Yii::$app->cache->get('ego_divide_' . $user->id) ?: '';
+			}
+			if ($user->advertisement_divide === null || $user->advertisement_divide == '') {
+				$user->advertisement_divide = Yii::$app->cache->get('advertisement_divide_' . $user->id) ?: '';
+			}
+			$users[$index] = $user;
+		}
 		$pagination = $dataProvider->getPagination();
 		return [
 			'size' => $pagination->getPageSize(),
@@ -94,7 +110,7 @@ class User extends CommonUser
 			'page' => ($pagination->getPage() + 1),
 			'total' => $pagination->totalCount,
 			'offset' => $pagination->getOffset(),
-			'users' => $dataProvider->getModels(),
+			'users' => $users,
 		];
 	}
 
@@ -225,16 +241,16 @@ class User extends CommonUser
 			$loginUser->round = $round;
 		}
 		$loginUser->save();
-		if($step==2){
+		if ($step == 2) {
 			Client::request([
-				'action'=>'userIncarnation',
-				'accessToken'=>$loginUser->generateAccessToken(),
+				'action' => 'userIncarnation',
+				'accessToken' => $loginUser->generateAccessToken(),
 			]);
 		}
-		if($step==4){
+		if ($step == 4) {
 			Client::request([
-				'action'=>'egoDifferences',
-				'accessToken'=>$loginUser->generateAccessToken(),
+				'action' => 'egoDifferences',
+				'accessToken' => $loginUser->generateAccessToken(),
 			]);
 		}
 		return $loginUser;

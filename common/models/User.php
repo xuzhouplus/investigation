@@ -34,6 +34,9 @@ use yii\web\IdentityInterface;
  * @property string $step
  * @property string $stage
  * @property string $round
+ * @property string $incarnation_divide
+ * @property string $ego_divide
+ * @property string $advertisement_divide
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -92,6 +95,7 @@ class User extends ActiveRecord implements IdentityInterface
 			['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMINISTRATOR]],
 			['status', 'default', 'value' => self::STATUS_ACTIVE],
 			['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
+			['round', 'default', 'value' => '0'],
 			[['step', 'round', 'stage'], 'string']
 		];
 	}
