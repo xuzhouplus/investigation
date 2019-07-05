@@ -3,10 +3,10 @@
 
 namespace api\modules\v1\models;
 
-use common\models\Option as CommonOption;
+use common\models\EgoOption as CommonEgoOption;
 use yii\helpers\ArrayHelper;
 
-class Option extends CommonOption
+class EgoOption extends CommonEgoOption
 {
 	/**
 	 * @param $questionID
@@ -28,7 +28,7 @@ class Option extends CommonOption
 	/**
 	 * 编辑
 	 * @param $data
-	 * @return Option|null
+	 * @return EgoOption|null
 	 * @throws \Exception
 	 */
 	public static function updateOptions($questionID, $options)

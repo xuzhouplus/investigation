@@ -4,14 +4,15 @@
  */
 
 $cache = [
-    'class' => yii\caching\FileCache::class,
-    'cachePath' => '@api/runtime/cache'
+	'class' => 'yii\redis\Cache',
+	'redis' => 'redis',
+	'keyPrefix' => 'INV_CACHE:',
 ];
 
 if (YII_ENV_DEV) {
-    $cache = [
-        'class' => yii\caching\DummyCache::class
-    ];
+	$cache = [
+		'class' => yii\caching\DummyCache::class
+	];
 }
 
 return $cache;

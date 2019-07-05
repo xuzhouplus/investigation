@@ -32,6 +32,6 @@ class Type extends ActiveRecord
 
 	public function getQuestion()
 	{
-		return $this->hasMany(Question::class, ['type_id' => 'id']);
+		return $this->hasMany(EgoQuestion::class, ['type_id' => 'id']);
 	}
 }

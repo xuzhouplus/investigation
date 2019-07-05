@@ -1,16 +1,16 @@
 <?php
 
 
-namespace api\modules\v1\actions\question;
+namespace api\modules\v1\actions\emotion;
 
 
-use api\modules\v1\models\Question;
+use api\modules\v1\models\EgoQuestion;
 use yii\rest\Action;
 
 /**
  * Class CreateAction
  * @package api\modules\v1\actions\question
- * @property Question $modelClass
+ * @property EgoQuestion $modelClass
  */
 class CreateAction extends Action
 {

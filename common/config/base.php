@@ -20,8 +20,17 @@ $config = [
 		],
 
 		'cache' => [
-			'class' => yii\caching\FileCache::class,
-			'cachePath' => '@common/runtime/cache'
+			'class' => 'yii\redis\Cache',
+			'redis' => 'redis',
+			'keyPrefix' => 'INV_CACHE:',
+		],
+
+		'redis' => [
+			'class' => 'yii\redis\Connection',
+			'hostname' => env('REDIS_HOST'),
+			'port' => env('REDIS_PORT', 6379),
+			'database' => env('REDIS_DATABASE', 0),
+			'password' => env('REDIS_PASSWORD', null) ?: null,
 		],
 
 		'commandBus' => [
@@ -79,10 +88,10 @@ $config = [
 						return sprintf('[%s][%s]', Yii::$app->id, $url);
 					},
 					'logVars' => [],
-					'logTable' => '{{%log}}'
+					'logTable' => '{{%system_log}}',
+					'exportInterval' => 1,
 				],
 				'file' => [
-					'enabled' => false,
 					'class' => 'yii\log\FileTarget',
 					'levels' => ['error', 'warning'],
 					'except' => ['yii\web\HttpException:*', 'yii\i18n\I18N\*'],
@@ -90,7 +99,7 @@ $config = [
 						$url = !Yii::$app->request->isConsoleRequest ? Yii::$app->request->getUrl() : null;
 						return sprintf('[%s][%s]', Yii::$app->id, $url);
 					},
-//					'logFile' => '/home/vagrant/code/investigation/api/runtime/log/app.log',
+					'logFile' => env('LOG_FILE'),
 				]
 			],
 		],
@@ -172,12 +181,9 @@ $config = [
 			'zh-CN' => '简体中文',
 			'pl-PL' => 'Polski (PL)',
 		],
+		'swoolePort' => env('SWOOLE_PORT')
 	],
 ];
-
-if (YII_ENV_PROD) {
-	$config['components']['log']['targets']['db']['enabled'] = true;
-}
 
 if (YII_ENV_DEV) {
 	$config['bootstrap'][] = 'gii';

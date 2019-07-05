@@ -3,17 +3,16 @@
 
 namespace api\modules\v1\models;
 
-use common\models\Answer as CommonAnswer;
+use common\models\EmotionAnswer as CommonEmotionAnswer;
 use Yii;
 use yii\helpers\ArrayHelper;
 
-class Answer extends CommonAnswer
+class EmotionAnswer extends CommonEmotionAnswer
 {
 	/**
 	 * @param $data
 	 * @return array
 	 * @throws \Throwable
-	 * @throws \yii\db\Exception
 	 */
 	public static function submit($data)
 	{
@@ -27,17 +26,18 @@ class Answer extends CommonAnswer
 					throw new \Exception('解析answers参数失败：' . json_last_error_msg());
 				}
 			}
-			$questionIDS = array_keys($answers);
-			self::deleteAll(['question_id' => $questionIDS, 'user_id' => $loginUser->getId()]);
+			self::deleteAll(['user_id' => $loginUser->getId()]);
+			$options = EmotionOption::find()->indexBy('id')->where(['id' => array_values($answers)])->all();
 			$answerData = [];
 			foreach ($answers as $questionID => $answerID) {
-				$option = EgoOption::find()->where(['id' => $answerID])->one();
-				$answerData[] = [
+				$option = ArrayHelper::getValue($options, $answerID);
+				$record = [
 					'question_id' => $questionID,
 					'user_id' => $loginUser->getId(),
 					'option_id' => $option->id,
 					'grades' => $option->grades
 				];
+				$answerData[] = $record;
 			}
 			if (!empty($answerData)) {
 				self::getDb()->createCommand()->batchInsert(self::tableName(), ['question_id', 'user_id', 'option_id', 'grades'], $answerData)->execute();

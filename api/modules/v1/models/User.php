@@ -3,6 +3,7 @@
 
 namespace api\modules\v1\models;
 
+use common\components\swoole\Client;
 use common\models\User as CommonUser;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -224,6 +225,18 @@ class User extends CommonUser
 			$loginUser->round = $round;
 		}
 		$loginUser->save();
+		if($step==2){
+			Client::request([
+				'action'=>'userIncarnation',
+				'accessToken'=>$loginUser->generateAccessToken(),
+			]);
+		}
+		if($step==4){
+			Client::request([
+				'action'=>'egoDifferences',
+				'accessToken'=>$loginUser->generateAccessToken(),
+			]);
+		}
 		return $loginUser;
 	}
 

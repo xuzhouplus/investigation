@@ -52,14 +52,15 @@
 		"trntv/sitemaped": "^0.1",
 		"yii2mod/yii2-swagger": "^1.1",
 		"phpoffice/phpspreadsheet": "^1.7",
-		"eaglewu/swoole-ide-helper": "dev-master"
+		"yiisoft/yii2-redis": "^2.0"
 	},
 	"require-dev": {
 		"yiisoft/yii2-debug": "^2.0.0",
 		"yiisoft/yii2-gii": "^2.0.0",
 		"yiisoft/yii2-faker": "^2.0.0",
 		"codeception/codeception": "2.4.0",
-		"codeception/verify": "^0.3.1"
+		"codeception/verify": "^0.3.1",
+		"eaglewu/swoole-ide-helper": "dev-master"
 	},
 	"autoload-dev": {
 		"psr-4": {

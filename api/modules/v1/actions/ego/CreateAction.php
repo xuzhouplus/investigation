@@ -1,29 +1,28 @@
 <?php
 
 
-namespace api\modules\v1\actions\question;
+namespace api\modules\v1\actions\ego;
 
 
-use api\modules\v1\models\Question;
+use api\modules\v1\models\EgoQuestion;
 use yii\rest\Action;
-use Yii;
 
 /**
- * Class UpdateAction
+ * Class CreateAction
  * @package api\modules\v1\actions\question
- * @property Question $modelClass
+ * @property EgoQuestion $modelClass
  */
-class UpdateAction extends Action
+class CreateAction extends Action
 {
-	public $scenario = 'update';
+	public $scenario = 'create';
 
 	public function run()
 	{
 		try {
-			if (!Yii::$app->getUser()->getIdentity()->administrator()) {
+			if (!\Yii::$app->getUser()->getIdentity()->administrator()) {
 				throw new \Exception('你没有权限调用此接口');
 			}
-			$result = call_user_func_array([$this->modelClass, 'updateQuestion'], ['data' => \Yii::$app->request->getBodyParams()]);
+			$result = call_user_func_array([$this->modelClass, 'createQuestion'], ['data' => \Yii::$app->request->getBodyParams()]);
 			return [
 				'code' => 200,
 				'message' => '新建成功',

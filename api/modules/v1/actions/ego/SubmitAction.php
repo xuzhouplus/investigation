@@ -1,19 +1,19 @@
 <?php
 
 
-namespace api\modules\v1\actions\question;
+namespace api\modules\v1\actions\ego;
 
 
-use api\modules\v1\models\Answer;
+use api\modules\v1\models\EgoAnswer;
 use Yii;
 use yii\rest\Action;
 
 /**
  * Class AnswerAction
- * @package api\modules\v1\actions\question
- * @property Answer $modelClass
+ * @package api\modules\v1\actions\ego
+ * @property EgoAnswer $modelClass
  */
-class AnswerAction extends Action
+class SubmitAction extends Action
 {
 	public function run()
 	{

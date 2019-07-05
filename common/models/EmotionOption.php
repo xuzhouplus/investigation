@@ -8,7 +8,7 @@ use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
- * 调查问题选项
+ * 自我调查问题选项
  * Class Option
  * @package common\models
  * @property int $id
@@ -17,11 +17,11 @@ use yii\helpers\ArrayHelper;
  * @property string $name 选项
  * @property int $grades 分值
  */
-class Option extends ActiveRecord
+class EmotionOption extends ActiveRecord
 {
 	public static function tableName()
 	{
-		return '{{%option}}';
+		return '{{%emotion_option}}';
 	}
 
 	public function rules()
@@ -35,7 +35,7 @@ class Option extends ActiveRecord
 
 	public function getQuestion()
 	{
-		return $this->hasOne(Question::class, ['id' => 'question_id']);
+		return $this->hasOne(EmotionQuestion::class, ['id' => 'question_id']);
 	}
 
 	public static function batchInsert($records, $index = null)
@@ -44,7 +44,7 @@ class Option extends ActiveRecord
 		try {
 			$result = [];
 			foreach ($records as $record) {
-				$option = new Option();
+				$option = new EgoOption();
 				$option->setScenario('create');
 				$option->load($record, '');
 				if ($option->validate()) {

@@ -90,7 +90,7 @@ class User extends ActiveRecord implements IdentityInterface
 			['gender', 'in', 'range' => [self::GENDER_MALE, self::GENDER_FEMALE]],
 			['role', 'default', 'value' => self::ROLE_USER],
 			['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMINISTRATOR]],
-			['status', 'default', 'value' => self::STATUS_INACTIVE],
+			['status', 'default', 'value' => self::STATUS_ACTIVE],
 			['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
 			[['step', 'round', 'stage'], 'string']
 		];
@@ -145,20 +145,19 @@ class User extends ActiveRecord implements IdentityInterface
 	 */
 	public static function findIdentityByAccessToken($token, $type = null)
 	{
-		if (YII_ENV_DEV) {
-			return static::find()->active()
-				->one();
-		}
 		switch ($type) {
 			case HttpBasicAuth::class:
-				Yii::error('HttpBasicAuth');
+				Yii::info('HttpBasicAuth');
 				break;
 			case HttpBearerAuth::class:
-				Yii::error('HttpBearerAuth');
+				Yii::info('HttpBearerAuth');
 				break;
 			case QueryParamAuth::class:
-				Yii::error('QueryParamAuth');
+				Yii::info('QueryParamAuth');
 				break;
+		}
+		if (!$token) {
+			return null;
 		}
 		$loginUser = Yii::$app->cache->get($token);
 		if (is_null($loginUser)) {

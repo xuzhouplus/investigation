@@ -72,7 +72,7 @@ class Immerse extends CommonImmerse
 	/**
 	 * 化身沉浸答卷提交
 	 * @param $data
-	 * @return Immerse|null
+	 * @return Immerse[]
 	 * @throws \Exception
 	 */
 	public static function submit($data)
@@ -87,39 +87,32 @@ class Immerse extends CommonImmerse
 		if (is_string($order)) {
 			$order = json_decode($order, 'true');
 		}
-		$transaction = Yii::$app->getDb()->beginTransaction();
-		try {
-			$result = [];
-			foreach ($order as $item) {
-				$incarnationID = ArrayHelper::getValue($item, 'incarnation_id');
-				$grades = ArrayHelper::getValue($item, 'grades');
-				if (isset($exists[$incarnationID])) {
-					$immerse = $exists[$incarnationID];
-					$immerse->setScenario('update');
-				} else {
-					$immerse = new Immerse();
-					$immerse->setScenario('create');
-				}
-				$immerse->user_id = $userID;
-				$immerse->incarnation_id = $incarnationID;
-				$immerse->grades = $grades;
-				if ($immerse->validate()) {
-					if ($immerse->save()) {
-						$result[$immerse->incarnation_id] = $immerse;
-					} else {
-						throw new \Exception('保存失败');
-					}
-				} else {
-					$errors = $immerse->getFirstErrors();
-					$error = reset($errors);
-					throw new \Exception($error);
-				}
+		$result = [];
+		foreach ($order as $item) {
+			$incarnationID = ArrayHelper::getValue($item, 'incarnation_id');
+			$grades = ArrayHelper::getValue($item, 'grades');
+			if (isset($exists[$incarnationID])) {
+				$immerse = $exists[$incarnationID];
+				$immerse->setScenario('update');
+			} else {
+				$immerse = new Immerse();
+				$immerse->setScenario('create');
 			}
-			$transaction->commit();
-			return $result;
-		} catch (\Exception $exception) {
-			$transaction->rollBack();
-			throw $exception;
+			$immerse->user_id = $userID;
+			$immerse->incarnation_id = $incarnationID;
+			$immerse->grades = $grades;
+			if ($immerse->validate()) {
+				if ($immerse->save()) {
+					$result[$immerse->incarnation_id] = $immerse;
+				} else {
+					throw new \Exception('保存失败');
+				}
+			} else {
+				$errors = $immerse->getFirstErrors();
+				$error = reset($errors);
+				throw new \Exception($error);
+			}
 		}
+		return $result;
 	}
 }

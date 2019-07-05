@@ -3,11 +3,11 @@
 
 namespace api\modules\v1\models;
 
-use common\models\Answer as CommonAnswer;
+use common\models\EgoAnswer as CommonEgoAnswer;
 use Yii;
 use yii\helpers\ArrayHelper;
 
-class Answer extends CommonAnswer
+class EgoAnswer extends CommonEgoAnswer
 {
 	/**
 	 * @param $data
@@ -20,6 +20,16 @@ class Answer extends CommonAnswer
 		$transaction = Yii::$app->getDb()->beginTransaction();
 		try {
 			$loginUser = Yii::$app->getUser()->getIdentity();
+			$deleteCondition = [
+				'user_id' => $loginUser->getId(),
+				'incarnation_id' => -1
+			];
+			$incarnationID = ArrayHelper::getValue($data, 'incarnation_id');
+			$incarnation = null;
+			if ($incarnationID) {
+				$incarnation = Incarnation::findOne($incarnationID);
+				$deleteCondition['incarnation_id'] = $incarnationID;
+			}
 			$answers = ArrayHelper::getValue($data, 'answers');
 			if (is_string($answers)) {
 				$answers = json_decode($answers, true);
@@ -27,20 +37,26 @@ class Answer extends CommonAnswer
 					throw new \Exception('解析answers参数失败：' . json_last_error_msg());
 				}
 			}
-			$questionIDS = array_keys($answers);
-			self::deleteAll(['question_id' => $questionIDS, 'user_id' => $loginUser->getId()]);
+			$deleteCondition['question_id'] = array_keys($answers);
+			self::deleteAll($deleteCondition);
+			$options = EgoOption::find()->indexBy('id')->where(['id' => array_values($answers)])->all();
 			$answerData = [];
 			foreach ($answers as $questionID => $answerID) {
-				$option = EgoOption::find()->where(['id' => $answerID])->one();
-				$answerData[] = [
+				$option = ArrayHelper::getValue($options, $answerID);
+				$record = [
 					'question_id' => $questionID,
 					'user_id' => $loginUser->getId(),
 					'option_id' => $option->id,
+					'incarnation_id' => -1,
 					'grades' => $option->grades
 				];
+				if ($incarnation) {
+					$record['incarnation_id'] = $incarnation->id;
+				}
+				$answerData[] = $record;
 			}
 			if (!empty($answerData)) {
-				self::getDb()->createCommand()->batchInsert(self::tableName(), ['question_id', 'user_id', 'option_id', 'grades'], $answerData)->execute();
+				self::getDb()->createCommand()->batchInsert(self::tableName(), ['question_id', 'user_id', 'option_id', 'incarnation_id', 'grades'], $answerData)->execute();
 			}
 			$transaction->commit();
 			return $answerData;

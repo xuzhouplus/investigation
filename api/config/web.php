@@ -5,7 +5,7 @@ $config = [
 	'defaultRoute' => 'site/index',
 	'bootstrap' => ['maintenance'],
 	'modules' => [
-		'v1' => \api\modules\v1\Module::class
+		'v1' => api\modules\v1\Module::class
 	],
 	'components' => [
 		'errorHandler' => [

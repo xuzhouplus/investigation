@@ -4,22 +4,22 @@
 namespace api\modules\v1\controllers;
 
 
-use api\modules\v1\actions\question\AnswerAction;
-use api\modules\v1\actions\question\CreateAction;
-use api\modules\v1\actions\question\DeleteAction;
-use api\modules\v1\actions\question\IndexAction;
-use api\modules\v1\actions\question\UpdateAction;
-use api\modules\v1\actions\question\ViewAction;
-use api\modules\v1\models\Answer;
-use api\modules\v1\models\Question;
+use api\modules\v1\actions\ego\SubmitAction;
+use api\modules\v1\actions\ego\CreateAction;
+use api\modules\v1\actions\ego\DeleteAction;
+use api\modules\v1\actions\ego\QuestionAction;
+use api\modules\v1\actions\ego\UpdateAction;
+use api\modules\v1\actions\ego\ViewAction;
+use api\modules\v1\models\EgoAnswer;
+use api\modules\v1\models\EgoQuestion;
 use common\filters\AccessTokenAuth;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\ActiveController;
 
-class QuestionController extends ActiveController
+class EgoController extends ActiveController
 {
-	public $modelClass = Question::class;
+	public $modelClass = EgoQuestion::class;
 	public $optional = [
 	];
 
@@ -32,9 +32,9 @@ class QuestionController extends ActiveController
 			'create' => ['POST'],
 			'update' => ['POST', 'PUT', 'PATCH'],
 			'delete' => ['POST', 'DELETE'],
-			'index' => ['GET', 'POST', 'HEAD'],
+			'question' => ['GET', 'POST', 'HEAD'],
 			'view' => ['GET', 'POST'],
-			'answer' => ['POST', 'PUT']
+			'submit' => ['POST', 'PUT']
 		];
 	}
 
@@ -55,29 +55,29 @@ class QuestionController extends ActiveController
 	public function actions()
 	{
 		$parentActions = [
-			'index' => [
-				'class' => IndexAction::class,
-				'modelClass' => Question::class,
+			'question' => [
+				'class' => QuestionAction::class,
+				'modelClass' => EgoQuestion::class,
 			],
 			'delete' => [
 				'class' => DeleteAction::class,
-				'modelClass' => Question::class,
+				'modelClass' => EgoQuestion::class,
 			],
 			'create' => [
 				'class' => CreateAction::class,
-				'modelClass' => Question::class,
+				'modelClass' => EgoQuestion::class,
 			],
 			'update' => [
 				'class' => UpdateAction::class,
-				'modelClass' => Question::class,
+				'modelClass' => EgoQuestion::class,
 			],
 			'view' => [
 				'class' => ViewAction::class,
-				'modelClass' => Question::class
+				'modelClass' => EgoQuestion::class
 			],
-			'answer' => [
-				'class' => AnswerAction::class,
-				'modelClass' => Answer::class
+			'submit' => [
+				'class' => SubmitAction::class,
+				'modelClass' => EgoAnswer::class
 			]
 		];
 		return $parentActions;

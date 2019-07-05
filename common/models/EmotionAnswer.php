@@ -16,11 +16,11 @@ use yii\db\ActiveRecord;
  * @property $option_id int 选项id
  * @property $grades int 得分
  */
-class Answer extends ActiveRecord
+class EmotionAnswer extends ActiveRecord
 {
 	public static function tableName()
 	{
-		return '{{%answer}}';
+		return '{{%emotion_answer}}';
 	}
 
 	public function rules()
@@ -39,11 +39,11 @@ class Answer extends ActiveRecord
 
 	public function getQuestion()
 	{
-		return $this->hasOne(Question::class, ['id' => 'question_id']);
+		return $this->hasOne(EmotionQuestion::class, ['id' => 'question_id']);
 	}
 
 	public function getOption()
 	{
-		return $this->hasOne(Option::class, ['id' => 'option_id']);
+		return $this->hasOne(EmotionOption::class, ['id' => 'option_id']);
 	}
 }

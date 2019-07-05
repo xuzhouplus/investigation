@@ -71,7 +71,7 @@ class Approve extends CommonApprove
 	/**
 	 * 化身认同答卷提交
 	 * @param $data
-	 * @return Approve|null
+	 * @return Approve[]
 	 * @throws \Exception
 	 */
 	public static function submit($data)
@@ -86,8 +86,6 @@ class Approve extends CommonApprove
 		if (is_string($order)) {
 			$order = json_decode($order, 'true');
 		}
-		$transaction = Yii::$app->getDb()->beginTransaction();
-		try {
 			$result = [];
 			foreach ($order as $item) {
 				$incarnationID = ArrayHelper::getValue($item, 'incarnation_id');
@@ -114,11 +112,6 @@ class Approve extends CommonApprove
 					throw new \Exception($error);
 				}
 			}
-			$transaction->commit();
 			return $result;
-		} catch (\Exception $exception) {
-			$transaction->rollBack();
-			throw $exception;
-		}
 	}
 }

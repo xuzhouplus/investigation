@@ -6,6 +6,7 @@ namespace api\modules\v1\actions\incarnation;
 
 use api\modules\v1\models\Approve;
 use api\modules\v1\models\Immerse;
+use common\components\swoole\Client;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\rest\Action;
@@ -29,37 +30,44 @@ class GradesAction extends Action
 					'data' => compact('approve', 'immerse')
 				];
 			} else {
-				$loginUser = Yii::$app->getUser()->getIdentity();
-				$requestParams = $request->getBodyParam('grades');
-				if (is_string($requestParams)) {
-					$requestParams = json_decode($requestParams, true);
-				}
-				$approves = ArrayHelper::getValue($requestParams, 'approve');
-				$approveSet = [];
-				foreach ($approves as $incarnationID => $approve) {
-					$approveSet[] = [
-						'incarnation_id' => $incarnationID,
-						'grades' => $approve
+				$transaction = Yii::$app->getDb()->beginTransaction();
+				try {
+					$loginUser = Yii::$app->getUser()->getIdentity();
+					$requestParams = $request->getBodyParam('grades');
+					if (is_string($requestParams)) {
+						$requestParams = json_decode($requestParams, true);
+					}
+					$approves = ArrayHelper::getValue($requestParams, 'approve');
+					$approveSet = [];
+					foreach ($approves as $incarnationID => $approve) {
+						$approveSet[] = [
+							'incarnation_id' => $incarnationID,
+							'grades' => $approve
+						];
+					}
+					$approveResult = Approve::submit(['user_id' => $loginUser->getId(), 'grades' => $approveSet]);
+					$immerses = ArrayHelper::getValue($requestParams, 'immerse');
+					$immerseSet = [];
+					foreach ($immerses as $incarnationID => $immerse) {
+						$immerseSet[] = [
+							'incarnation_id' => $incarnationID,
+							'grades' => $immerse
+						];
+					}
+					$immerseResult = Immerse::submit(['user_id' => $loginUser->getId(), 'grades' => $immerseSet]);
+					$transaction->commit();
+					return [
+						'code' => 200,
+						'message' => '获取成功',
+						'data' => [
+							'approve' => $approveResult,
+							'immerse' => $immerseResult
+						]
 					];
+				} catch (\Exception $exception) {
+					$transaction->rollBack();
+					throw $exception;
 				}
-				$approveResult = Approve::submit(['user_id' => $loginUser->getId(), 'grades' => $approveSet]);
-				$immerses = ArrayHelper::getValue($requestParams, 'immerse');
-				$immerseSet = [];
-				foreach ($immerses as $incarnationID => $immerse) {
-					$immerseSet[] = [
-						'incarnation_id' => $incarnationID,
-						'grades' => $immerse
-					];
-				}
-				$immerseResult = Immerse::submit(['user_id' => $loginUser->getId(), 'grades' => $immerseSet]);
-				return [
-					'code' => 200,
-					'message' => '获取成功',
-					'data' => [
-						'approve' => $approveResult,
-						'immerse' => $immerseResult
-					]
-				];
 			}
 		} catch (\Exception $exception) {
 			Yii::error($exception->__toString());
