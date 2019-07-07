@@ -28,7 +28,7 @@ class DeleteAction extends Action
 			}
 			throw new \Exception('删除失败');
 		} catch (\Exception $exception) {
-			return ['data' => new \stdClass(), 'message' => '登录失败：' . $exception->getMessage(), 'code' => 300];
+			return ['data' => new \stdClass(), 'message' => '删除失败：' . $exception->getMessage(), 'code' => 300];
 		}
 	}
 }

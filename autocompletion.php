@@ -25,6 +25,7 @@ class Yii extends \yii\BaseYii
  * @property trntv\glide\components\Glide $glide
  * @property trntv\bus\CommandBus $commandBus
  * @property \common\components\excel\UserExport $userExport
+ * @property Redis $redis
  */
 abstract class BaseApplication extends yii\base\Application
 {

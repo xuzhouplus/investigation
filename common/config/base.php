@@ -181,6 +181,7 @@ $config = [
 			'zh-CN' => '简体中文',
 			'pl-PL' => 'Polski (PL)',
 		],
+		'baseUrl' => env('BASE_URL'),
 		'swoolePort' => env('SWOOLE_PORT')
 	],
 ];

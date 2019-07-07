@@ -23,9 +23,50 @@ class Client
 		$swooleClient->send($requestData);
 		$receive = $swooleClient->recv();
 		$swooleClient->close();
-		\Yii::error($receive);
 		if ($receive != 'success') {
 			throw new \Exception('发送异步任务失败:' . $receive);
+		}
+	}
+
+	/**
+	 * redis加锁
+	 * @return array
+	 */
+	public static function lock()
+	{
+		$lockKey = 'lock_key';
+		$randValue = rand(10000, 99999);
+		$lock = \Yii::$app->redis->set($lockKey, $randValue, ['NX', 'EX' => 1]);
+		if ($lock) {
+			return compact('lockKey', 'randValue');
+		}
+		return [];
+	}
+
+	/**
+	 * redis解锁
+	 * @param $lockKey
+	 * @param $randValue
+	 */
+	public static function unlock($lockKey, $randValue = null)
+	{
+		if (is_array($lockKey)) {
+			$lockKey = ArrayHelper::getValue($lockKey, 'lockKey');
+			$randValue = ArrayHelper::getValue($lockKey, 'randValue');
+		}
+		//unlock
+		if (function_exists('shell_exec')) {
+			$script = 'if redis.call("get",KEYS[1]) == ARGV[1] then
+                              return redis.call("del",KEYS[1])
+                           else
+                              return 0
+                           end
+                           ';
+			\Yii::$app->redis->eval($script, [$lockKey, $randValue], 1);
+		} else {
+			if (\Yii::$app->redis->get($lockKey) == $randValue) {
+				\Yii::$app->redis->del($lockKey);
+			}
 		}
 	}
 }

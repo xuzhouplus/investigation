@@ -5,6 +5,7 @@ namespace api\modules\v1\controllers;
 
 use api\modules\v1\actions\user\AuditAction;
 use api\modules\v1\actions\user\DeleteAction;
+use api\modules\v1\actions\user\DivideAction;
 use api\modules\v1\actions\user\ExportAction;
 use api\modules\v1\actions\user\IndexAction;
 use api\modules\v1\actions\user\LoginAction;
@@ -43,6 +44,7 @@ class UserController extends ActiveController
 			'delete' => ['POST', 'DELETE'],
 			'index' => ['GET', 'POST', 'HEAD'],
 			'export' => ['GET', 'POST', 'HEAD'],
+			'divide'=>['POST']
 		];
 	}
 
@@ -98,6 +100,10 @@ class UserController extends ActiveController
 			'state' => [
 				'class' => StateAction::class,
 				'modelClass' => $this->modelClass
+			],
+			'divide'=>[
+				'class'=>DivideAction::class,
+				'modelClass'=>$this->modelClass
 			]
 		];
 		return $parentActions;
