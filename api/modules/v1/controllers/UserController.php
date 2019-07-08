@@ -44,7 +44,7 @@ class UserController extends ActiveController
 			'delete' => ['POST', 'DELETE'],
 			'index' => ['GET', 'POST', 'HEAD'],
 			'export' => ['GET', 'POST', 'HEAD'],
-			'divide'=>['POST']
+			'divide' => ['GET', 'POST']
 		];
 	}
 
@@ -101,9 +101,9 @@ class UserController extends ActiveController
 				'class' => StateAction::class,
 				'modelClass' => $this->modelClass
 			],
-			'divide'=>[
-				'class'=>DivideAction::class,
-				'modelClass'=>$this->modelClass
+			'divide' => [
+				'class' => DivideAction::class,
+				'modelClass' => $this->modelClass
 			]
 		];
 		return $parentActions;

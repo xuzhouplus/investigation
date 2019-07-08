@@ -19,12 +19,127 @@ class User extends CommonUser
 	public static function getList($data)
 	{
 		$query = self::find();
+		//当传递了divide且为true时，需要获取广告化身信息
+		if (ArrayHelper::getValue($data, 'divide')) {
+			$query->joinWith(['incarnation']);
+		}
+		$query->andFilterWhere([self::tableName() . '.id' => ArrayHelper::getValue($data, 'id')]);
+		$query->andFilterWhere(['like', self::tableName() . '.username', ArrayHelper::getValue($data, 'username')]);
+		$query->andFilterWhere(['like', self::tableName() . '.mobile', ArrayHelper::getValue($data, 'mobile')]);
+		$query->andFilterWhere([self::tableName() . '.gender' => ArrayHelper::getValue($data, 'gender')]);
+		$query->andFilterWhere(['like', self::tableName() . '.email', ArrayHelper::getValue($data, 'email')]);
+		$query->andFilterWhere(['like', self::tableName() . '.department', ArrayHelper::getValue($data, 'department')]);
+		$query->andFilterWhere([self::tableName() . '.incarnation_divide' => ArrayHelper::getValue($data, 'incarnation_id')]);
+		$query->andFilterWhere([self::tableName() . '.ego_divide' => ArrayHelper::getValue($data, 'ego_divide')]);
+		$query->andFilterWhere([self::tableName() . '.advertisement_divide' => ArrayHelper::getValue($data, 'advertisement_divide')]);
+		$query->andFilterWhere([self::tableName() . '.round' => ArrayHelper::getValue($data, 'round')]);
+		$query->andFilterWhere([self::tableName() . '.age' => ArrayHelper::getValue($data, 'age')]);
+		if (ArrayHelper::getValue($data, 'role')) {
+			$query->andFilterWhere([self::tableName() . '.role' => self::ROLE_USER]);
+		} else {
+			$queryRoles = ArrayHelper::getValue($data, 'role');
+			if ($queryRoles && is_string($queryRoles)) {
+				$firstChart = substr($queryRoles, 0, 1);
+				if ($firstChart == '[') {
+					$queryRoles = json_decode($queryRoles, true);
+				} else {
+					$queryRoles = explode(',', $queryRoles);
+				}
+			}
+			if (!empty($queryRoles)) {
+				$query->andFilterWhere([self::tableName() . '.role' => $queryRoles]);
+			}
+		}
+		if (ArrayHelper::getValue($data, 'status')) {
+			$query->andFilterWhere([self::tableName() . '.status' => self::STATUS_ACTIVE]);
+		} else {
+			$queryStatus = ArrayHelper::getValue($data, 'status');
+			if ($queryStatus && is_string($queryStatus)) {
+				$firstChart = substr($queryStatus, 0, 1);
+				if ($firstChart == '[') {
+					$queryStatus = json_decode($queryStatus, true);
+				} else {
+					$queryStatus = explode(',', $queryStatus);
+				}
+			}
+			if (!empty($queryStatus)) {
+				$query->andFilterWhere([self::tableName() . '.status' => $queryStatus]);
+			}
+		}
+		if (!empty($data['order'])) {
+			if (is_string($data['order'])) {
+				$data['order'] = json_decode($data['order'], true);
+			}
+			$order = [];
+			foreach ($data['order'] as $key => $sort) {
+				if (strtolower($sort) == 'asc') {
+					$order[self::tableName() . '.' . $key] = SORT_ASC;
+				} else {
+					$order[self::tableName() . '.' . $key] = SORT_DESC;
+				}
+			}
+			$query->orderBy($order);
+		}
+		$query->groupBy([self::tableName() . '.id']);
+		Yii::error($query->createCommand()->getRawSql());
+		$page = ArrayHelper::getValue($data, 'page') ?: 1;
+		$pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => ArrayHelper::getValue($data, 'size', 10), 'page' => $page - 1]);
+		$dataProvider = new ActiveDataProvider([
+				'query' => $query,
+				'pagination' => $pagination,
+				'sort' => [
+					'defaultOrder' => [
+						'created_at' => SORT_DESC,
+					],
+					'attributes' => [
+						'created_at'
+					]
+				],
+			]
+		);
+		/**
+		 * @var $users User[]
+		 */
+		$users = $dataProvider->getModels();
+		foreach ($users as $index => $user) {
+			if ($user->incarnation_divide === null || $user->incarnation_divide == '') {
+				$user->incarnation_divide = Yii::$app->cache->get('incarnation_divide_' . $user->id) ?: '';
+			}
+			if ($user->ego_divide === null || $user->ego_divide == '') {
+				$user->ego_divide = Yii::$app->cache->get('ego_divide_' . $user->id) ?: '';
+			}
+			if ($user->advertisement_divide === null || $user->advertisement_divide == '') {
+				$user->advertisement_divide = Yii::$app->cache->get('advertisement_divide_' . $user->id) ?: '';
+			}
+			if ($user->incarnation_id === null || $user->incarnation_id == '') {
+				$user->incarnation_id = Yii::$app->cache->get('advertisement_incarnation_' . $user->id) ?: '';
+			}
+			$users[$index] = $user;
+		}
+		$pagination = $dataProvider->getPagination();
+		return [
+			'size' => $pagination->getPageSize(),
+			'count' => $pagination->getPageCount(),
+			'page' => ($pagination->getPage() + 1),
+			'total' => $pagination->totalCount,
+			'offset' => $pagination->getOffset(),
+			'users' => $users,
+		];
+	}
+
+	public static function count($data)
+	{
+		$query = self::find();
 		$query->andFilterWhere(['id' => ArrayHelper::getValue($data, 'id')]);
 		$query->andFilterWhere(['like', 'username', ArrayHelper::getValue($data, 'username')]);
 		$query->andFilterWhere(['like', 'mobile', ArrayHelper::getValue($data, 'mobile')]);
 		$query->andFilterWhere(['gender' => ArrayHelper::getValue($data, 'gender')]);
 		$query->andFilterWhere(['like', 'email', ArrayHelper::getValue($data, 'email')]);
 		$query->andFilterWhere(['like', 'department', ArrayHelper::getValue($data, 'department')]);
+		$query->andFilterWhere(['incarnation_divide' => ArrayHelper::getValue($data, 'incarnation_divide')]);
+		$query->andFilterWhere(['ego_divide' => ArrayHelper::getValue($data, 'ego_divide')]);
+		$query->andFilterWhere(['advertisement_divide' => ArrayHelper::getValue($data, 'advertisement_divide')]);
+		$query->andFilterWhere(['round' => ArrayHelper::getValue($data, 'round')]);
 		$query->andFilterWhere(['age' => ArrayHelper::getValue($data, 'age')]);
 		if (ArrayHelper::getValue($data, 'role')) {
 			$query->andFilterWhere(['role' => self::ROLE_USER]);
@@ -58,60 +173,7 @@ class User extends CommonUser
 				$query->andFilterWhere(['status' => $queryStatus]);
 			}
 		}
-		if (!empty($data['order'])) {
-			if (is_string($data['order'])) {
-				$data['order'] = json_decode($data['order'], true);
-			}
-			$order = [];
-			foreach ($data['order'] as $key => $sort) {
-				if (strtolower($sort) == 'asc') {
-					$order[self::tableName() . '.' . $key] = SORT_ASC;
-				} else {
-					$order[self::tableName() . '.' . $key] = SORT_DESC;
-				}
-			}
-			$query->orderBy($order);
-		}
-		$page = ArrayHelper::getValue($data, 'page') ?: 1;
-		$pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => ArrayHelper::getValue($data, 'size', 10), 'page' => $page - 1]);
-		$dataProvider = new ActiveDataProvider([
-				'query' => $query,
-				'pagination' => $pagination,
-				'sort' => [
-					'defaultOrder' => [
-						'created_at' => SORT_DESC,
-					],
-					'attributes' => [
-						'created_at'
-					]
-				],
-			]
-		);
-		/**
-		 * @var $users User[]
-		 */
-		$users = $dataProvider->getModels();
-		foreach ($users as $index => $user) {
-			if ($user->incarnation_divide === null || $user->incarnation_divide == '') {
-				$user->incarnation_divide = Yii::$app->cache->get('incarnation_divide_' . $user->id) ?: '';
-			}
-			if ($user->ego_divide === null || $user->ego_divide == '') {
-				$user->ego_divide = Yii::$app->cache->get('ego_divide_' . $user->id) ?: '';
-			}
-			if ($user->advertisement_divide === null || $user->advertisement_divide == '') {
-				$user->advertisement_divide = Yii::$app->cache->get('advertisement_divide_' . $user->id) ?: '';
-			}
-			$users[$index] = $user;
-		}
-		$pagination = $dataProvider->getPagination();
-		return [
-			'size' => $pagination->getPageSize(),
-			'count' => $pagination->getPageCount(),
-			'page' => ($pagination->getPage() + 1),
-			'total' => $pagination->totalCount,
-			'offset' => $pagination->getOffset(),
-			'users' => $users,
-		];
+		return $query->count();
 	}
 
 	/**

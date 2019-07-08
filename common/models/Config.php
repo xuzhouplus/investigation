@@ -22,10 +22,16 @@ class Config extends ActiveRecord
 	const REQUIRED_TRUE = 1;
 	const REQUIRED_FALSE = 2;
 
-	const CONFIG_ROUND_KEY='round';
+	const CONFIG_ROUND_KEY = 'round';
 
 	public static function tableName()
 	{
 		return '{{%config}}';
+	}
+
+	public static function getRound()
+	{
+		$config = self::find()->select('value')->where(['name' => self::CONFIG_ROUND_KEY])->limit(1)->one();
+		return (int)$config->value;
 	}
 }

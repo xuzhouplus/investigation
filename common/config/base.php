@@ -59,6 +59,14 @@ $config = [
 
 		'mailer' => [
 			'class' => yii\swiftmailer\Mailer::class,
+			'transport' => [
+				'class' => 'Swift_SmtpTransport',
+				'host' => env('SMTP_HOST'),
+				'username' => env('SMTP_ACCOUNT'),
+				'password' => env('SMTP_PASSWORD'),
+				'port' => env('SMTP_PORT'),
+				'encryption' => env('SMTP_ENCRYPTION'),
+			],
 			'messageConfig' => [
 				'charset' => 'UTF-8',
 				'from' => env('ADMIN_EMAIL')
@@ -181,7 +189,8 @@ $config = [
 			'zh-CN' => '简体中文',
 			'pl-PL' => 'Polski (PL)',
 		],
-		'baseUrl' => env('BASE_URL'),
+		'frontendBaseUrl' => env('FRONTEND_BASE_URL'),
+		'backendBaseUrl' => env('BACKEND_BASE_URL'),
 		'swoolePort' => env('SWOOLE_PORT')
 	],
 ];

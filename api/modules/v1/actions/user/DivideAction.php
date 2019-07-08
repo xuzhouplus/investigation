@@ -14,6 +14,7 @@ class DivideAction extends Action
 {
 	public function run()
 	{
+		$request = Yii::$app->request;
 		try {
 			/**
 			 * @var $loginUser User
@@ -22,14 +23,14 @@ class DivideAction extends Action
 			if (!$loginUser->administrator()) {
 				throw new \Exception('你没有权限调用此接口');
 			}
-			$request = \Yii::$app->request;
-			if ($request->getBodyParam('action')) {
+
+			if (!$request->getBodyParam('lock')) {
 				$lock = Client::lock();
 				if ($lock) {
 					Client::request([
 						'action' => 'divideIntoGroups',
 						'accessToken' => $loginUser->generateAccessToken(),
-						'callback' => ArrayHelper::getValue(Yii::$app->params, 'baseUrl'),
+						'callback' => ArrayHelper::getValue(Yii::$app->params, 'backendBaseUrl'),
 						'lock' => $lock
 					]);
 				} else {

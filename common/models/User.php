@@ -37,6 +37,7 @@ use yii\web\IdentityInterface;
  * @property string $incarnation_divide
  * @property string $ego_divide
  * @property string $advertisement_divide
+ * @property int $incarnation_id
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -49,6 +50,13 @@ class User extends ActiveRecord implements IdentityInterface
 	const STATUS_NEW = 0;
 	const STATUS_ACTIVE = 1;
 	const STATUS_INACTIVE = 2;
+
+	//化身分组标识，1大，2小，3不分组
+	const INCARNATION_DIVIDE_LEVEL = ['1', '2', '3'];
+	//情绪差异分组标识，1正大，2正小，3负大，4负小，5不分组
+	const EGO_DIVIDE_LEVEL = ['1', '2', '3', '4', '5'];
+	//广告分组，1有广告，2无广告
+	const ADVERTISEMENT_DIVIDE_LEVEL = ['1', '2'];
 
 	/**
 	 * @inheritdoc
@@ -207,6 +215,15 @@ class User extends ActiveRecord implements IdentityInterface
 	}
 
 	/**
+	 * 获取广告答题落在的化身
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getIncarnation()
+	{
+		return $this->hasOne(Incarnation::class, ['id' => 'incarnation_id']);
+	}
+
+	/**
 	 * @inheritdoc
 	 */
 	public function getAuthKey()
@@ -263,6 +280,24 @@ class User extends ActiveRecord implements IdentityInterface
 		$accessToken = Yii::$app->getSecurity()->generateRandomString(40);
 		Yii::$app->cache->set($accessToken, $this->getId());
 		return $accessToken;
+	}
+
+	public function generateCaptcha()
+	{
+		$accessToken = Yii::$app->getSecurity()->generateRandomString(6);
+		Yii::$app->cache->set($accessToken, $this->getId());
+		return $accessToken;
+	}
+
+	public function validateCaptcha($captcha)
+	{
+		$loginUser = Yii::$app->cache->get($captcha);
+		if (is_null($loginUser)) {
+			return null;
+		}
+		return static::find()->active()
+			->andWhere(['id' => $loginUser])
+			->one();
 	}
 
 	public function administrator()
