@@ -12,9 +12,7 @@ use yii\db\ActiveRecord;
  * @property int $id
  * @property string $title
  * @property string $description
- * @property int $file_id
- * @property File $file
- * @property AdvertisementOption $option
+ * @property AdvertisementOption[] $option
  */
 class AdvertisementQuestion extends ActiveRecord
 {
@@ -35,10 +33,5 @@ class AdvertisementQuestion extends ActiveRecord
 	public function getOption()
 	{
 		return $this->hasMany(AdvertisementOption::class, ['question_id' => 'id']);
-	}
-
-	public function getFile()
-	{
-		return $this->hasOne(File::class, ['id' => 'file_id']);
 	}
 }

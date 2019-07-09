@@ -17,14 +17,28 @@ class CaptchaAction extends Action
 			/**
 			 * @var $loginUser User
 			 */
-			$loginUser = Yii::$app->getUser()->getIdentity();
+			$request = Yii::$app->request;
+			if ($request->getBodyParam('access_token')) {
+				$loginUser = User::findIdentityByAccessToken($request->getBodyParam('access_token'));
+				if (!$loginUser) {
+					throw new \Exception('access_token验证失败');
+				}
+			} else {
+				$loginUser = User::findByUsername($request->getBodyParam('username'));
+				if (!$loginUser) {
+					throw new \Exception('用户不存在');
+				}
+				if (!$loginUser->validateEmail($request->getBodyParam('email'))) {
+					throw new \Exception('邮箱验证失败');
+				}
+			}
 			$accessToken = $loginUser->generateAccessToken();
 			Client::request([
 				'action' => 'mailer',
 				'view' => '@console/mail/views/Captcha',
 				'params' => [
 					'topic' => '验证码',
-					'captcha'=>$loginUser->generateCaptcha()
+					'captcha' => $loginUser->generateCaptcha()
 				],
 				'accessToken' => $accessToken
 			]);

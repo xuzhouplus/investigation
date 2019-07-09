@@ -12,7 +12,7 @@ use yii\rest\Action;
 use Yii;
 
 /**
- * Class IndexAction
+ * Class QuestionAction
  * @package api\modules\v1\actions\type
  * @property Type $modelClass
  */

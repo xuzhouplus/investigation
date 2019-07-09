@@ -1,19 +1,20 @@
 <?php
 
 
-namespace api\modules\v1\actions\ego;
+namespace api\modules\v1\actions\brand;
 
 
 use api\modules\v1\models\EgoQuestion;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 
 /**
- * Class QuestionAction
- * @package api\modules\v1\actions\question
- * @property  EgoQuestion $modelClass
+ * Class ViewAction
+ * @package api\modules\v1\actions\brand
+ * @property EgoQuestion $modelClass
  */
-class QuestionAction extends Action
+class ViewAction extends Action
 {
 	public function run()
 	{
@@ -22,7 +23,7 @@ class QuestionAction extends Action
 			if (empty($requestParams)) {
 				$requestParams = Yii::$app->getRequest()->getQueryParams();
 			}
-			$result = call_user_func_array([$this->modelClass, 'getList'], ['data' => $requestParams]);
+			$result = call_user_func_array([$this->modelClass, 'getView'], ['id' => ArrayHelper::getValue($requestParams, 'id')]);
 			return [
 				'code' => 200,
 				'message' => '获取成功',

@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use common\components\validate\IDCardValidate;
 use common\models\query\UserQuery;
 use Yii;
 use yii\behaviors\AttributeBehavior;
@@ -11,7 +10,6 @@ use yii\db\ActiveRecord;
 use yii\filters\auth\HttpBasicAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
-use yii\helpers\ArrayHelper;
 use yii\web\IdentityInterface;
 
 /**
@@ -38,6 +36,13 @@ use yii\web\IdentityInterface;
  * @property string $ego_divide
  * @property string $advertisement_divide
  * @property int $incarnation_id
+ * @property int $advertisement_grades
+ * @property AdvertisementAnswer $advertisementAnswer
+ * @property Incarnation $incarnation
+ * @property Approve $approve
+ * @property Immerse $immerse
+ * @property EgoAnswer $egoAnswer
+ * @property EmotionAnswer $emotionAnswer
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -224,6 +229,51 @@ class User extends ActiveRecord implements IdentityInterface
 	}
 
 	/**
+	 * 品牌记忆答题
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getAdvertisementAnswer()
+	{
+		return $this->hasMany(AdvertisementAnswer::class, ['user_id' => 'id']);
+	}
+
+	/**
+	 * 化身认同答题
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getApprove()
+	{
+		return $this->hasMany(Approve::class, ['user_id' => 'id']);
+	}
+
+	/**
+	 * 化身沉浸答题
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getImmerse()
+	{
+		return $this->hasMany(Immerse::class, ['user_id' => 'id']);
+	}
+
+	/**
+	 * 自我认知差异答题
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getEgoAnswer()
+	{
+		return $this->hasMany(EgoAnswer::class, ['user_id' => 'id']);
+	}
+
+	/**
+	 * 化身广告情绪答题
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getEmotionAnswer()
+	{
+		return $this->hasMany(EmotionAnswer::class, ['user_id' => 'id']);
+	}
+
+	/**
 	 * @inheritdoc
 	 */
 	public function getAuthKey()
@@ -280,6 +330,11 @@ class User extends ActiveRecord implements IdentityInterface
 		$accessToken = Yii::$app->getSecurity()->generateRandomString(40);
 		Yii::$app->cache->set($accessToken, $this->getId());
 		return $accessToken;
+	}
+
+	public function validateEmail($email)
+	{
+		return $this->email == $email;
 	}
 
 	public function generateCaptcha()

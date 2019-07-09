@@ -8,7 +8,7 @@ use api\modules\v1\models\Approve;
 use yii\rest\Action;
 
 /**
- * Class IndexAction
+ * Class QuestionAction
  * @package api\modules\v1\actions\approve
  * @property Approve $modelClass
  */

@@ -10,7 +10,7 @@ use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 
 /**
- * Class IndexAction
+ * Class QuestionAction
  * @package api\modules\v1\actions\user
  * @property User $modelClass
  */

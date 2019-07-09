@@ -4,6 +4,7 @@
 namespace console\controllers;
 
 use common\components\curl\Curl;
+use common\models\AdvertisementAnswer;
 use common\models\Approve;
 use common\models\Config;
 use common\models\EgoAnswer;
@@ -116,6 +117,9 @@ class SwooleController extends Controller
 					break;
 				case 'mailer':
 					$result = self::mailer($data);
+					break;
+				case 'countAdvertisementGrades':
+					$result = self::countAdvertisementGrades($data);
 					break;
 			}
 			$taskData['status'] = 'success';
@@ -472,7 +476,7 @@ class SwooleController extends Controller
 			$userIncarnationGrades = json_decode($item);
 			$user = User::findOne($userIncarnationGrades->user_id);
 			$user->advertisement_divide = 1;
-			$user->incarnation_id=$userIncarnationGrades->incarnation_id;
+			$user->incarnation_id = $userIncarnationGrades->incarnation_id;
 			$user->save();
 		}
 		//广告无
@@ -480,7 +484,7 @@ class SwooleController extends Controller
 			$userIncarnationGrades = json_decode($item);
 			$user = User::findOne($userIncarnationGrades->user_id);
 			$user->advertisement_divide = 2;
-			$user->incarnation_id=$userIncarnationGrades->incarnation_id;
+			$user->incarnation_id = $userIncarnationGrades->incarnation_id;
 			$user->save();
 		}
 	}
@@ -510,5 +514,22 @@ class SwooleController extends Controller
 		$mail->setTo($user->email);
 		$mail->setSubject(ArrayHelper::getValue($data, 'data.params.topic'));
 		return $mail->send();
+	}
+
+	/**
+	 * 计算用户品牌记忆总得分
+	 * @param $data
+	 * @return User
+	 */
+	public static function countAdvertisementGrades($data)
+	{
+		/**
+		 * @var $user User
+		 */
+		$user = ArrayHelper::getValue($data, 'user');
+		$grades = AdvertisementAnswer::find()->where(['user_id' => $user])->count('grades');
+		$user->advertisement_grades = $grades;
+		$user->save();
+		return $user;
 	}
 }

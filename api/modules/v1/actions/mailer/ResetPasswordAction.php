@@ -14,10 +14,17 @@ class ResetPasswordAction extends Action
 	public function run()
 	{
 		try {
+			$request = Yii::$app->request;
 			/**
 			 * @var $loginUser User
 			 */
-			$loginUser = Yii::$app->getUser()->getIdentity();
+			$loginUser = User::findByUsername($request->getBodyParam('username'));
+			if (!$loginUser) {
+				throw new \Exception('用户名错误');
+			}
+			if (!$loginUser->validateEmail($request->getBodyParam('email'))) {
+				throw new \Exception('邮箱验证失败');
+			}
 			$accessToken = $loginUser->generateAccessToken();
 			Client::request([
 				'action' => 'mailer',

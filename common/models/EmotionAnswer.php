@@ -10,11 +10,14 @@ use yii\db\ActiveRecord;
  * 用户答题表
  * Class Answer
  * @package common\models
- * @property $id
- * @property $user_id int 用户id
- * @property $question_id int 问题id
- * @property $option_id int 选项id
- * @property $grades int 得分
+ * @property int $id
+ * @property int $user_id 用户id
+ * @property int $question_id 问题id
+ * @property int $option_id 选项id
+ * @property int $grades 得分
+ * @property User $user
+ * @property EmotionQuestion $question
+ * @property EmotionOption $option
  */
 class EmotionAnswer extends ActiveRecord
 {

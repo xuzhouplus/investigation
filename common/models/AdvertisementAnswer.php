@@ -15,6 +15,9 @@ use yii\db\ActiveRecord;
  * @property int $question_id
  * @property int $option_id
  * @property int $grades
+ * @property User $user
+ * @property AdvertisementQuestion $question
+ * @property AdvertisementOption $option
  */
 class AdvertisementAnswer extends ActiveRecord
 {
@@ -31,5 +34,20 @@ class AdvertisementAnswer extends ActiveRecord
 			['grades', 'default', 'value' => 0],
 			['grades', 'integer', 'min' => 0]
 		];
+	}
+
+	public function getUser()
+	{
+		return $this->hasOne(User::class, ['id' => 'user_id']);
+	}
+
+	public function getQuestion()
+	{
+		return $this->hasOne(AdvertisementQuestion::class, ['id' => 'question_id']);
+	}
+
+	public function getOption()
+	{
+		return $this->hasOne(AdvertisementOption::class, ['id' => 'option_id']);
 	}
 }

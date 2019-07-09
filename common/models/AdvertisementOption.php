@@ -20,7 +20,7 @@ class AdvertisementOption extends ActiveRecord
 {
 	public static function tableName()
 	{
-		return '{{%aadvertisement_option}}';
+		return '{{%advertisement_option}}';
 	}
 
 	public function rules()
@@ -36,5 +36,40 @@ class AdvertisementOption extends ActiveRecord
 	public function getFile()
 	{
 		return $this->hasOne(File::class, ['id' => 'file_id']);
+	}
+
+	public static function batchInsert($records, $index = null)
+	{
+		$transaction = self::getDb()->beginTransaction();
+		try {
+			$result = [];
+			foreach ($records as $record) {
+				$option = new EgoOption();
+				$option->setScenario('create');
+				$option->load($record, '');
+				if ($option->validate()) {
+					$option->save();
+					if ($index && property_exists($option, $index)) {
+						$result[$option->getAttribute($index)] = $option;
+					} else {
+						$result[] = $option;
+					}
+				} else {
+					$errors = $option->getFirstErrors();
+					$error = reset($errors);
+					throw new \Exception($error);
+				}
+			}
+			$transaction->commit();
+			return $result;
+		} catch (\Exception $exception) {
+			$transaction->rollBack();
+			throw new \Exception($exception);
+		}
+	}
+
+	public static function batchDelete($questionID)
+	{
+		return self::deleteAll(['question_id' => $questionID]);
 	}
 }

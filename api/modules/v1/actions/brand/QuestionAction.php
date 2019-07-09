@@ -1,17 +1,17 @@
 <?php
 
 
-namespace api\modules\v1\actions\ego;
+namespace api\modules\v1\actions\brand;
 
 
-use api\modules\v1\models\EgoQuestion;
+use api\modules\v1\models\AdvertisementQuestion;
 use Yii;
 use yii\rest\Action;
 
 /**
  * Class QuestionAction
- * @package api\modules\v1\actions\question
- * @property  EgoQuestion $modelClass
+ * @package api\modules\v1\actions\brand
+ * @property AdvertisementQuestion $modelClass
  */
 class QuestionAction extends Action
 {
@@ -29,11 +29,10 @@ class QuestionAction extends Action
 				'data' => $result
 			];
 		} catch (\Exception $exception) {
-			\Yii::error($exception->__toString());
 			return [
 				'code' => 300,
 				'message' => $exception->getMessage(),
-				'data' => (new \stdClass())
+				'data' => new \stdClass()
 			];
 		}
 	}

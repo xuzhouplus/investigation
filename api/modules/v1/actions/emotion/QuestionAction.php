@@ -9,7 +9,7 @@ use Yii;
 use yii\rest\Action;
 
 /**
- * Class IndexAction
+ * Class QuestionAction
  * @package api\modules\v1\actions\question
  * @property  EgoQuestion $modelClass
  */

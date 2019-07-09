@@ -16,6 +16,8 @@ class MailerController extends ActiveController
 {
 	public $modelClass = User::class;
 	public $optional = [
+		'resetPassword',
+		'captcha'
 	];
 
 	/**

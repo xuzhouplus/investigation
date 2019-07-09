@@ -29,7 +29,8 @@ class ApproveController extends ActiveController
 	protected function verbs()
 	{
 		return [
-			'index' => ['POST', 'PUT', 'PATCH']
+			'index' => ['GET', 'POST'],
+			'submit' => ['POST']
 		];
 	}
 
