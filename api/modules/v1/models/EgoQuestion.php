@@ -52,7 +52,6 @@ class EgoQuestion extends CommonEgoQuestion
 					$options[] = [
 						'id' => $option->id,
 						'name' => $option->name,
-						'grades' => $option->grades,
 						'description' => $option->description
 					];
 				}

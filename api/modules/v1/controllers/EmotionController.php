@@ -3,6 +3,7 @@
 
 namespace api\modules\v1\controllers;
 
+use api\modules\v1\actions\emotion\IncarnationAction;
 use api\modules\v1\actions\emotion\SubmitAction;
 use api\modules\v1\actions\emotion\CreateAction;
 use api\modules\v1\actions\emotion\DeleteAction;
@@ -11,6 +12,7 @@ use api\modules\v1\actions\emotion\UpdateAction;
 use api\modules\v1\actions\emotion\ViewAction;
 use api\modules\v1\models\EmotionAnswer;
 use api\modules\v1\models\EmotionQuestion;
+use api\modules\v1\models\User;
 use common\filters\AccessTokenAuth;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
@@ -33,7 +35,8 @@ class EmotionController extends ActiveController
 			'delete' => ['POST', 'DELETE'],
 			'question' => ['GET', 'POST', 'HEAD'],
 			'view' => ['GET', 'POST'],
-			'submit' => ['POST', 'PUT']
+			'submit' => ['POST', 'PUT'],
+			'incarnation' => ['GET', 'POST']
 		];
 	}
 
@@ -54,6 +57,10 @@ class EmotionController extends ActiveController
 	public function actions()
 	{
 		$parentActions = [
+			'incarnation' => [
+				'class' => IncarnationAction::class,
+				'modelClass' => User::class,
+			],
 			'question' => [
 				'class' => QuestionAction::class,
 				'modelClass' => EmotionQuestion::class,

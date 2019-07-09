@@ -40,7 +40,7 @@ class EmotionAnswerAction extends Action
 			/**
 			 * @var $emotionAnswers EmotionAnswer[]
 			 */
-			$emotionAnswers = EmotionAnswer::find()->joinWith(['incarnation', 'question', 'option'])->where([EmotionAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
+			$emotionAnswers = EmotionAnswer::find()->joinWith(['question', 'option'])->where([EmotionAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
 			$result = [
 				'incarnation_name' => $user->incarnation->name,
 				'incarnation_file' => $user->incarnation->file->fileUrl(),

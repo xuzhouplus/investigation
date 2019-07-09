@@ -123,13 +123,19 @@ class UserAction extends Action
 				/**
 				 * @var $emotionAnswers EmotionAnswer[]
 				 */
-				$emotionAnswers = EmotionAnswer::find()->joinWith(['incarnation', 'question', 'option'])->where([EmotionAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
+				$emotionAnswers = EmotionAnswer::find()->joinWith(['question', 'option'])->where([EmotionAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
 				$result['emotion']['incarnation'] = [
 					'incarnation_name' => $user->incarnation->name,
 					'incarnation_file' => $user->incarnation->file->fileUrl(),
 					'incarnation_description' => $user->incarnation->description,
 					'incarnation_gender' => $user->incarnation->gender,
+					'advertisement_description' => $user->incarnation->advertisement->description
 				];
+				if ($user->advertisement_divide == 1) {
+					$result['emotion']['incarnation']['advertisement_file'] = $user->incarnation->advertisement->onFile->fileUrl();
+				} else {
+					$result['emotion']['incarnation']['advertisement_file'] = $user->incarnation->advertisement->sideFile->fileUrl();
+				}
 				foreach ($emotionAnswers as $emotionAnswer) {
 					$result['emotion']['answer'][] = [
 						'question_title' => $emotionAnswer->question->title,

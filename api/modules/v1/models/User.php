@@ -32,6 +32,8 @@ class User extends CommonUser
 		$query->andFilterWhere([self::tableName() . '.incarnation_divide' => ArrayHelper::getValue($data, 'incarnation_id')]);
 		$query->andFilterWhere([self::tableName() . '.ego_divide' => ArrayHelper::getValue($data, 'ego_divide')]);
 		$query->andFilterWhere([self::tableName() . '.advertisement_divide' => ArrayHelper::getValue($data, 'advertisement_divide')]);
+		$query->andFilterWhere([self::tableName() . '.step' => ArrayHelper::getValue($data, 'step')]);
+		$query->andFilterWhere([self::tableName() . '.stage' => ArrayHelper::getValue($data, 'stage')]);
 		$query->andFilterWhere([self::tableName() . '.round' => ArrayHelper::getValue($data, 'round')]);
 		$query->andFilterWhere([self::tableName() . '.age' => ArrayHelper::getValue($data, 'age')]);
 		if (ArrayHelper::getValue($data, 'role')) {

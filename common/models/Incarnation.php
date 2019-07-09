@@ -16,6 +16,7 @@ use yii\db\ActiveRecord;
  * @property string $description 化身描述
  * @property string $gender 性别，female女性，male男性
  * @property File $file
+ * @property Advertisement $advertisement
  */
 class Incarnation extends ActiveRecord
 {
@@ -47,7 +48,7 @@ class Incarnation extends ActiveRecord
 
 	public function getAdvertisement()
 	{
-		return $this->hasMany(Advertisement::class, ['incarnation_id' => 'id']);
+		return $this->hasOne(Advertisement::class, ['incarnation_id' => 'id']);
 	}
 
 	/**

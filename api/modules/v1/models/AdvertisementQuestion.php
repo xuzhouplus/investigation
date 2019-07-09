@@ -55,7 +55,6 @@ class AdvertisementQuestion extends CommonAdvertisementQuestion
 					$options[] = [
 						'id' => $option->id,
 						'name' => $option->name,
-						'grades' => $option->grades,
 						'file' => $file
 					];
 				}
