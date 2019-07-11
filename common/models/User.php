@@ -180,6 +180,9 @@ class User extends ActiveRecord implements IdentityInterface
 		if (is_null($loginUser)) {
 			return null;
 		}
+		/**
+		 * @var $loginUser User
+		 */
 		return static::find()->active()
 			->andWhere(['id' => $loginUser])
 			->one();
@@ -339,9 +342,9 @@ class User extends ActiveRecord implements IdentityInterface
 
 	public function generateCaptcha()
 	{
-		$accessToken = Yii::$app->getSecurity()->generateRandomString(6);
-		Yii::$app->cache->set($accessToken, $this->getId());
-		return $accessToken;
+		$captcha = Yii::$app->getSecurity()->generateRandomString(6);
+		Yii::$app->cache->set($captcha, $this->getId());
+		return $captcha;
 	}
 
 	public function validateCaptcha($captcha)
@@ -350,9 +353,12 @@ class User extends ActiveRecord implements IdentityInterface
 		if (is_null($loginUser)) {
 			return null;
 		}
-		return static::find()->active()
-			->andWhere(['id' => $loginUser])
-			->one();
+		Yii::$app->cache->delete($captcha);
+		if ($loginUser == $this->getId()) {
+			$this->status = self::STATUS_ACTIVE;
+			$this->save();
+		}
+		return $this;
 	}
 
 	public function administrator()

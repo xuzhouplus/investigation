@@ -10,9 +10,9 @@ $cache = [
 ];
 
 if (YII_ENV_DEV) {
-	$cache = [
-		'class' => yii\caching\DummyCache::class
-	];
+//	$cache = [
+//		'class' => yii\caching\DummyCache::class
+//	];
 }
 
 return $cache;

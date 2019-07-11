@@ -2,7 +2,6 @@
 /**
  * @var $this \yii\web\View
  * @var $user \common\models\User
- * @var $captcha string
  */
 
 use yii\helpers\Html;
@@ -13,12 +12,9 @@ $baseUrl = ArrayHelper::getValue(Yii::$app->params, 'frontendBaseUrl');
 <div>
 	<div><?php echo Html::encode($user->username) ?></div>
 	<div style="margin-top: 20px">
-		你本次操作的验证码是
+		现在邀请你参加我们下一阶段的调查答卷，请点击下方链接登录参与
 	</div>
 	<div>
-		<?php echo $captcha;?>
-	</div>
-	<div style="margin-top: 20px">
-		请不要把验证码透露给其他人。
+		<a href="<?php echo $baseUrl ?>"><?php echo $baseUrl ?></a>
 	</div>
 </div>

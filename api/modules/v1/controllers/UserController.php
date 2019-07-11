@@ -6,6 +6,7 @@ namespace api\modules\v1\controllers;
 use api\modules\v1\actions\user\AuditAction;
 use api\modules\v1\actions\user\DeleteAction;
 use api\modules\v1\actions\user\DivideAction;
+use api\modules\v1\actions\user\EmailValidateAction;
 use api\modules\v1\actions\user\ExportAction;
 use api\modules\v1\actions\user\IndexAction;
 use api\modules\v1\actions\user\LoginAction;
@@ -103,6 +104,10 @@ class UserController extends ActiveController
 			],
 			'divide' => [
 				'class' => DivideAction::class,
+				'modelClass' => $this->modelClass
+			],
+			'emailValidate' => [
+				'class' => EmailValidateAction::class,
 				'modelClass' => $this->modelClass
 			]
 		];

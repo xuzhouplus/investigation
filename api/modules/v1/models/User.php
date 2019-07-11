@@ -305,16 +305,18 @@ class User extends CommonUser
 			$loginUser->round = $round;
 		}
 		$loginUser->save();
-		if ($step == 2) {
+		if ($step == 1) {
 			Client::request([
 				'action' => 'userIncarnation',
-				'accessToken' => $loginUser->generateAccessToken(),
+				'access_token' => $loginUser->generateAccessToken(),
+				'callback' => ArrayHelper::getValue(Yii::$app->params, 'backendBaseUrl') . '/v1/swoole/callback',
 			]);
 		}
-		if ($step == 4) {
+		if ($step == 3) {
 			Client::request([
 				'action' => 'egoDifferences',
-				'accessToken' => $loginUser->generateAccessToken(),
+				'access_token' => $loginUser->generateAccessToken(),
+				'callback' => ArrayHelper::getValue(Yii::$app->params, 'backendBaseUrl') . '/v1/swoole/callback',
 			]);
 		}
 		return $loginUser;

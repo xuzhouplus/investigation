@@ -53,7 +53,7 @@ class Curl
 			throw new \Exception($curlError);
 		};
 		curl_close($ch);
-		\Yii::info(compact('uri', 'data', 'output'));
+		var_dump(compact('uri', 'data', 'output'));
 		return $output;
 	}
 }

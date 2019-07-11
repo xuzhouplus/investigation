@@ -191,7 +191,8 @@ $config = [
 		],
 		'frontendBaseUrl' => env('FRONTEND_BASE_URL'),
 		'backendBaseUrl' => env('BACKEND_BASE_URL'),
-		'swoolePort' => env('SWOOLE_PORT')
+		'swoolePort' => env('SWOOLE_PORT'),
+		'egoAlgorithm' => env('EGO_ALGORITHM')
 	],
 ];
 
@@ -201,11 +202,12 @@ if (YII_ENV_DEV) {
 		'class' => yii\gii\Module::class
 	];
 
-	$config['components']['cache'] = [
-		'class' => yii\caching\DummyCache::class
-	];
+//	$config['components']['cache'] = [
+//		'class' => yii\caching\DummyCache::class
+//	];
 	$config['components']['log']['targets']['db']['enabled'] = false;
 	$config['components']['log']['targets']['file']['enabled'] = true;
+	$config['components']['log']['targets']['file']['levels'][] = 'trace';
 }
 
 return $config;

@@ -7,6 +7,7 @@ namespace api\modules\v1\actions\mailer;
 use api\modules\v1\models\User;
 use common\components\swoole\Client;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 
 class ResetPasswordAction extends Action
@@ -32,7 +33,8 @@ class ResetPasswordAction extends Action
 				'params' => [
 					'topic' => '重置密码'
 				],
-				'accessToken' => $accessToken
+				'access_token' => $accessToken,
+				'callback' => ArrayHelper::getValue(Yii::$app->params, 'backendBaseUrl') . '/v1/swoole/callback',
 			]);
 			return ['message' => '创建成功', 'code' => 200];
 		} catch (\Exception $exception) {

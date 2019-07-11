@@ -4,6 +4,7 @@
 namespace common\components\swoole;
 
 
+use Yii;
 use yii\helpers\ArrayHelper;
 use Swoole\Client as SwooleClient;
 
@@ -31,12 +32,13 @@ class Client
 	/**
 	 * redis加锁
 	 * @return array
+	 * @throws \yii\base\Exception
 	 */
 	public static function lock()
 	{
-		$lockKey = 'lock_key';
-		$randValue = rand(10000, 99999);
-		$lock = \Yii::$app->redis->set($lockKey, $randValue, ['NX', 'EX' => 1]);
+		$lockKey = 'INV_CACHE:LOCK_KEY';
+		$randValue = Yii::$app->getSecurity()->generateRandomString(32);
+		$lock = \Yii::$app->redis->setnx($lockKey, $randValue);
 		if ($lock) {
 			return compact('lockKey', 'randValue');
 		}
@@ -51,22 +53,12 @@ class Client
 	public static function unlock($lockKey, $randValue = null)
 	{
 		if (is_array($lockKey)) {
-			$lockKey = ArrayHelper::getValue($lockKey, 'lockKey');
 			$randValue = ArrayHelper::getValue($lockKey, 'randValue');
+			$lockKey = ArrayHelper::getValue($lockKey, 'lockKey');
 		}
 		//unlock
-		if (function_exists('shell_exec')) {
-			$script = 'if redis.call("get",KEYS[1]) == ARGV[1] then
-                              return redis.call("del",KEYS[1])
-                           else
-                              return 0
-                           end
-                           ';
-			\Yii::$app->redis->eval($script, [$lockKey, $randValue], 1);
-		} else {
-			if (\Yii::$app->redis->get($lockKey) == $randValue) {
-				\Yii::$app->redis->del($lockKey);
-			}
+		if (\Yii::$app->redis->get($lockKey) == $randValue) {
+			\Yii::$app->redis->del($lockKey);
 		}
 	}
 }
