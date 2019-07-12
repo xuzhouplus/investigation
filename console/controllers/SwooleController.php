@@ -263,7 +263,7 @@ class SwooleController extends Controller
 	{
 		$transaction = Yii::$app->getDb()->beginTransaction();
 		try {
-			$users = User::find()->where(['stage' => '1', 'step' => 3])->all();
+			$users = User::find()->where(['stage' => '1', 'step' => 3, 'role' => User::ROLE_USER])->all();
 			$userID = ArrayHelper::getColumn($users, 'id');
 			$systemRound = Config::find()->where(['name' => Config::CONFIG_ROUND_KEY])->limit(1)->one();
 			$systemRound->value = $systemRound->value + 1;

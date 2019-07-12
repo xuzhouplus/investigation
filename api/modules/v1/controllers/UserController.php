@@ -10,6 +10,7 @@ use api\modules\v1\actions\user\EmailValidateAction;
 use api\modules\v1\actions\user\ExportAction;
 use api\modules\v1\actions\user\IndexAction;
 use api\modules\v1\actions\user\LoginAction;
+use api\modules\v1\actions\user\LogoutAction;
 use api\modules\v1\actions\user\RegisterAction;
 use api\modules\v1\actions\user\ResetPasswordAction;
 use api\modules\v1\actions\user\StateAction;
@@ -68,6 +69,10 @@ class UserController extends ActiveController
 		$parentActions = [
 			'login' => [
 				'class' => LoginAction::class,
+				'modelClass' => $this->modelClass,
+			],
+			'logout'=>[
+				'class' => LogoutAction::class,
 				'modelClass' => $this->modelClass,
 			],
 			'register' => [

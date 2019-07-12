@@ -10,6 +10,7 @@ use yii\db\ActiveRecord;
 use yii\filters\auth\HttpBasicAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
+use yii\helpers\ArrayHelper;
 use yii\web\IdentityInterface;
 
 /**
@@ -37,6 +38,7 @@ use yii\web\IdentityInterface;
  * @property string $advertisement_divide
  * @property int $incarnation_id
  * @property int $advertisement_grades
+ * @property int $access_token
  * @property AdvertisementAnswer $advertisementAnswer
  * @property Incarnation $incarnation
  * @property Approve $approve
@@ -57,11 +59,54 @@ class User extends ActiveRecord implements IdentityInterface
 	const STATUS_INACTIVE = 2;
 
 	//化身分组标识，1大，2小，3不分组
-	const INCARNATION_DIVIDE_LEVEL = ['1', '2', '3'];
+	const INCARNATION_DIVIDE_LEVEL = [
+		[
+			'name' => '大',
+			'value' => '1'
+		],
+		[
+			'name' => '小',
+			'value' => '2'
+		],
+		[
+			'name' => '中',
+			'value' => '3'
+		]
+	];
 	//情绪差异分组标识，1正大，2正小，3负大，4负小，5不分组
-	const EGO_DIVIDE_LEVEL = ['1', '2', '3', '4', '5'];
+	const EGO_DIVIDE_LEVEL = [
+		[
+			'name' => '正大',
+			'value' => '1'
+		],
+		[
+			'name' => '正小',
+			'value' => '2'
+		],
+		[
+			'name' => '负大',
+			'value' => '3'
+		],
+		[
+			'name' => '负小',
+			'value' => '4'
+		],
+		[
+			'name' => '中',
+			'value' => '5'
+		]
+	];
 	//广告分组，1有广告，2无广告
-	const ADVERTISEMENT_DIVIDE_LEVEL = ['1', '2'];
+	const ADVERTISEMENT_DIVIDE_LEVEL = [
+		[
+			'name' => '有广告',
+			'value' => '1'
+		],
+		[
+			'name' => '无广告',
+			'value' => '2'
+		]
+	];
 
 	/**
 	 * @inheritdoc
@@ -111,6 +156,13 @@ class User extends ActiveRecord implements IdentityInterface
 			['round', 'default', 'value' => '0'],
 			[['step', 'round', 'stage'], 'string']
 		];
+	}
+
+	public function attributes()
+	{
+		$attributes = parent::attributes();
+		//向对象添加access_token属性，该属性不存在于数据库中
+		return ArrayHelper::merge($attributes, ['access_token']);
 	}
 
 	/**
@@ -183,9 +235,15 @@ class User extends ActiveRecord implements IdentityInterface
 		/**
 		 * @var $loginUser User
 		 */
-		return static::find()->active()
+		$loginUser = static::find()->active()
 			->andWhere(['id' => $loginUser])
 			->one();
+		if ($loginUser) {
+			//把token添加到登录用户对象上
+			//要使用此功能，需要重写attributes方法和修改common/behaviors/LoginTimestampBehavior.php
+			$loginUser->access_token = $token;
+		}
+		return $loginUser;
 	}
 
 	/**
@@ -274,6 +332,46 @@ class User extends ActiveRecord implements IdentityInterface
 	public function getEmotionAnswer()
 	{
 		return $this->hasMany(EmotionAnswer::class, ['user_id' => 'id']);
+	}
+
+
+	/**
+	 * @param $data
+	 * @return array|bool
+	 * @throws \yii\base\Exception
+	 */
+	public function login($data)
+	{
+		$user = $this->findByLogin(ArrayHelper::getValue($data, 'username'));
+		if ($user) {
+			if ($user->validatePassword(ArrayHelper::getValue($data, 'password')) && \Yii::$app->user->login($user)) {
+				return [
+					'id' => $user->id,
+					'username' => $user->username,
+					'role' => $user->role,
+					'auth_key' => $user->auth_key,
+					'mobile' => $user->mobile,
+					'email' => $user->email,
+					'gender' => $user->gender,
+					'department' => $user->department,
+					'age' => $user->age,
+					'created_at' => $user->created_at,
+					'updated_at' => $user->updated_at,
+					'logged_at' => $user->logged_at,
+					'access_token' => $user->generateAccessToken(),
+				];
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 用户登出
+	 * @return bool
+	 */
+	public function logout()
+	{
+		return Yii::$app->cache->delete($this->access_token);
 	}
 
 	/**

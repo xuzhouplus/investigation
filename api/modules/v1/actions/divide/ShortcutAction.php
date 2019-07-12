@@ -6,6 +6,7 @@ namespace api\modules\v1\actions\divide;
 
 use api\modules\v1\models\User;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 
 /**
@@ -29,20 +30,29 @@ class ShortcutAction extends Action
 
 			$incarnationDivide = [];
 			foreach (User::INCARNATION_DIVIDE_LEVEL as $divide) {
-				$requestParams['incarnation_divide'] = $divide;
-				$incarnationDivide[$divide] = call_user_func_array([$this->modelClass, 'count'], ['data' => $requestParams]);
+				$requestParams['incarnation_divide'] = ArrayHelper::getValue($divide, 'key');
+				$incarnationDivide = [
+					'name' => ArrayHelper::getValue($divide, 'name'),
+					'count' => call_user_func_array([$this->modelClass, 'count'], ['data' => $requestParams])
+				];
 			}
 			unset($requestParams['incarnation_divide']);
 			$egoDivide = [];
 			foreach (User::EGO_DIVIDE_LEVEL as $divide) {
-				$requestParams['ego_divide'] = $divide;
-				$egoDivide[$divide] = call_user_func_array([$this->modelClass, 'count'], ['data' => $requestParams]);
+				$requestParams['ego_divide'] = ArrayHelper::getValue($divide, 'key');
+				$egoDivide = [
+					'name' => ArrayHelper::getValue($divide, 'name'),
+					'count' => call_user_func_array([$this->modelClass, 'count'], ['data' => $requestParams])
+				];
 			}
 			unset($requestParams['ego_divide']);
 			$advertisementDivide = [];
 			foreach (User::ADVERTISEMENT_DIVIDE_LEVEL as $divide) {
-				$requestParams['advertisement_divide'] = $divide;
-				$advertisementDivide[$divide] = call_user_func_array([$this->modelClass, 'count'], ['data' => $requestParams]);
+				$requestParams['advertisement_divide'] = ArrayHelper::getValue($divide, 'key');
+				$advertisementDivide = [
+					'name' => ArrayHelper::getValue($divide, 'name'),
+					'count' => call_user_func_array([$this->modelClass, 'count'], ['data' => $requestParams])
+				];
 			}
 			return [
 				'code' => 200,

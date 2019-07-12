@@ -213,36 +213,6 @@ class User extends CommonUser
 
 	/**
 	 * @param $data
-	 * @return array|bool
-	 * @throws \yii\base\Exception
-	 */
-	public function login($data)
-	{
-		$user = $this->findByLogin(ArrayHelper::getValue($data, 'username'));
-		if ($user) {
-			if ($user->validatePassword(ArrayHelper::getValue($data, 'password')) && \Yii::$app->user->login($user)) {
-				return [
-					'id' => $user->id,
-					'username' => $user->username,
-					'role' => $user->role,
-					'auth_key' => $user->auth_key,
-					'mobile' => $user->mobile,
-					'email' => $user->email,
-					'gender' => $user->gender,
-					'department' => $user->department,
-					'age' => $user->age,
-					'created_at' => $user->created_at,
-					'updated_at' => $user->updated_at,
-					'logged_at' => $user->logged_at,
-					'access_token' => $user->generateAccessToken(),
-				];
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * @param $data
 	 * @return User|null
 	 * @throws \Exception
 	 */
