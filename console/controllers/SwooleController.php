@@ -242,15 +242,24 @@ class SwooleController extends Controller
 		foreach ($virtualEgoGrades as $incarnationID => $virtualEgoGrade) {
 			foreach ($virtualEgoGrade as $questionType => $virtualGrades) {
 				$realisticGrades = $realisticEgoGrades[$questionType];
+				$grades = $virtualGrades - $realisticGrades;
+				if ($grades > 0) {
+					$sign = 1;
+				} elseif ($grades < 0) {
+					$sign = 2;
+				} else {
+					$sign = 3;
+				}
 				$egoDifference[] = [
 					'user_id' => $user->getId(),
 					'incarnation_id' => $incarnationID,
 					'type' => $questionType,
-					'grades' => $virtualGrades - $realisticGrades
+					'sign' => $sign,
+					'grades' => abs($grades)
 				];
 			}
 		}
-		EgoDifferenceGrades::getDb()->createCommand()->batchInsert(EgoDifferenceGrades::tableName(), ['user_id', 'incarnation_id', 'type', 'grades'], $egoDifference)->execute();
+		EgoDifferenceGrades::getDb()->createCommand()->batchInsert(EgoDifferenceGrades::tableName(), ['user_id', 'incarnation_id', 'type', 'sign', 'grades'], $egoDifference)->execute();
 		return $egoDifference;
 	}
 
@@ -266,13 +275,13 @@ class SwooleController extends Controller
 			$users = User::find()->where(['stage' => '1', 'step' => 3, 'role' => User::ROLE_USER])->all();
 			$userID = ArrayHelper::getColumn($users, 'id');
 			$systemRound = Config::find()->where(['name' => Config::CONFIG_ROUND_KEY])->limit(1)->one();
-			$systemRound->value = $systemRound->value + 1;
-			$systemRound->save();
-			User::updateAll(['round' => $systemRound->value, 'step' => 4, 'stage' => 2], ['id' => $userID]);
 			self::divideIncarnationGroup($userID);
 			self::divideEgoGroup($userID);
 			self::divideAdvertisement();
 			self::saveDivideToDatabase();
+			$systemRound->value = $systemRound->value + 1;
+			$systemRound->save();
+			User::updateAll(['round' => $systemRound->value, 'step' => 4, 'stage' => 2], ['id' => $userID]);
 			$transaction->commit();
 			//发送通知邮件
 			if (ArrayHelper::getValue(Yii::$app->params, 'emailNotify')) {
@@ -328,59 +337,85 @@ class SwooleController extends Controller
 	public static function divideEgoGroup($users)
 	{
 		/**
-		 * @var $userIncarnationGrades UserIncarnationGrades
+		 * @var $egoDifferenceGrades EgoDifferenceGrades
 		 */
-		//查询所有分值大于0的用户，设置分组为正，再按从大到小不重复取用户，用户数为一半
+		//查询所有分值不等于0的用户
 		$query = EgoDifferenceGrades::find();
 		$query->andFilterWhere(['user_id' => $users]);
-		$query->andFilterWhere(['>', 'grades', 0]);
+		$query->andFilterWhere(['!=', 'grades', 0]);
 		$query->orderBy(['grades' => SORT_DESC]);
-		$positiveDivideCount = $query->count();
-		$positiveDivideHalf = ceil($positiveDivideCount / 2);
-		$divideCount = 0;
-		foreach ($query->each() as $userIncarnationGrades) {
-			$divideCount++;
-			$userEgoDivide = Yii::$app->cache->get('EGO_DIVIDE_' . $userIncarnationGrades->user_id);
+		$userCount = $query->count();
+		$loopIndex = 0;
+		foreach ($query->each() as $egoDifferenceGrades) {
+			$userEgoDivide = Yii::$app->cache->get('EGO_DIVIDE_SIGN_' . $egoDifferenceGrades->user_id);
 			if (!$userEgoDivide) {
-				if ($divideCount <= $positiveDivideHalf) {
-					Yii::$app->cache->set('EGO_DIVIDE_' . $userIncarnationGrades->user_id, 1);
-					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', json_encode(ArrayHelper::toArray($userIncarnationGrades)));
-				} else {
-					Yii::$app->cache->set('EGO_DIVIDE_' . $userIncarnationGrades->user_id, 2);
-					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_POSITIVE_SMALLER', json_encode(ArrayHelper::toArray($userIncarnationGrades)));
+				if ($egoDifferenceGrades->sign == EgoDifferenceGrades::SIGN_POSITIVE) {
+					Yii::$app->cache->set('EGO_DIVIDE_SIGN_' . $egoDifferenceGrades->user_id, 1);
+					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_POSITIVE', json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
+				} elseif ($egoDifferenceGrades->sign == EgoDifferenceGrades::SIGN_NEGATIVE) {
+					Yii::$app->cache->set('EGO_DIVIDE_SIGN_' . $egoDifferenceGrades->user_id, 1);
+					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE', json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
 				}
 			}
-		}
-		//查询所有分值小于0的用户，按分值倒序排列，再按从小到大不重复取用户，用户数为一半
-		$query = EgoDifferenceGrades::find();
-		$query->andFilterWhere(['user_id' => $users]);
-		$query->andFilterWhere(['<', 'grades', 0]);
-		$query->orderBy(['grades' => SORT_ASC]);
-		$negativeDivideCount = $query->count();
-		$negativeDivideHalf = ceil($negativeDivideCount / 2);
-		$divideCount = 0;
-		foreach ($query->each() as $userIncarnationGrades) {
-			$divideCount++;
-			$userEgoDivide = Yii::$app->cache->get('EGO_DIVIDE_' . $userIncarnationGrades->user_id);
-			if (!$userEgoDivide) {
-				if ($divideCount <= $negativeDivideHalf) {
-					Yii::$app->cache->set('EGO_DIVIDE_' . $userIncarnationGrades->user_id, 3);
-					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', json_encode(ArrayHelper::toArray($userIncarnationGrades)));
-				} else {
-					Yii::$app->cache->set('EGO_DIVIDE_' . $userIncarnationGrades->user_id, 4);
-					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_SMALLER', json_encode(ArrayHelper::toArray($userIncarnationGrades)));
-				}
+			$loopIndex++;
+			if ($loopIndex == $userCount) {
+				break;
 			}
 		}
+		//区分正分的大小
+		$listLength = Yii::$app->redis->llen('INV_CACHE:EGO_DIVIDE_POSITIVE');
+		$halfLength = ceil($listLength / 2);
+		$popIndex = 0;
+		while ($popIndex < $listLength) {
+			$leftItem = Yii::$app->redis->lindex('INV_CACHE:EGO_DIVIDE_POSITIVE', $popIndex);
+			$popIndex++;
+			var_dump($popIndex . '//' . $leftItem);
+			if ($leftItem) {
+				if ($popIndex <= $halfLength) {
+					$egoDifferenceGrades = json_decode($leftItem);
+					Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 1);
+					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', $leftItem);
+				} else {
+					$egoDifferenceGrades = json_decode($leftItem);
+					Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 2);
+					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_POSITIVE_SMALLER', $leftItem);
+				}
+			} else {
+				break;
+			}
+		}
+		//区分负分的大小
+		$listLength = Yii::$app->redis->llen('INV_CACHE:EGO_DIVIDE_NEGATIVE');
+		$halfLength = ceil($listLength / 2);
+		$popIndex = 0;
+		while ($popIndex < $listLength) {
+			$leftItem = Yii::$app->redis->lindex('INV_CACHE:EGO_DIVIDE_NEGATIVE', $popIndex);
+			$popIndex++;
+			var_dump($popIndex . '//' . $leftItem);
+			if ($leftItem) {
+				if ($popIndex <= $halfLength) {
+					$egoDifferenceGrades = json_decode($leftItem);
+					Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 3);
+					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', $leftItem);
+				} else {
+					$egoDifferenceGrades = json_decode($leftItem);
+					Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 4);
+					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_SMALLER', $leftItem);
+				}
+			} else {
+				break;
+			}
+		}
+
 		//查询所有分值为0的用户，设置分组为0，即不参与分组
 		$query = EgoDifferenceGrades::find();
 		$query->andFilterWhere(['user_id' => $users]);
 		$query->andFilterWhere(['grades' => 0]);
-		foreach ($query->each() as $userIncarnationGrades) {
-			$userEgoDivide = Yii::$app->cache->get('EGO_DIVIDE_' . $userIncarnationGrades->user_id);
+		foreach ($query->each() as $egoDifferenceGrades) {
+			$userEgoDivide = Yii::$app->cache->get('EGO_DIVIDE_' . $egoDifferenceGrades->user_id);
 			if (!$userEgoDivide) {
-				Yii::$app->cache->set('EGO_DIVIDE_' . $userIncarnationGrades->user_id, 5);
-				Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', json_encode(ArrayHelper::toArray($userIncarnationGrades)));
+				Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 5);
+				Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
 			}
 		}
 	}
@@ -396,29 +431,17 @@ class SwooleController extends Controller
 		$divides = ['INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_POSITIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_SMALLER'];
 		foreach ($divides as $divide) {
 			$listLength = Yii::$app->redis->llen($divide);
-			$halfLength = ceil($listLength / 2);
-			$indexLength = 0;
 			$popIndex = 0;
-			while (true) {
+			while ($popIndex < $listLength) {
 				$leftItem = Yii::$app->redis->lindex($divide, $popIndex);
-				var_dump($leftItem);
+				$popIndex++;
+				var_dump($popIndex . '//' . $leftItem);
 				if ($leftItem) {
-					if ($indexLength <= $halfLength) {
-						$indexLength++;
-						$popIndex++;
+					if ($popIndex % 2 == 0) {
 						$userIncarnationGrades = json_decode($leftItem);
 						Yii::$app->cache->set('ADVERTISEMENT_DIVIDE_' . $userIncarnationGrades->user_id, 1);
 						Yii::$app->cache->set('ADVERTISEMENT_INCARNATION_' . $userIncarnationGrades->user_id, $userIncarnationGrades->incarnation_id);
 						Yii::$app->redis->lpush('INV_CACHE:ADVERTISEMENT_DIVIDE_WITH', $leftItem);
-						$rightItem = Yii::$app->redis->lindex($divide, $popIndex);
-						$indexLength++;
-						$popIndex++;
-						if ($rightItem) {
-							$userIncarnationGrades = json_decode($rightItem);
-							Yii::$app->cache->set('ADVERTISEMENT_DIVIDE_' . $userIncarnationGrades->user_id, 1);
-							Yii::$app->cache->set('ADVERTISEMENT_INCARNATION_' . $userIncarnationGrades->user_id, $userIncarnationGrades->incarnation_id);
-							Yii::$app->redis->lpush('INV_CACHE:ADVERTISEMENT_DIVIDE_WITH', $rightItem);
-						}
 					} else {
 						$userIncarnationGrades = json_decode($leftItem);
 						Yii::$app->cache->set('ADVERTISEMENT_DIVIDE_' . $userIncarnationGrades->user_id, 2);

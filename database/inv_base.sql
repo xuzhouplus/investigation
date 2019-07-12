@@ -635,9 +635,9 @@ CREATE TABLE `inv_user`  (
 DROP TABLE IF EXISTS `inv_user_incarnation_grades`;
 CREATE TABLE `inv_user_incarnation_grades`  (
   `user_id` int(11) NOT NULL,
-  `incarantion_id` int(11) NOT NULL,
+  `incarnation_id` int(11) NOT NULL,
   `grades` float(255, 0) NOT NULL,
-  PRIMARY KEY (`user_id`, `incarantion_id`) USING BTREE,
+  PRIMARY KEY (`user_id`, `incarnation_id`) USING BTREE,
   INDEX `user_id`(`user_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 

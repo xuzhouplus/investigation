@@ -175,6 +175,7 @@ class User extends CommonUser
 				$query->andFilterWhere(['status' => $queryStatus]);
 			}
 		}
+		Yii::error($query->createCommand()->getRawSql());
 		return $query->count();
 	}
 
