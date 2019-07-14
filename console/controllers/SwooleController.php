@@ -437,7 +437,7 @@ class SwooleController extends Controller
 				$popIndex++;
 				var_dump($popIndex . '//' . $leftItem);
 				if ($leftItem) {
-					if ($popIndex % 2 == 0) {
+					if ($popIndex % 2 == 1) {
 						$userIncarnationGrades = json_decode($leftItem);
 						Yii::$app->cache->set('ADVERTISEMENT_DIVIDE_' . $userIncarnationGrades->user_id, 1);
 						Yii::$app->cache->set('ADVERTISEMENT_INCARNATION_' . $userIncarnationGrades->user_id, $userIncarnationGrades->incarnation_id);

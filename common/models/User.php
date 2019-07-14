@@ -99,11 +99,11 @@ class User extends ActiveRecord implements IdentityInterface
 	//广告分组，1有广告，2无广告
 	const ADVERTISEMENT_DIVIDE_LEVEL = [
 		[
-			'key' => '有广告',
+			'key' => '强广告',
 			'value' => '1'
 		],
 		[
-			'key' => '无广告',
+			'key' => '弱广告',
 			'value' => '2'
 		]
 	];
