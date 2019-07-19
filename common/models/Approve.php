@@ -10,10 +10,10 @@ use yii\db\ActiveRecord;
  * 化身认同
  * Class Approve
  * @package common\models
- * @property $id
- * @property $user_id 用户id
- * @property $incarnation_id 化身id
- * @property $grades 得分
+ * @property int $id
+ * @property int $user_id 用户id
+ * @property int $incarnation_id 化身id
+ * @property int $grades 得分
  * @property User $user 提交用户
  * @property Incarnation $incarnation 化身
  */

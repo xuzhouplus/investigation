@@ -20,25 +20,24 @@ class IncarnationAction extends Action
 	{
 		try {
 			$user = Yii::$app->user->getIdentity();
-//			$user = User::find()->joinWith(['incarnation'])->where([User::tableName() . '.id' => ArrayHelper::getValue($requestParams, 'user_id')])->limit(1)->one();
 			if (!$user) {
 				throw new \Exception('用户不存在');
 			}
-			if (!$user->incarnation_id) {
+			if (!$user->ego_incarnation) {
 				throw new \Exception('用户没有相关分组信息');
 			}
 			if ($user->advertisement_divide == 1) {
-				$advertisementFile = $user->incarnation->advertisement->onFile->fileUrl();
+				$advertisementFile = $user->egoIncarnation->advertisement->onFile->fileUrl();
 			} else {
-				$advertisementFile = $user->incarnation->advertisement->sideFile->fileUrl();
+				$advertisementFile = $user->egoIncarnation->advertisement->sideFile->fileUrl();
 			}
 			$result = [
-				'incarnation_name' => $user->incarnation->name,
-				'incarnation_description' => $user->incarnation->description,
-				'incarnation_gender' => $user->incarnation->gender,
-				'incarnation_file' => $user->incarnation->file->fileUrl(),
+				'incarnation_name' => $user->egoIncarnation->name,
+				'incarnation_description' => $user->egoIncarnation->description,
+				'incarnation_gender' => $user->egoIncarnation->gender,
+				'incarnation_file' => $user->egoIncarnation->file->fileUrl(),
 				'advertisement_file' => $advertisementFile,
-				'advertisement_description' => $user->incarnation->advertisement->description
+				'advertisement_description' => $user->egoIncarnation->advertisement->description
 			];
 			return [
 				'code' => 200,

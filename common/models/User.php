@@ -33,14 +33,16 @@ use yii\web\IdentityInterface;
  * @property string $step
  * @property string $stage
  * @property string $round
- * @property string $incarnation_divide
+ * @property string $identify_incarnation
+ * @property string $identify_divide
  * @property string $ego_divide
  * @property string $advertisement_divide
- * @property int $incarnation_id
+ * @property int $ego_incarnation
  * @property int $advertisement_grades
  * @property int $access_token
  * @property AdvertisementAnswer $advertisementAnswer
- * @property Incarnation $incarnation
+ * @property Incarnation $identifyIncarnation
+ * @property Incarnation $egoIncarnation
  * @property Approve $approve
  * @property Immerse $immerse
  * @property EgoAnswer $egoAnswer
@@ -59,7 +61,7 @@ class User extends ActiveRecord implements IdentityInterface
 	const STATUS_INACTIVE = 2;
 
 	//化身分组标识，1大，2小，3不分组
-	const INCARNATION_DIVIDE_LEVEL = [
+	const IDENTIFY_DIVIDE_LEVEL = [
 		[
 			'key' => '大',
 			'value' => '1'
@@ -69,41 +71,41 @@ class User extends ActiveRecord implements IdentityInterface
 			'value' => '2'
 		],
 		[
-			'key' => '其他',
+			'key' => '中',
 			'value' => '3'
 		]
 	];
-	//情绪差异分组标识，1正大，2正小，3负大，4负小，5不分组
+	//自我差异分组标识，1正大，2正小，3负大，4负小，5不分组
 	const EGO_DIVIDE_LEVEL = [
 		[
-			'key' => '正大',
+			'key' => '大正',
 			'value' => '1'
 		],
 		[
-			'key' => '正小',
+			'key' => '小正',
 			'value' => '2'
 		],
 		[
-			'key' => '负大',
+			'key' => '大负',
 			'value' => '3'
 		],
 		[
-			'key' => '负小',
+			'key' => '小负',
 			'value' => '4'
 		],
 		[
-			'key' => '其他',
+			'key' => '中零',
 			'value' => '5'
 		]
 	];
-	//广告分组，1有广告，2无广告
+	//广告分组，1强广告，2弱广告
 	const ADVERTISEMENT_DIVIDE_LEVEL = [
 		[
-			'key' => '强广告',
+			'key' => '强',
 			'value' => '1'
 		],
 		[
-			'key' => '弱广告',
+			'key' => '弱',
 			'value' => '2'
 		]
 	];
@@ -141,7 +143,7 @@ class User extends ActiveRecord implements IdentityInterface
 		return [
 			['id', 'required', 'on' => ['update']],
 			[['username', 'mobile', 'email', 'password'], 'required', 'on' => ['create', 'update']],
-			[['username', 'mobile', 'email'], 'unique'],
+			[['mobile', 'email'], 'unique'],
 			[['username', 'mobile', 'email'], 'trim'],
 			[['username', 'department'], 'filter', 'filter' => '\yii\helpers\Html::encode'],
 			['mobile', 'match', 'pattern' => '/^1[3-9][0-9]{9}$/'],
@@ -169,7 +171,7 @@ class User extends ActiveRecord implements IdentityInterface
 	}
 
 	/**
-	 * 保存前取出access_token参数
+	 * 保存前去除access_token参数
 	 * @param bool $insert
 	 * @return bool
 	 */
@@ -261,19 +263,6 @@ class User extends ActiveRecord implements IdentityInterface
 	}
 
 	/**
-	 * Finds user by username
-	 *
-	 * @param string $username
-	 * @return User|array|null
-	 */
-	public static function findByUsername($username)
-	{
-		return static::find()->active()
-			->andWhere(['username' => $username])
-			->one();
-	}
-
-	/**
 	 * Finds user by username or email
 	 *
 	 * @param string $login
@@ -282,7 +271,7 @@ class User extends ActiveRecord implements IdentityInterface
 	public static function findByLogin($login)
 	{
 		return static::find()->active()
-			->andWhere(['or', ['username' => $login], ['mobile' => $login], ['email' => $login]])
+			->andWhere(['or', ['mobile' => $login], ['email' => $login]])
 			->one();
 	}
 
@@ -295,12 +284,21 @@ class User extends ActiveRecord implements IdentityInterface
 	}
 
 	/**
+	 * 获取化身认同分组落在的化身
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getIdentifyIncarnation()
+	{
+		return $this->hasOne(Incarnation::class, ['id' => 'identify_incarnation']);
+	}
+
+	/**
 	 * 获取广告答题落在的化身
 	 * @return \yii\db\ActiveQuery
 	 */
-	public function getIncarnation()
+	public function getEgoIncarnation()
 	{
-		return $this->hasOne(Incarnation::class, ['id' => 'incarnation_id']);
+		return $this->hasOne(Incarnation::class, ['id' => 'ego_incarnation']);
 	}
 
 	/**
@@ -421,8 +419,8 @@ class User extends ActiveRecord implements IdentityInterface
 	 */
 	public function getPublicIdentity()
 	{
-		if ($this->username) {
-			return $this->username;
+		if ($this->email) {
+			return $this->email;
 		}
 		return $this->mobile;
 	}

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace common\components\excelTemplate;
+namespace common\excel\templates;
 
 
 abstract class ExcelTemplate

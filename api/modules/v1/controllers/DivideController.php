@@ -8,6 +8,7 @@ use api\modules\v1\actions\divide\AdvertisementAnswerAction;
 use api\modules\v1\actions\divide\ApproveAction;
 use api\modules\v1\actions\divide\EgoAnswerAction;
 use api\modules\v1\actions\divide\EmotionAnswerAction;
+use api\modules\v1\actions\divide\ExportAction;
 use api\modules\v1\actions\divide\ImmerseAction;
 use api\modules\v1\actions\divide\UserAction;
 use api\modules\v1\actions\divide\ListAction;
@@ -17,6 +18,7 @@ use api\modules\v1\models\AdvertisementAnswer;
 use api\modules\v1\models\Approve;
 use api\modules\v1\models\EgoAnswer;
 use api\modules\v1\models\EmotionAnswer;
+use api\modules\v1\models\Export;
 use api\modules\v1\models\Immerse;
 use api\modules\v1\models\User;
 use common\filters\AccessTokenAuth;
@@ -100,6 +102,10 @@ class DivideController extends ActiveController
 			'advertisementAnswer' => [
 				'class' => AdvertisementAnswerAction::class,
 				'modelClass' => AdvertisementAnswer::class
+			],
+			'export' => [
+				'class' => ExportAction::class,
+				'modelClass' => Export::class
 			]
 		];
 		return $parentActions;

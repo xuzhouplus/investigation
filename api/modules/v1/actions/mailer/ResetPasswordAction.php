@@ -19,7 +19,7 @@ class ResetPasswordAction extends Action
 			/**
 			 * @var $loginUser User
 			 */
-			$loginUser = User::findByUsername($request->getBodyParam('username'));
+			$loginUser = User::findByLogin($request->getBodyParam('username'));
 			if (!$loginUser) {
 				throw new \Exception('用户名错误');
 			}

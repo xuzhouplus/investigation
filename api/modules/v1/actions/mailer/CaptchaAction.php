@@ -25,7 +25,7 @@ class CaptchaAction extends Action
 					throw new \Exception('access_token验证失败');
 				}
 			} else {
-				$loginUser = User::findByUsername($request->getBodyParam('username'));
+				$loginUser = User::findByLogin($request->getBodyParam('username'));
 				if (!$loginUser) {
 					throw new \Exception('用户不存在');
 				}

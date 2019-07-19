@@ -13,8 +13,9 @@ use yii\db\ActiveRecord;
  * @property int $id
  * @property string $title 题目
  * @property string $description 说明
+ * @property string $type 类型
  * @property EmotionOption $option 选项
- * @property Answer $answer 回答
+ * @property EmotionAnswer $answer 回答
  */
 class EmotionQuestion extends ActiveRecord
 {

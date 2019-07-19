@@ -1,10 +1,10 @@
 <?php
 
 
-namespace common\components\excelTemplate;
+namespace common\excel\templates;
 
 
-class UserExportTemplate extends ExcelTemplate
+class UserTemplate extends ExcelTemplate
 {
 	public function run()
 	{

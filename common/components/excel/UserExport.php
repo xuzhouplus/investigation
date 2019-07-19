@@ -12,49 +12,14 @@ class UserExport extends Component
 	public $verticalAligns = ['top', 'middle', 'bottom'];
 	public $horizontalAlign = ['left', 'center', 'right'];
 
+	/**
+	 * @throws \Exception
+	 */
 	public function init()
 	{
 		if (!$this->exportTemplate) {
-			throw new \Exception('用户到处模板没有配置');
+			throw new \Exception('用户导出模板没有配置');
 		}
-	}
-
-	/**
-	 * @param $file string
-	 * @return array
-	 * @throws Exception
-	 * @throws PHPExcel_Exception
-	 * @throws PHPExcel_Reader_Exception
-	 */
-	public function loadExcel($file)
-	{
-		//默认用excel2007读取excel，若格式不对，则用之前的版本进行读取
-		$PHPReader = new PHPExcel_Reader_Excel2007();
-		if (!$PHPReader->canRead($file)) {
-			$PHPReader = new PHPExcel_Reader_Excel5();
-			if (!$PHPReader->canRead($file)) {
-				throw new Exception('excel读取失败');
-			}
-		}
-		$PHPExcel = $PHPReader->load($file);
-//  $PHPExcel = PHPExcel_IOFactory::load($file);
-		$currentSheet = $PHPExcel->getSheet(0); //读取excel文件中的第一个工作表
-//  $currentSheet = $PHPExcel->getAllSheets(); //读取excel文件中的第一个工作表
-		$allColumn = $currentSheet->getHighestColumn();
-		$allColumn = PHPExcel_Cell::columnIndexFromString($allColumn);
-		//取得最大的列号
-		$allRow = $currentSheet->getHighestRow(); // 取得一共有多少行
-//    PHPExcel_Cell::columnIndexFromString(); //字母列转换为数字列 如:AA变为27
-		$sheets = [];
-		for ($currentRow = 1; $currentRow <= $allRow; $currentRow++) {
-			$column_value = [];
-			for ($currentColumn = 0; $currentColumn < $allColumn; $currentColumn++) {
-				$column_value[] = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-			}
-			$sheets[] = $column_value;
-//     $trailtime = date("Y-m-d H:i:s", PHPExcel_Shared_Date::ExcelToPHP($trailtime) - 28800); //时间的转换
-		}
-		return $sheets;
 	}
 
 	/**
@@ -146,42 +111,5 @@ class UserExport extends Component
 		header('Cache-Control: max-age=0');
 		$objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
 		$objWriter->save('php://output');
-	}
-
-	/**
-	 * @param PHPExcel_Worksheet $objActSheet
-	 * @param $cell
-	 * @param $color
-	 * @throws PHPExcel_Exception
-	 */
-	private function setExcelBorderColor(PHPExcel_Worksheet &$objActSheet, $cell, $color)
-	{
-		$color = $color ?: PHPExcel_Style_Color::COLOR_BLACK;
-		$objActSheet->getStyle($cell)->getBorders()->getBottom()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN)->getColor()->setARGB($color);
-		$objActSheet->getStyle($cell)->getBorders()->getTop()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN)->getColor()->setARGB($color);
-		$objActSheet->getStyle($cell)->getBorders()->getLeft()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN)->getColor()->setARGB($color);
-		$objActSheet->getStyle($cell)->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN)->getColor()->setARGB($color);
-	}
-
-	/**
-	 * @param PHPExcel_Worksheet $worksheet
-	 * @param $cell
-	 * @param array $style
-	 * @throws PHPExcel_Exception
-	 */
-	private function setExcelFontStyle(PHPExcel_Worksheet &$worksheet, $cell, Array $style)
-	{
-		$worksheet->getStyle($cell)->getFont()->setSize(@$style['fontSize'])->setName(@$style['fontName'])->setItalic(@$style['fontItalic'])->setBold(@$style['fontBold'])->getColor()->setARGB(@$style['fontColor']);
-	}
-
-	/**
-	 * @param PHPExcel_Worksheet $worksheet
-	 * @param $cell
-	 * @param $color
-	 * @throws PHPExcel_Exception
-	 */
-	private function setExcelFillColor(PHPExcel_Worksheet &$worksheet, $cell, $color)
-	{
-		$worksheet->getStyle($cell)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB(@$color ?: PHPExcel_Style_Color::COLOR_WHITE);
 	}
 }

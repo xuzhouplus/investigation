@@ -10,6 +10,7 @@ use api\modules\v1\models\EgoAnswer;
 use api\modules\v1\models\EmotionAnswer;
 use api\modules\v1\models\Immerse;
 use api\modules\v1\models\User;
+use common\models\UserIncarnationGrades;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\rest\Action;
@@ -48,7 +49,7 @@ class UserAction extends Action
 				'emotion' => []
 			];
 			//化身认同分组
-			if ($user->incarnation_divide) {
+			if ($user->identify_divide) {
 				/**
 				 * @var $approves Approve[]
 				 */
@@ -75,6 +76,18 @@ class UserAction extends Action
 						'grades' => $immerse->grades
 					];
 				}
+				$approve = Approve::find()->where(['user_id' => $user->id, 'incarnation_id' => $user->identify_incarnation])->limit(1)->one();
+				$immerse = Immerse::find()->where(['user_id' => $user->id, 'incarnation_id' => $user->identify_incarnation])->limit(1)->one();
+				$userIncarnationGrades = UserIncarnationGrades::find()->where(['user_id' => $user->id, 'incarnation_id' => $user->identify_incarnation])->limit(1)->one();
+				$result['identify'] = [
+					'incarnation_name' => $user->identifyIncarnation->name,
+					'incarnation_file' => $user->identifyIncarnation->file->fileUrl(),
+					'incarnation_description' => $user->identifyIncarnation->description,
+					'incarnation_gender' => $user->identifyIncarnation->gender,
+					'approve_grades' => $approve->grades,
+					'immerse_grades' => $immerse->grades,
+					'identify_grades' => $userIncarnationGrades->grades
+				];
 			}
 			//品牌记忆答题
 			if ($user->advertisement_grades) {
@@ -91,6 +104,7 @@ class UserAction extends Action
 					$result['advertisement'][] = [
 						'question_title' => $answer->question->title,
 						'question_description' => $answer->question->description,
+						'question_type' => $answer->question->type,
 						'option_name' => $answer->option->name,
 						'option_file' => $optionFile,
 						'grades' => $answer->grades
@@ -105,41 +119,58 @@ class UserAction extends Action
 				$egoAnswers = EgoAnswer::find()->joinWith(['incarnation', 'question', 'option'])->where([EgoAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
 				$result = [];
 				foreach ($egoAnswers as $egoAnswer) {
-					$result['ego'][] = [
-						'incarnation_name' => $egoAnswer->incarnation->name,
-						'incarnation_file' => $egoAnswer->incarnation->file->fileUrl(),
-						'incarnation_description' => $egoAnswer->incarnation->description,
-						'incarnation_gender' => $egoAnswer->incarnation->gender,
-						'question_title' => $egoAnswer->question->title,
-						'question_description' => $egoAnswer->question->description,
-						'option_name' => $egoAnswer->option->name,
-						'option_description' => $egoAnswer->option->description,
-						'grades' => $egoAnswer->grades
-					];
+					if ($egoAnswer->incarnation_id == -1) {
+						$result['ego'][] = [
+							'incarnation_name' => '',
+							'incarnation_file' => '',
+							'incarnation_description' => '',
+							'incarnation_gender' => '',
+							'question_title' => $egoAnswer->question->title,
+							'question_description' => $egoAnswer->question->description,
+							'question_type' => $egoAnswer->question->type,
+							'option_name' => $egoAnswer->option->name,
+							'option_description' => $egoAnswer->option->description,
+							'grades' => $egoAnswer->grades
+						];
+					} else {
+						$result['ego'][] = [
+							'incarnation_name' => $egoAnswer->incarnation->name,
+							'incarnation_file' => $egoAnswer->incarnation->file->fileUrl(),
+							'incarnation_description' => $egoAnswer->incarnation->description,
+							'incarnation_gender' => $egoAnswer->incarnation->gender,
+							'question_title' => $egoAnswer->question->title,
+							'question_description' => $egoAnswer->question->description,
+							'question_type' => $egoAnswer->question->type,
+							'option_name' => $egoAnswer->option->name,
+							'option_description' => $egoAnswer->option->description,
+							'grades' => $egoAnswer->grades
+						];
+					}
 				}
 			}
 			//情绪量化答题
-			if ($user->incarnation_id) {
+			if ($user->ego_incarnation) {
 				/**
 				 * @var $emotionAnswers EmotionAnswer[]
 				 */
 				$emotionAnswers = EmotionAnswer::find()->joinWith(['question', 'option'])->where([EmotionAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
 				$result['emotion']['incarnation'] = [
-					'incarnation_name' => $user->incarnation->name,
-					'incarnation_file' => $user->incarnation->file->fileUrl(),
-					'incarnation_description' => $user->incarnation->description,
-					'incarnation_gender' => $user->incarnation->gender,
-					'advertisement_description' => $user->incarnation->advertisement->description
+					'incarnation_name' => $user->egoIncarnation->name,
+					'incarnation_file' => $user->egoIncarnation->file->fileUrl(),
+					'incarnation_description' => $user->egoIncarnation->description,
+					'incarnation_gender' => $user->egoIncarnation->gender,
+					'advertisement_description' => $user->egoIncarnation->advertisement->description
 				];
 				if ($user->advertisement_divide == 1) {
-					$result['emotion']['incarnation']['advertisement_file'] = $user->incarnation->advertisement->onFile->fileUrl();
+					$result['emotion']['incarnation']['advertisement_file'] = $user->egoIncarnation->advertisement->onFile->fileUrl();
 				} else {
-					$result['emotion']['incarnation']['advertisement_file'] = $user->incarnation->advertisement->sideFile->fileUrl();
+					$result['emotion']['incarnation']['advertisement_file'] = $user->egoIncarnation->advertisement->sideFile->fileUrl();
 				}
 				foreach ($emotionAnswers as $emotionAnswer) {
 					$result['emotion']['answer'][] = [
 						'question_title' => $emotionAnswer->question->title,
 						'question_description' => $emotionAnswer->question->description,
+						'question_type' => $emotionAnswer->question->type,
 						'option_name' => $emotionAnswer->option->name,
 						'option_description' => $emotionAnswer->option->description,
 						'grades' => $emotionAnswer->grades

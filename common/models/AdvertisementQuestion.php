@@ -12,6 +12,7 @@ use yii\db\ActiveRecord;
  * @property int $id
  * @property string $title
  * @property string $description
+ * @property string $type
  * @property AdvertisementOption[] $option
  */
 class AdvertisementQuestion extends ActiveRecord

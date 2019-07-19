@@ -34,7 +34,7 @@ class ApproveAction extends Action
 			if (!$user) {
 				throw new \Exception('用户不存在');
 			}
-			if (is_null($user->incarnation_divide)) {
+			if (is_null($user->identify_divide)) {
 				throw new \Exception('该用户没有参与化身认同答题');
 			}
 			/**

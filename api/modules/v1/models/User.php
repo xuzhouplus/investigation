@@ -21,7 +21,7 @@ class User extends CommonUser
 		$query = self::find();
 		//当传递了divide且为true时，需要获取广告化身信息
 		if (ArrayHelper::getValue($data, 'divide')) {
-			$query->joinWith(['incarnation']);
+			$query->joinWith(['egoIncarnation', 'identifyIncarnation']);
 		}
 		$query->andFilterWhere([self::tableName() . '.id' => ArrayHelper::getValue($data, 'id')]);
 		$query->andFilterWhere(['like', self::tableName() . '.username', ArrayHelper::getValue($data, 'username')]);
@@ -29,7 +29,7 @@ class User extends CommonUser
 		$query->andFilterWhere([self::tableName() . '.gender' => ArrayHelper::getValue($data, 'gender')]);
 		$query->andFilterWhere(['like', self::tableName() . '.email', ArrayHelper::getValue($data, 'email')]);
 		$query->andFilterWhere(['like', self::tableName() . '.department', ArrayHelper::getValue($data, 'department')]);
-		$query->andFilterWhere([self::tableName() . '.incarnation_divide' => ArrayHelper::getValue($data, 'incarnation_id')]);
+		$query->andFilterWhere([self::tableName() . '.identify_divide' => ArrayHelper::getValue($data, 'identify_divide')]);
 		$query->andFilterWhere([self::tableName() . '.ego_divide' => ArrayHelper::getValue($data, 'ego_divide')]);
 		$query->andFilterWhere([self::tableName() . '.advertisement_divide' => ArrayHelper::getValue($data, 'advertisement_divide')]);
 		$query->andFilterWhere([self::tableName() . '.step' => ArrayHelper::getValue($data, 'step')]);
@@ -104,17 +104,20 @@ class User extends CommonUser
 		 */
 		$users = $dataProvider->getModels();
 		foreach ($users as $index => $user) {
-			if ($user->incarnation_divide === null || $user->incarnation_divide == '') {
-				$user->incarnation_divide = Yii::$app->cache->get('incarnation_divide_' . $user->id) ?: '';
+			if ($user->identify_divide === null || $user->identify_divide == '') {
+				$user->identify_divide = Yii::$app->cache->get('IDENTIFY_DIVIDE_' . $user->id) ?: '';
+			}
+			if ($user->identify_incarnation === null || $user->identify_incarnation == '') {
+				$user->identify_incarnation = Yii::$app->cache->get('IDENTIFY_INCARNATION_' . $user->id) ?: '';
 			}
 			if ($user->ego_divide === null || $user->ego_divide == '') {
-				$user->ego_divide = Yii::$app->cache->get('ego_divide_' . $user->id) ?: '';
+				$user->ego_divide = Yii::$app->cache->get('EGO_DIVIDE_' . $user->id) ?: '';
 			}
 			if ($user->advertisement_divide === null || $user->advertisement_divide == '') {
-				$user->advertisement_divide = Yii::$app->cache->get('advertisement_divide_' . $user->id) ?: '';
+				$user->advertisement_divide = Yii::$app->cache->get('ADVERTISEMENT_DIVIDE_' . $user->id) ?: '';
 			}
-			if ($user->incarnation_id === null || $user->incarnation_id == '') {
-				$user->incarnation_id = Yii::$app->cache->get('advertisement_incarnation_' . $user->id) ?: '';
+			if ($user->ego_incarnation === null || $user->ego_incarnation == '') {
+				$user->ego_incarnation = Yii::$app->cache->get('ADVERTISEMENT_INCARNATION_' . $user->id) ?: '';
 			}
 			$users[$index] = $user;
 		}
@@ -138,7 +141,7 @@ class User extends CommonUser
 		$query->andFilterWhere(['gender' => ArrayHelper::getValue($data, 'gender')]);
 		$query->andFilterWhere(['like', 'email', ArrayHelper::getValue($data, 'email')]);
 		$query->andFilterWhere(['like', 'department', ArrayHelper::getValue($data, 'department')]);
-		$query->andFilterWhere(['incarnation_divide' => ArrayHelper::getValue($data, 'incarnation_divide')]);
+		$query->andFilterWhere(['identify_divide' => ArrayHelper::getValue($data, 'identify_divide')]);
 		$query->andFilterWhere(['ego_divide' => ArrayHelper::getValue($data, 'ego_divide')]);
 		$query->andFilterWhere(['advertisement_divide' => ArrayHelper::getValue($data, 'advertisement_divide')]);
 		$query->andFilterWhere(['round' => ArrayHelper::getValue($data, 'round')]);
@@ -342,5 +345,20 @@ class User extends CommonUser
 		$loginUser->round = $round;
 		$loginUser->save();
 		return $loginUser;
+	}
+
+	/**
+	 * @param $identifyDivide
+	 * @param $egoDivide
+	 * @param $advertisementDivide
+	 * @return \common\models\query\UserQuery
+	 */
+	public static function getDivideQuery($identifyDivide, $egoDivide, $advertisementDivide)
+	{
+		$query = static::find();
+		$query->joinWith(['egoIncarnation', 'identifyIncarnation']);
+		$query->andFilterWhere([User::tableName() . '.role' => 'user']);
+		$query->andFilterWhere([User::tableName() . '.identify_divide' => $identifyDivide, User::tableName() . '.ego_divide' => $egoDivide, User::tableName() . '.advertisement_divide' => $advertisementDivide]);
+		return $query;
 	}
 }

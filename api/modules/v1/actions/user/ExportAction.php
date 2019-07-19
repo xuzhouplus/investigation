@@ -21,6 +21,7 @@ class ExportAction extends Action
 				$requestParams = \Yii::$app->getRequest()->getQueryParams();
 			}
 
+
 			/* @var $modelClass User */
 			$modelClass = $this->modelClass;
 

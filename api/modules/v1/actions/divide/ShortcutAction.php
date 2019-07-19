@@ -29,14 +29,14 @@ class ShortcutAction extends Action
 			$requestParams['role'] = User::ROLE_USER;
 
 			$incarnationDivide = [];
-			foreach (User::INCARNATION_DIVIDE_LEVEL as $divide) {
-				$requestParams['incarnation_divide'] = ArrayHelper::getValue($divide, 'value');
+			foreach (User::IDENTIFY_DIVIDE_LEVEL as $divide) {
+				$requestParams['identify_divide'] = ArrayHelper::getValue($divide, 'value');
 				$incarnationDivide[] = [
 					'name' => ArrayHelper::getValue($divide, 'key'),
 					'count' => intval(call_user_func_array([$this->modelClass, 'count'], ['data' => $requestParams]))
 				];
 			}
-			unset($requestParams['incarnation_divide']);
+			unset($requestParams['identify_divide']);
 			$egoDivide = [];
 			foreach (User::EGO_DIVIDE_LEVEL as $divide) {
 				$requestParams['ego_divide'] = ArrayHelper::getValue($divide, 'value');

@@ -34,7 +34,7 @@ class EmotionAnswerAction extends Action
 			if (!$user) {
 				throw new \Exception('用户不存在');
 			}
-			if (is_null($user->incarnation_id)) {
+			if (is_null($user->ego_incarnation)) {
 				throw new \Exception('该用户没有参与情绪量化答题');
 			}
 			/**

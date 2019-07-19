@@ -26,6 +26,7 @@ class Yii extends \yii\BaseYii
  * @property trntv\bus\CommandBus $commandBus
  * @property \common\components\excel\UserExport $userExport
  * @property \yii\redis\Connection $redis
+ * @property \common\components\excel\DivideExport $divideExport
  */
 abstract class BaseApplication extends yii\base\Application
 {

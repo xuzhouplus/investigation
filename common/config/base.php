@@ -173,7 +173,11 @@ $config = [
 		],
 		'userExport' => [
 			'class' => \common\components\excel\UserExport::class,
-			'exportTemplate' => \common\components\excelTemplate\UserExportTemplate::class
+			'exportTemplate' => \common\excel\templates\UserTemplate::class
+		],
+		'divideExport' => [
+			'class' => \common\components\excel\DivideExport::class,
+			'exportTemplate' => \common\excel\templates\DivideTemplate::class
 		]
 	],
 	'params' => [
@@ -192,7 +196,9 @@ $config = [
 		'frontendBaseUrl' => env('FRONTEND_BASE_URL'),
 		'backendBaseUrl' => env('BACKEND_BASE_URL'),
 		'swoolePort' => env('SWOOLE_PORT'),
-		'egoAlgorithm' => env('EGO_ALGORITHM')
+		'egoAlgorithm' => env('EGO_ALGORITHM'),
+		'accessPath' => env('UPLOAD_PATH'),
+		'accessUrl' => env('PREVIEW_URL')
 	],
 ];
 

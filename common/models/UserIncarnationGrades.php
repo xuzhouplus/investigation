@@ -12,7 +12,7 @@ use yii\db\ActiveRecord;
  * @package common\models
  * @property int $user_id
  * @property int $incarnation_id
- * @property int $grades
+ * @property float $grades
  */
 class UserIncarnationGrades extends ActiveRecord
 {
