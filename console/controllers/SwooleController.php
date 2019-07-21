@@ -5,6 +5,7 @@ namespace console\controllers;
 
 use common\components\curl\Curl;
 use common\models\AdvertisementAnswer;
+use common\models\AdvertisementQuestion;
 use common\models\Approve;
 use common\models\Config;
 use common\models\EgoAnswer;
@@ -14,6 +15,7 @@ use common\models\EmotionAnswer;
 use common\models\EmotionQuestion;
 use common\models\Export;
 use common\models\Immerse;
+use common\models\RoundMean;
 use common\models\User;
 use common\models\UserIncarnationGrades;
 use Yii;
@@ -270,6 +272,7 @@ class SwooleController extends Controller
 	 * 用户分组
 	 * @param $data
 	 * @return bool
+	 * @throws \yii\db\Exception
 	 */
 	public static function divideIntoGroups($data)
 	{
@@ -281,7 +284,7 @@ class SwooleController extends Controller
 			self::divideIncarnationGroup($userID);
 			self::divideEgoGroup($userID);
 			self::divideAdvertisement();
-			self::saveDivideToDatabase();
+			self::saveDivideToDatabase($systemRound->value + 1);
 			self::saveExportDivide($users, $systemRound->value + 1);
 			$systemRound->value = $systemRound->value + 1;
 			$systemRound->save();
@@ -390,12 +393,14 @@ class SwooleController extends Controller
 		while ($popIndex < $listLength) {
 			$leftItem = Yii::$app->redis->lindex('INV_CACHE:EGO_DIVIDE_POSITIVE', $popIndex);
 			$popIndex++;
-			var_dump($popIndex . '//' . $leftItem);
 			if ($leftItem) {
 				if ($popIndex <= $halfLength) {
 					$egoDifferenceGrades = json_decode($leftItem);
 					Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 1);
 					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', $leftItem);
+					if ($popIndex == $halfLength) {
+						Yii::$app->cache->set('EGO_POSITIVE_MEAN', $egoDifferenceGrades->grades);
+					}
 				} else {
 					$egoDifferenceGrades = json_decode($leftItem);
 					Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 2);
@@ -412,12 +417,14 @@ class SwooleController extends Controller
 		while ($popIndex < $listLength) {
 			$leftItem = Yii::$app->redis->lindex('INV_CACHE:EGO_DIVIDE_NEGATIVE', $popIndex);
 			$popIndex++;
-			var_dump($popIndex . '//' . $leftItem);
 			if ($leftItem) {
 				if ($popIndex <= $halfLength) {
 					$egoDifferenceGrades = json_decode($leftItem);
 					Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 3);
 					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', $leftItem);
+					if ($popIndex == $halfLength) {
+						Yii::$app->cache->set('EGO_NEGATIVE_MEAN', $egoDifferenceGrades->grades);
+					}
 				} else {
 					$egoDifferenceGrades = json_decode($leftItem);
 					Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 4);
@@ -478,8 +485,9 @@ class SwooleController extends Controller
 
 	/**
 	 * 保存分组数据到数据库
+	 * @param $round
 	 */
-	public static function saveDivideToDatabase()
+	public static function saveDivideToDatabase($round)
 	{
 		/**
 		 * @var $userIncarnationGrades UserIncarnationGrades
@@ -584,6 +592,15 @@ class SwooleController extends Controller
 			$user->ego_incarnation = $userIncarnationGrades->incarnation_id;
 			$user->save();
 		}
+		//分组正负大小中间值
+		$roundMean = RoundMean::find()->where(['round' => $round])->limit(1)->one();
+		if (empty($roundMean)) {
+			$roundMean = new RoundMean();
+		}
+		$roundMean->round = $round;
+		$roundMean->positive_mean = Yii::$app->cache->get('EGO_POSITIVE_MEAN');
+		$roundMean->negative_mean = Yii::$app->cache->get('EGO_NEGATIVE_MEAN');
+		$roundMean->save();
 	}
 
 	/**
@@ -738,14 +755,42 @@ class SwooleController extends Controller
 			//易怒
 			$exportData->ego_irritable = ArrayHelper::getValue($emotionTypeAnswers, 'irritable') ?: 0;
 			//品牌态度
-			$exportData->brand_attitude_a = 0;
-			$exportData->brand_attitude_b = 0;
-			$exportData->brand_attitude_c = 0;
-			$exportData->brand_attitude_d = 0;
+			$brandAttitudeAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([self::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandAttitude'])->all();
+			if ($brandAttitudeAnswer) {
+				/**
+				 * @var $brandAttitude AdvertisementAnswer
+				 */
+				$brandAttitude = array_shift($brandAttitudeAnswer);
+				$exportData->brand_attitude_a = $brandAttitude->grades;
+				$brandAttitude = array_shift($brandAttitudeAnswer);
+				$exportData->brand_attitude_b = $brandAttitude->grades;
+				$brandAttitude = array_shift($brandAttitudeAnswer);
+				$exportData->brand_attitude_c = $brandAttitude->grades;
+				$brandAttitude = array_shift($brandAttitudeAnswer);
+				$exportData->brand_attitude_d = $brandAttitude->grades;
+			} else {
+				$exportData->brand_attitude_a = 0;
+				$exportData->brand_attitude_b = 0;
+				$exportData->brand_attitude_c = 0;
+				$exportData->brand_attitude_d = 0;
+			}
 			//品牌记忆
-			$exportData->brand_memory_1 = 0;
-			$exportData->brand_memory_2 = 0;
-			$exportData->brand_memory_3 = 0;
+			$brandMemoryAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([self::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandMemory'])->all();
+			if ($brandMemoryAnswer) {
+				/**
+				 * @var $brandMemory AdvertisementAnswer
+				 */
+				$brandMemory = array_shift($brandMemoryAnswer);
+				$exportData->brand_memory_1 = $brandMemory->grades;
+				$brandMemory = array_shift($brandMemoryAnswer);
+				$exportData->brand_memory_2 = $brandMemory->grades;
+				$brandMemory = array_shift($brandMemoryAnswer);
+				$exportData->brand_memory_3 = $brandMemory->grades;
+			} else {
+				$exportData->brand_memory_1 = 0;
+				$exportData->brand_memory_2 = 0;
+				$exportData->brand_memory_3 = 0;
+			}
 			//性别
 			$exportData->gender = $user->gender;
 			//年龄
@@ -754,14 +799,11 @@ class SwooleController extends Controller
 			$exportData->identify_stamp = ArrayHelper::getValue($identifyLevelList, $identifyDivide) ?: 3;
 			//自我差异分组结果，结果标识是放在一起的，需要拆分
 			if ($egoDivide) {
-				var_dump($egoLevelList);
-				var_dump($egoDivide);
 				$egoDivideKey = ArrayHelper::getValue($egoLevelList, $egoDivide);
-				$egoDivideKeySplits = str_split($egoDivideKey);
 				//差异大小
-				$exportData->difference_size = reset($egoDivideKeySplits);
+				$exportData->difference_size = mb_substr($egoDivideKey, -1, 1, 'utf-8');
 				//差异正负
-				$exportData->difference_direction = end($egoDivideKeySplits);
+				$exportData->difference_direction = mb_substr($egoDivideKey, -1, 1, 'utf-8');
 			} else {
 				//差异大小
 				$exportData->difference_size = '中';

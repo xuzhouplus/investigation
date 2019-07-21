@@ -22,6 +22,7 @@ class AdvertisementQuestion extends CommonAdvertisementQuestion
 		$query->andFilterWhere([self::tableName() . '.id' => ArrayHelper::getValue($data, 'id')]);
 		$query->andFilterWhere(['like', self::tableName() . '.description', ArrayHelper::getValue($data, 'description')]);
 		$query->andFilterWhere(['like', self::tableName() . '.title', ArrayHelper::getValue($data, 'title')]);
+		$query->andFilterWhere([self::tableName() . '.type' => ArrayHelper::getValue($data, 'type')]);
 		$query->groupBy([self::tableName() . '.id']);
 		$page = ArrayHelper::getValue($data, 'page') ?: 1;
 		$dataProvider = Yii::createObject([
