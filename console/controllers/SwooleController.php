@@ -126,9 +126,6 @@ class SwooleController extends Controller
 				case 'mailer':
 					$result = self::mailer($data);
 					break;
-				case 'countAdvertisementGrades':
-					$result = self::countAdvertisementGrades($data);
-					break;
 			}
 			$taskData['status'] = 'success';
 			$taskData['message'] = $result;
@@ -841,22 +838,5 @@ class SwooleController extends Controller
 		$mail->setTo($user->email);
 		$mail->setSubject(ArrayHelper::getValue($data, 'data.params.topic'));
 		return $mail->send();
-	}
-
-	/**
-	 * 计算用户品牌记忆总得分
-	 * @param $data
-	 * @return User
-	 */
-	public static function countAdvertisementGrades($data)
-	{
-		/**
-		 * @var $user User
-		 */
-		$user = ArrayHelper::getValue($data, 'user');
-		$grades = AdvertisementAnswer::find()->where(['user_id' => $user])->count('grades');
-		$user->advertisement_grades = $grades;
-		$user->save();
-		return $user;
 	}
 }

@@ -38,7 +38,6 @@ use yii\web\IdentityInterface;
  * @property string $ego_divide
  * @property string $advertisement_divide
  * @property int $ego_incarnation
- * @property int $advertisement_grades
  * @property int $access_token
  * @property AdvertisementAnswer $advertisementAnswer
  * @property Incarnation $identifyIncarnation

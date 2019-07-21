@@ -5,10 +5,14 @@ namespace api\modules\v1\actions\divide;
 
 
 use api\modules\v1\models\AdvertisementAnswer;
+use api\modules\v1\models\AdvertisementQuestion;
 use api\modules\v1\models\Approve;
 use api\modules\v1\models\EgoAnswer;
+use api\modules\v1\models\EgoQuestion;
 use api\modules\v1\models\EmotionAnswer;
+use api\modules\v1\models\EmotionQuestion;
 use api\modules\v1\models\Immerse;
+use api\modules\v1\models\Incarnation;
 use api\modules\v1\models\User;
 use common\models\UserIncarnationGrades;
 use Yii;
@@ -48,12 +52,14 @@ class UserAction extends Action
 				'ego' => [],
 				'emotion' => []
 			];
+			//获取化身总数，添加到获取答题的limit参数中可以提升性能
+			$incarnationCount = Incarnation::find()->where(['gender' => $user->gender])->count('id');
 			//化身认同分组
 			if ($user->identify_divide) {
 				/**
 				 * @var $approves Approve[]
 				 */
-				$approves = Approve::find()->joinWith(['incarnation'])->where([Approve::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
+				$approves = Approve::find()->joinWith(['incarnation'])->where([Approve::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->limit($incarnationCount)->cache()->all();
 				foreach ($approves as $approve) {
 					$result['approves'][] = [
 						'incarnation_name' => $approve->incarnation->name,
@@ -66,7 +72,7 @@ class UserAction extends Action
 				/**
 				 * @var $immerses Immerse[]
 				 */
-				$immerses = Immerse::find()->joinWith(['incarnation'])->where([Immerse::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
+				$immerses = Immerse::find()->joinWith(['incarnation'])->where([Immerse::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->limit($incarnationCount)->cache()->all();
 				foreach ($immerses as $immerse) {
 					$result['immerse'][] = [
 						'incarnation_name' => $immerse->incarnation->name,
@@ -90,33 +96,34 @@ class UserAction extends Action
 				];
 			}
 			//品牌记忆答题
-			if ($user->advertisement_grades) {
-				/**
-				 * @var $answers AdvertisementAnswer[]
-				 */
-				$answers = AdvertisementAnswer::find()->joinWith(['question', 'option'])->where([AdvertisementAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
-				foreach ($answers as $answer) {
-					if ($answer->option->file_id) {
-						$optionFile = $answer->option->file->fileUrl();
-					} else {
-						$optionFile = '';
-					}
-					$result['advertisement'][] = [
-						'question_title' => $answer->question->title,
-						'question_description' => $answer->question->description,
-						'question_type' => $answer->question->type,
-						'option_name' => $answer->option->name,
-						'option_file' => $optionFile,
-						'grades' => $answer->grades
-					];
+			$questionCount = AdvertisementQuestion::find()->count('id');
+			/**
+			 * @var $answers AdvertisementAnswer[]
+			 */
+			$answers = AdvertisementAnswer::find()->joinWith(['question', 'option'])->where([AdvertisementAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->limit($questionCount)->cache()->all();
+			foreach ($answers as $answer) {
+				if ($answer->option->file_id) {
+					$optionFile = $answer->option->file->fileUrl();
+				} else {
+					$optionFile = '';
 				}
+				$result['advertisement'][] = [
+					'question_title' => $answer->question->title,
+					'question_description' => $answer->question->description,
+					'question_type' => $answer->question->type,
+					'option_name' => $answer->option->name,
+					'option_file' => $optionFile,
+					'grades' => $answer->grades
+				];
 			}
 			//自我差异分组
 			if ($user->ego_divide) {
+				$egoQuestionCount = EgoQuestion::find()->count('id');
 				/**
+				 * 包含一个现实自我和每种化身的虚拟自我
 				 * @var $egoAnswers EgoAnswer[]
 				 */
-				$egoAnswers = EgoAnswer::find()->joinWith(['incarnation', 'question', 'option'])->where([EgoAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
+				$egoAnswers = EgoAnswer::find()->joinWith(['incarnation', 'question', 'option'])->where([EgoAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->limit($egoQuestionCount * ($incarnationCount + 1))->cache()->all();
 				$result = [];
 				foreach ($egoAnswers as $egoAnswer) {
 					if ($egoAnswer->incarnation_id == -1) {
@@ -150,10 +157,11 @@ class UserAction extends Action
 			}
 			//情绪量化答题
 			if ($user->ego_incarnation) {
+				$emotionQuestionCount = EmotionQuestion::find()->count('id');
 				/**
 				 * @var $emotionAnswers EmotionAnswer[]
 				 */
-				$emotionAnswers = EmotionAnswer::find()->joinWith(['question', 'option'])->where([EmotionAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->cache()->all();
+				$emotionAnswers = EmotionAnswer::find()->joinWith(['question', 'option'])->where([EmotionAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->limit($emotionQuestionCount)->cache()->all();
 				$result['emotion']['incarnation'] = [
 					'incarnation_name' => $user->egoIncarnation->name,
 					'incarnation_file' => $user->egoIncarnation->file->fileUrl(),

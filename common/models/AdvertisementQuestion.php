@@ -17,6 +17,8 @@ use yii\db\ActiveRecord;
  */
 class AdvertisementQuestion extends ActiveRecord
 {
+	const TYPE_BRAND_ATTITUDE='brandAttitude';
+	const TYPE_BRAND_MEMORY='brandMemory';
 	public static function tableName()
 	{
 		return '{{%advertisement_question}}';

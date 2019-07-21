@@ -4,6 +4,7 @@
 namespace api\modules\v1\controllers;
 
 
+use api\modules\v1\actions\brand\AttitudeAction;
 use api\modules\v1\actions\brand\CreateAction;
 use api\modules\v1\actions\brand\DeleteAction;
 use api\modules\v1\actions\brand\QuestionAction;
@@ -58,6 +59,10 @@ class BrandController extends ActiveController
 			'question' => [
 				'class' => QuestionAction::class,
 				'modelClass' => AdvertisementQuestion::class,
+			],
+			'attitude' => [
+				'class' => AttitudeAction::class,
+				'modelClass' => AdvertisementAnswer::class
 			],
 			'delete' => [
 				'class' => DeleteAction::class,

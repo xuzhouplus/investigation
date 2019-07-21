@@ -20,10 +20,6 @@ class SubmitAction extends Action
 		try {
 			$result = call_user_func_array([$this->modelClass, 'submit'], ['data' => \Yii::$app->request->getBodyParams()]);
 			if ($result) {
-				Client::request([
-					'action' => 'countAdvertisementGrades',
-					'accessToken' => \Yii::$app->user->getIdentity()->generateAccessToken()
-				]);
 				return [
 					'code' => 200,
 					'message' => '提交成功',
