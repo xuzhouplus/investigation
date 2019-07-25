@@ -106,7 +106,11 @@ class User extends ActiveRecord implements IdentityInterface
 		[
 			'key' => '弱',
 			'value' => '2'
-		]
+		],
+		[
+			'key' => '无',
+			'value' => '3'
+		],
 	];
 
 	/**

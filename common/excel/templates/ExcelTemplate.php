@@ -8,9 +8,12 @@ abstract class ExcelTemplate
 {
 	private $tableTitle;
 	private $sheetTitle;
-	private $title = [];
-	private $head = [];
-	private $body = [];
+	private $titleContent = [];
+	private $titleStyle = [];
+	private $headContent = [];
+	private $headStyle = [];
+	private $bodyContent = [];
+	private $bodyStyle = [];
 
 	/**
 	 * 模板定义方法
@@ -28,7 +31,7 @@ abstract class ExcelTemplate
 		if (!empty($this->tableTitle)) {
 			return $this->tableTitle;
 		}
-		return $this->getTitle('content');
+		return $this->getTitleContent('content');
 	}
 
 	/**
@@ -59,60 +62,108 @@ abstract class ExcelTemplate
 	 * @param null $key
 	 * @return array|mixed
 	 */
-	public function getTitle($key = null)
+	public function getTitleContent($key = null)
 	{
 		if (is_null($key)) {
-			return $this->title;
+			return $this->titleContent;
 		}
-		return $this->title[$key];
+		return $this->titleContent[$key];
 	}
 
 	/**
 	 * @param array $title
 	 */
-	public function setTitle($title)
+	public function setTitleContent($title)
 	{
-		$this->title = $title;
+		$this->titleContent = $title;
 	}
 
 	/**
 	 * @param null $key
 	 * @return array|mixed
 	 */
-	public function getHead($key = null)
+	public function getHeadContent($key = null)
 	{
 		if (is_null($key)) {
-			return $this->head;
+			return $this->headContent;
 		}
-		return $this->head[$key];
+		return $this->headContent[$key];
 	}
 
 	/**
 	 * @param array $head
 	 */
-	public function setHead($head)
+	public function setHeadContent($head)
 	{
-		$this->head = $head;
+		$this->headContent = $head;
 	}
 
 	/**
 	 * @param null $key
 	 * @return array|mixed
 	 */
-	public function getBody($key = null)
+	public function getBodyContent($key = null)
 	{
 		if (is_null($key)) {
-			return $this->body;
+			return $this->bodyContent;
 		}
-		return $this->body[$key];
+		return $this->bodyContent[$key];
 	}
 
 	/**
 	 * @param array $body
 	 */
-	public function setBody($body)
+	public function setBodyContent($body)
 	{
-		$this->body = $body;
+		$this->bodyContent = $body;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getTitleStyle(): array
+	{
+		return $this->titleStyle;
+	}
+
+	/**
+	 * @param array $titleStyle
+	 */
+	public function setTitleStyle(array $titleStyle): void
+	{
+		$this->titleStyle = $titleStyle;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getHeadStyle(): array
+	{
+		return $this->headStyle;
+	}
+
+	/**
+	 * @param array $headStyle
+	 */
+	public function setHeadStyle(array $headStyle): void
+	{
+		$this->headStyle = $headStyle;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getBodyStyle(): array
+	{
+		return $this->bodyStyle;
+	}
+
+	/**
+	 * @param array $bodyStyle
+	 */
+	public function setBodyStyle(array $bodyStyle): void
+	{
+		$this->bodyStyle = $bodyStyle;
 	}
 
 	abstract public function run();

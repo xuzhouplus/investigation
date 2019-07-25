@@ -17,12 +17,12 @@ class Export extends CommonExport
 	public static function export($data)
 	{
 		ini_set('memory_limit', '100M');
-		$exportData = [];
+		set_time_limit(600);
 		$round = ArrayHelper::getValue($data, 'round');
-		$forceRefresh = ArrayHelper::getValue($data, 'force_refresh');
-		if (!$forceRefresh) {
-			$exportData = \Yii::$app->cache->get('EXPORT_CACHE' . $round) ?: [];
-		}
+		\Yii::$app->divideExport->createExcel();
+		\Yii::$app->divideExport->setTitle();
+		\Yii::$app->divideExport->renderTitle();
+		\Yii::$app->divideExport->renderHead();
 		foreach (User::IDENTIFY_DIVIDE_LEVEL as $identifyDivideLevel) {
 			foreach (User::EGO_DIVIDE_LEVEL as $egoDivideLevel) {
 				foreach (User::ADVERTISEMENT_DIVIDE_LEVEL as $advertisementDivideLevel) {
@@ -35,7 +35,7 @@ class Export extends CommonExport
 						 * @var $export Export
 						 */
 						$divideIndex++;
-						$exportData[] = [
+						$exportData = [
 							'divideIndex' => $divideIndex,
 							'divideStamp' => $export->divide_stamp,
 							'approveGrades' => $export->approve_grades,
@@ -92,13 +92,13 @@ class Export extends CommonExport
 							'differenceDirection' => $export->difference_direction,
 							'associationStrength' => $export->association_strength
 						];
+						\Yii::$app->divideExport->renderBody($exportData);
 					}
 				}
 			}
 		}
-		if ($round && !empty($exportData)) {
-			\Yii::$app->cache->set('EXPORT_CACHE' . $round, $exportData);
-		}
-		\Yii::$app->divideExport->renderExcel($exportData, $round ?: 'all');
+		\Yii::$app->divideExport->setBodyStyle();
+		\Yii::$app->divideExport->save($round ?: 'all');
+		exit();
 	}
 }

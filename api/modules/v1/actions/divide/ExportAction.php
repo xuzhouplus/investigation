@@ -5,6 +5,7 @@ namespace api\modules\v1\actions\divide;
 
 use api\modules\v1\models\Export;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 
 /**
@@ -24,12 +25,7 @@ class ExportAction extends Action
 			if (empty($requestParams)) {
 				$requestParams = Yii::$app->getRequest()->getQueryParams();
 			}
-			$result = call_user_func_array([$this->modelClass, 'export'], ['data' => $requestParams]);
-			return [
-				'code' => 200,
-				'message' => '获取成功',
-				'data' => $result
-			];
+			call_user_func_array([$this->modelClass, 'export'], ['data' => $requestParams]);
 		} catch (\Exception $exception) {
 			Yii::error($exception->__toString());
 			return [

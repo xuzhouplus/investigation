@@ -22,24 +22,29 @@ use Yii;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\console\ExitCode;
-use yii\data\Sort;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use common\components\swoole\Server;
-use yii\log\Logger;
 
 class SwooleController extends Controller
 {
+	/**
+	 * @var $user User
+	 */
+	protected static $user;
+
 	/**
 	 * @throws Exception
 	 */
 	public function init()
 	{
+		Yii::getLogger()->flushInterval = 1;
 		if (!extension_loaded('swoole')) {
 			$this->stderr('Swoole is not installed');
 			throw new Exception('Swoole is not installed');
 		}
-		$this->stdout('A PHP program based on Swoole' . PHP_EOL, Console::BOLD);
+		$this->stdout('A PHP program based on Yii2 with Swoole' . PHP_EOL, Console::BOLD);
+		$this->stdout('Yii2:' . Yii::getVersion() . PHP_EOL);
 		$this->stdout('Swoole:' . SWOOLE_VERSION . PHP_EOL);
 		$this->stdout('PHP:' . PHP_VERSION . PHP_EOL);
 		Server::run($this);
@@ -89,10 +94,7 @@ class SwooleController extends Controller
 		 */
 		$data = json_decode($data, true);
 		if (!empty($data)) {
-			$user = User::findIdentityByAccessToken(ArrayHelper::getValue($data, 'access_token'));
-			if ($user) {
-				$server->task(['user' => $user, 'data' => $data]);
-			}
+			$server->task($data);
 			$server->send($taskId, 'success', $from_id);
 			$server->close($taskId);
 		} else {
@@ -113,7 +115,14 @@ class SwooleController extends Controller
 	{
 		echo 'task id:' . $task_id . PHP_EOL;
 		try {
-			switch (ArrayHelper::getValue($data, 'data.action')) {
+			Yii::$app->redis->open();
+			Yii::$app->getDb()->open();
+			$user = User::findIdentityByAccessToken(ArrayHelper::getValue($data, 'access_token'));
+			if (!$user) {
+				throw new \Exception('access_token校验失败');
+			}
+			static::$user = $user;
+			switch (ArrayHelper::getValue($data, 'action')) {
 				case 'userIncarnation':
 					$result = self::userIncarnationTask($data);
 					break;
@@ -130,15 +139,21 @@ class SwooleController extends Controller
 			$taskData['status'] = 'success';
 			$taskData['message'] = $result;
 		} catch (\Exception $exception) {
-			echo $exception->__toString();
+			Yii::error($exception->__toString());
 			$taskData['status'] = 'fail';
 			$taskData['message'] = $exception->getMessage();
+		} catch (\Throwable $throwable) {
+			Yii::error($throwable->__toString());
+			$taskData['status'] = 'fail';
+			$taskData['message'] = $throwable->getMessage();
 		}
 		if (ArrayHelper::getValue($data, 'data.callback')) {
 			$callback = ArrayHelper::getValue($data, 'data');
 			Curl::takeCurl('post', ArrayHelper::getValue($data, 'data.callback'), array_merge($callback, $taskData));
 		}
 		$server->finish(json_encode($taskData));
+		Yii::$app->getDb()->close();
+		Yii::$app->redis->close();
 		Yii::getLogger()->flush(true);
 	}
 
@@ -170,21 +185,14 @@ class SwooleController extends Controller
 	 */
 	public static function userIncarnationTask($taskData)
 	{
-		/**
-		 * @var $user User
-		 */
-		$user = ArrayHelper::getValue($taskData, 'user');
-		if (!$user) {
-			throw new \Exception('用户accessToken验证失败');
-		}
-		$approves = Approve::find()->where(['user_id' => $user->getId()])->indexBy('incarnation_id')->all();
-		$immerses = Immerse::find()->where(['user_id' => $user->getId()])->indexBy('incarnation_id')->all();
+		$approves = Approve::find()->where(['user_id' => static::$user->getId()])->indexBy('incarnation_id')->all();
+		$immerses = Immerse::find()->where(['user_id' => static::$user->getId()])->indexBy('incarnation_id')->all();
 		$incarnationGrades = [];
 		foreach ($approves as $incarnationID => $approve) {
 			$approveGrades = $approve->grades;
 			$immerseGrades = $immerses[$incarnationID]->grades;
 			$incarnationGrades[] = [
-				'user_id' => $user->getId(),
+				'user_id' => static::$user->getId(),
 				'incarnation_id' => $incarnationID,
 				'grades' => ($approveGrades + $immerseGrades) / 2
 			];
@@ -201,18 +209,11 @@ class SwooleController extends Controller
 	 */
 	public static function userEgoDifferences($taskData)
 	{
-		/**
-		 * @var $user User
-		 */
-		$user = ArrayHelper::getValue($taskData, 'user');
-		if (!$user) {
-			throw new \Exception('用户accessToken验证失败');
-		}
-		$virtualEgos = EgoAnswer::find()->joinWith(['question'])->where([EgoAnswer::tableName() . '.user_id' => $user->getId()])->andFilterWhere(['not', [EgoAnswer::tableName() . '.incarnation_id' => -1]])->all();
+		$virtualEgos = EgoAnswer::find()->joinWith(['question'])->where([EgoAnswer::tableName() . '.user_id' => static::$user->getId()])->andFilterWhere(['not', [EgoAnswer::tableName() . '.incarnation_id' => -1]])->all();
 		if (!$virtualEgos) {
 			throw new \Exception('虚拟自我答题为空');
 		}
-		$realisticEgos = EgoAnswer::find()->joinWith(['question'])->where([EgoAnswer::tableName() . '.user_id' => $user->getId(), EgoAnswer::tableName() . '.incarnation_id' => -1])->all();
+		$realisticEgos = EgoAnswer::find()->joinWith(['question'])->where([EgoAnswer::tableName() . '.user_id' => static::$user->getId(), EgoAnswer::tableName() . '.incarnation_id' => -1])->all();
 		if (!$realisticEgos) {
 			throw new \Exception('现实自我答题为空');
 		}
@@ -253,7 +254,7 @@ class SwooleController extends Controller
 					$sign = 3;
 				}
 				$egoDifference[] = [
-					'user_id' => $user->getId(),
+					'user_id' => static::$user->getId(),
 					'incarnation_id' => $incarnationID,
 					'type' => $questionType,
 					'sign' => $sign,
@@ -269,7 +270,7 @@ class SwooleController extends Controller
 	 * 用户分组
 	 * @param $data
 	 * @return bool
-	 * @throws \yii\db\Exception
+	 * @throws \Exception
 	 */
 	public static function divideIntoGroups($data)
 	{
@@ -303,7 +304,7 @@ class SwooleController extends Controller
 			Yii::error($exception->__toString());
 			var_dump($exception->__toString());
 			$transaction->rollBack();
-			return false;
+			throw $exception;
 		}
 	}
 
@@ -619,13 +620,13 @@ class SwooleController extends Controller
 		//遍历用户信息
 		foreach ($users as $user) {
 			//化身认同分组结果标识
-			$identifyDivide = Yii::$app->cache->get('IDENTIFY_DIVIDE_' . $user->id);
+			$identifyDivide = Yii::$app->cache->get('IDENTIFY_DIVIDE_' . $user->id) ?: 3;
 			//化身认同分组落在的化身id
 			$identifyIncarnation = Yii::$app->cache->get('IDENTIFY_INCARNATION_' . $user->id);
 			//自我差异分组结果标识
-			$egoDivide = Yii::$app->cache->get('EGO_DIVIDE_' . $user->id);
+			$egoDivide = Yii::$app->cache->get('EGO_DIVIDE_' . $user->id) ?: 5;
 			//广告强弱分组结果标识
-			$advDivide = Yii::$app->cache->get('ADVERTISEMENT_DIVIDE_' . $user->id);
+			$advDivide = Yii::$app->cache->get('ADVERTISEMENT_DIVIDE_' . $user->id) ?: 3;
 			//广告强弱分组落在的化身id
 			$advIncarnation = Yii::$app->cache->get('ADVERTISEMENT_INCARNATION_' . $user->id);
 			//如果数据已存在则更新，不存在则新建
@@ -638,6 +639,9 @@ class SwooleController extends Controller
 			//分组轮次
 			$exportData->round = $round;
 			//总分组标识
+			Yii::error($identifyDivide);
+			Yii::error($egoDivide);
+			Yii::error($advDivide);
 			$exportData->divide_stamp = ArrayHelper::getValue($identifyLevelList, $identifyDivide) . ArrayHelper::getValue($egoLevelList, $egoDivide) . ArrayHelper::getValue($advLevelList, $advDivide);
 			//用户的化身认同答题得分
 			if ($identifyIncarnation) {
@@ -752,7 +756,7 @@ class SwooleController extends Controller
 			//易怒
 			$exportData->ego_irritable = ArrayHelper::getValue($emotionTypeAnswers, 'irritable') ?: 0;
 			//品牌态度
-			$brandAttitudeAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([self::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandAttitude'])->all();
+			$brandAttitudeAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandAttitude'])->all();
 			if ($brandAttitudeAnswer) {
 				/**
 				 * @var $brandAttitude AdvertisementAnswer
@@ -772,7 +776,7 @@ class SwooleController extends Controller
 				$exportData->brand_attitude_d = 0;
 			}
 			//品牌记忆
-			$brandMemoryAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([self::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandMemory'])->all();
+			$brandMemoryAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandMemory'])->all();
 			if ($brandMemoryAnswer) {
 				/**
 				 * @var $brandMemory AdvertisementAnswer
@@ -824,19 +828,15 @@ class SwooleController extends Controller
 	 */
 	public static function mailer($data)
 	{
-		/**
-		 * @var $user User
-		 */
-		$user = ArrayHelper::getValue($data, 'user');
-		$view = ArrayHelper::getValue($data, 'data.view');
+		$view = ArrayHelper::getValue($data, 'view');
 		if ($view) {
-			$mail = Yii::$app->mailer->compose($view, ['user' => ArrayHelper::getValue($data, 'user'), 'params' => ArrayHelper::getValue($data, 'data.params')]);
+			$mail = Yii::$app->mailer->compose($view, ['user' => static::$user, 'params' => ArrayHelper::getValue($data, 'params')]);
 		} else {
 			$mail = Yii::$app->mailer->compose();
-			$mail->setTextBody(ArrayHelper::getValue($data, 'data.params.text'));
+			$mail->setTextBody(ArrayHelper::getValue($data, 'params.text'));
 		}
-		$mail->setTo($user->email);
-		$mail->setSubject(ArrayHelper::getValue($data, 'data.params.topic'));
+		$mail->setTo(static::$user->email);
+		$mail->setSubject(ArrayHelper::getValue($data, 'params.topic'));
 		return $mail->send();
 	}
 }

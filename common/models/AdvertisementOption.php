@@ -15,6 +15,7 @@ use yii\db\ActiveRecord;
  * @property int $file_id
  * @property int $grades
  * @property File $file
+ * @property AdvertisementQuestion $question
  */
 class AdvertisementOption extends ActiveRecord
 {
@@ -31,6 +32,11 @@ class AdvertisementOption extends ActiveRecord
 			['grades', 'default', 'value' => 0],
 			['grades', 'integer', 'min' => 0]
 		];
+	}
+
+	public function getQuestion()
+	{
+		return $this->hasOne(AdvertisementQuestion::class, ['id' => 'question_id']);
 	}
 
 	public function getFile()

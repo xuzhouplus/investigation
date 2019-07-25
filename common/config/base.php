@@ -21,7 +21,6 @@ $config = [
 
 		'cache' => [
 			'class' => 'yii\redis\Cache',
-			'redis' => 'redis',
 			'keyPrefix' => 'INV_CACHE:',
 		],
 
@@ -109,7 +108,7 @@ $config = [
 					},
 					'logFile' => env('LOG_FILE'),
 				]
-			],
+			]
 		],
 
 		'i18n' => [
