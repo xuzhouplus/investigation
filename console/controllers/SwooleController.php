@@ -5,6 +5,7 @@ namespace console\controllers;
 
 use common\components\curl\Curl;
 use common\models\AdvertisementAnswer;
+use common\models\AdvertisementOption;
 use common\models\AdvertisementQuestion;
 use common\models\Approve;
 use common\models\Config;
@@ -47,11 +48,43 @@ class SwooleController extends Controller
 		$this->stdout('Yii2:' . Yii::getVersion() . PHP_EOL);
 		$this->stdout('Swoole:' . SWOOLE_VERSION . PHP_EOL);
 		$this->stdout('PHP:' . PHP_VERSION . PHP_EOL);
-		Server::run($this);
 	}
 
 	public function actionIndex()
 	{
+		Server::run($this);
+		return ExitCode::OK;
+	}
+
+	public function actionMigrate()
+	{
+		$struct='$this->createTable($this->tableName, [
+			$attribute
+		], $tableOptions);';
+		$tmp = '$this->batchInsert($this->tableName,[$attribute],
+			[
+			$data
+		]);';
+		$records = AdvertisementOption::find()->all();
+		$attributes = AdvertisementOption::getTableSchema()->getColumnNames();
+		$data = [];
+		foreach ($records as $record) {
+			$single = [];
+			foreach ($attributes as $attribute) {
+				$single[] = '\'' . $attribute . '\'=>\'' . ArrayHelper::getValue($record, $attribute) . '\'';
+			}
+			$data[] = '[' . implode(',', $single) . '],'.PHP_EOL;
+		}
+		$attr = [];
+		foreach ($attributes as $attribute) {
+			$attr[] = '\'' . $attribute . '\'';
+		}
+		$struct = str_replace('$attribute', implode(',', $attr), $struct);
+		$this->stdout($struct);
+		$this->stdout(PHP_EOL);
+		$tmp = str_replace('$attribute', implode(',', $attr), $tmp);
+		$tmp = str_replace('$data', implode('', $data), $tmp);
+		$this->stdout($tmp);
 		return ExitCode::OK;
 	}
 
