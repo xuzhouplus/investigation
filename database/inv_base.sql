@@ -11,7 +11,7 @@
  Target Server Version : 50640
  File Encoding         : 65001
 
- Date: 09/07/2019 18:52:09
+ Date: 26/07/2019 14:52:01
 */
 
 SET NAMES utf8mb4;
@@ -28,23 +28,23 @@ CREATE TABLE `inv_advertisement`  (
   `side_file_id` int(11) NOT NULL COMMENT '广告在化身旁边的图片文件id',
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '广告描述',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of inv_advertisement
 -- ----------------------------
-INSERT INTO `inv_advertisement` VALUES (2, 1, 13, 14, 'aaaaa');
-INSERT INTO `inv_advertisement` VALUES (3, 2, 15, 16, 'bbbbb');
-INSERT INTO `inv_advertisement` VALUES (4, 3, 17, 18, 'ccccc');
-INSERT INTO `inv_advertisement` VALUES (5, 4, 19, 20, 'ddddd');
-INSERT INTO `inv_advertisement` VALUES (6, 5, 21, 22, 'eeeeee');
-INSERT INTO `inv_advertisement` VALUES (7, 6, 23, 24, 'fffffff');
-INSERT INTO `inv_advertisement` VALUES (8, 7, 25, 26, 'ggggggg');
-INSERT INTO `inv_advertisement` VALUES (9, 8, 27, 28, 'hhhhhh');
-INSERT INTO `inv_advertisement` VALUES (10, 9, 29, 30, 'iiiiii');
-INSERT INTO `inv_advertisement` VALUES (11, 10, 31, 32, 'jjjjjjjj');
-INSERT INTO `inv_advertisement` VALUES (13, 12, 35, 36, 'llllll');
-INSERT INTO `inv_advertisement` VALUES (14, 11, 37, 38, 'llllllllllllllllll');
+INSERT INTO `inv_advertisement` VALUES (1, 1, 13, 14, 'aaaaa');
+INSERT INTO `inv_advertisement` VALUES (2, 2, 15, 16, 'bbbbb');
+INSERT INTO `inv_advertisement` VALUES (3, 3, 17, 18, 'ccccc');
+INSERT INTO `inv_advertisement` VALUES (4, 4, 19, 20, 'ddddd');
+INSERT INTO `inv_advertisement` VALUES (5, 5, 21, 22, 'eeeeee');
+INSERT INTO `inv_advertisement` VALUES (6, 6, 23, 24, 'fffffff');
+INSERT INTO `inv_advertisement` VALUES (7, 7, 25, 26, 'ggggggg');
+INSERT INTO `inv_advertisement` VALUES (8, 8, 27, 28, 'hhhhhh');
+INSERT INTO `inv_advertisement` VALUES (9, 9, 29, 30, 'iiiiii');
+INSERT INTO `inv_advertisement` VALUES (10, 10, 31, 32, 'jjjjjjjj');
+INSERT INTO `inv_advertisement` VALUES (11, 11, 37, 38, 'llllllllllllllllll');
+INSERT INTO `inv_advertisement` VALUES (12, 12, 35, 36, 'llllll');
 
 -- ----------------------------
 -- Table structure for inv_advertisement_answer
@@ -61,6 +61,10 @@ CREATE TABLE `inv_advertisement_answer`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
+-- Records of inv_advertisement_answer
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for inv_advertisement_option
 -- ----------------------------
 DROP TABLE IF EXISTS `inv_advertisement_option`;
@@ -71,7 +75,7 @@ CREATE TABLE `inv_advertisement_option`  (
   `file_id` int(11) NULL DEFAULT NULL,
   `grades` int(1) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 36 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of inv_advertisement_option
@@ -91,6 +95,26 @@ INSERT INTO `inv_advertisement_option` VALUES (12, 2, '一切皆有可能', NULL
 INSERT INTO `inv_advertisement_option` VALUES (13, 2, '把精彩留给自己', NULL, 0);
 INSERT INTO `inv_advertisement_option` VALUES (14, 2, '一切皆有可能', NULL, 0);
 INSERT INTO `inv_advertisement_option` VALUES (15, 2, '让改变发生', NULL, 2);
+INSERT INTO `inv_advertisement_option` VALUES (16, 4, '1分', NULL, 1);
+INSERT INTO `inv_advertisement_option` VALUES (17, 4, '2分', NULL, 2);
+INSERT INTO `inv_advertisement_option` VALUES (18, 4, '3分', NULL, 3);
+INSERT INTO `inv_advertisement_option` VALUES (19, 4, '4分', NULL, 4);
+INSERT INTO `inv_advertisement_option` VALUES (20, 4, '5分', NULL, 5);
+INSERT INTO `inv_advertisement_option` VALUES (21, 5, '1分', NULL, 1);
+INSERT INTO `inv_advertisement_option` VALUES (22, 5, '2分', NULL, 2);
+INSERT INTO `inv_advertisement_option` VALUES (23, 5, '3分', NULL, 3);
+INSERT INTO `inv_advertisement_option` VALUES (24, 5, '4分', NULL, 4);
+INSERT INTO `inv_advertisement_option` VALUES (25, 5, '5分', NULL, 5);
+INSERT INTO `inv_advertisement_option` VALUES (26, 6, '1分', NULL, 1);
+INSERT INTO `inv_advertisement_option` VALUES (27, 6, '2分', NULL, 2);
+INSERT INTO `inv_advertisement_option` VALUES (28, 6, '3分', NULL, 3);
+INSERT INTO `inv_advertisement_option` VALUES (29, 6, '4分', NULL, 4);
+INSERT INTO `inv_advertisement_option` VALUES (30, 6, '5分', NULL, 5);
+INSERT INTO `inv_advertisement_option` VALUES (31, 7, '1分', NULL, 1);
+INSERT INTO `inv_advertisement_option` VALUES (32, 7, '2分', NULL, 2);
+INSERT INTO `inv_advertisement_option` VALUES (33, 7, '3分', NULL, 3);
+INSERT INTO `inv_advertisement_option` VALUES (34, 7, '4分', NULL, 4);
+INSERT INTO `inv_advertisement_option` VALUES (35, 7, '5分', NULL, 5);
 
 -- ----------------------------
 -- Table structure for inv_advertisement_question
@@ -100,15 +124,20 @@ CREATE TABLE `inv_advertisement_question`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of inv_advertisement_question
 -- ----------------------------
-INSERT INTO `inv_advertisement_question` VALUES (1, '在前面游戏角色界面中植入的是哪一个样式的品牌Logo？', '图片选择');
-INSERT INTO `inv_advertisement_question` VALUES (2, '在前面游戏角色界面植入的Logo中，广告语是以下哪一个？', '广告语');
-INSERT INTO `inv_advertisement_question` VALUES (3, '在前面游戏角色界面所植入品牌Logo中，字体位置是以下哪一种？', '位置判断');
+INSERT INTO `inv_advertisement_question` VALUES (1, '在前面虚拟角色界面中，您所看到的是以下哪一个样式的Logo?', '图片选择', 'brandMemory');
+INSERT INTO `inv_advertisement_question` VALUES (2, '在前面虚拟角色界面中，广告Logo下方的广告语是以下哪一个？', '广告语', 'brandMemory');
+INSERT INTO `inv_advertisement_question` VALUES (3, '在前面虚拟角色界面中，广告Logo文字的位置是以下哪一种？', '位置判断', 'brandMemory');
+INSERT INTO `inv_advertisement_question` VALUES (4, '不可爱1-可爱5', '您对前面虚拟角色界面中所植入的”LI-NING“品牌的态度是:', 'brandAttitude');
+INSERT INTO `inv_advertisement_question` VALUES (5, '不喜欢1-喜欢5', '您对前面虚拟角色界面中所植入的”LI-NING“品牌的态度是:', 'brandAttitude');
+INSERT INTO `inv_advertisement_question` VALUES (6, '消极的1-积极的5', '您对前面虚拟角色界面中所植入的”LI-NING“品牌的态度是:', 'brandAttitude');
+INSERT INTO `inv_advertisement_question` VALUES (7, '不好的1-好的5', '您对前面虚拟角色界面中所植入的”LI-NING“品牌的态度是:', 'brandAttitude');
 
 -- ----------------------------
 -- Table structure for inv_approve
@@ -143,7 +172,7 @@ CREATE TABLE `inv_config`  (
 -- ----------------------------
 -- Records of inv_config
 -- ----------------------------
-INSERT INTO `inv_config` VALUES (1, 'round', '0', '当前系统分组轮数', 'text', '1');
+INSERT INTO `inv_config` VALUES (1, 'round', '1', '当前系统分组轮数', 'text', '1');
 
 -- ----------------------------
 -- Table structure for inv_ego_answer
@@ -157,8 +186,9 @@ CREATE TABLE `inv_ego_answer`  (
   `incarnation_id` int(11) NOT NULL DEFAULT -1,
   `grades` int(1) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 495 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+  INDEX `user_id`(`user_id`) USING BTREE,
+  INDEX `incarnation_id`(`incarnation_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of inv_ego_answer
@@ -173,6 +203,7 @@ CREATE TABLE `inv_ego_difference_grades`  (
   `incarnation_id` int(11) NOT NULL,
   `type` int(11) NOT NULL COMMENT '1外倾性，2宜人性，3尽责性，4神经质，5开放性',
   `grades` int(1) NULL DEFAULT NULL,
+  `sign` int(1) NULL DEFAULT NULL COMMENT '得分符号，1正，2负，3零',
   PRIMARY KEY (`user_id`, `incarnation_id`, `type`) USING BTREE,
   INDEX `user_id`(`user_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
@@ -263,16 +294,16 @@ CREATE TABLE `inv_ego_question`  (
 -- ----------------------------
 -- Records of inv_ego_question
 -- ----------------------------
-INSERT INTO `inv_ego_question` VALUES (1, '是一个保守的人', '自我差异', '1');
-INSERT INTO `inv_ego_question` VALUES (2, '是一个值得信赖的人', '自我差异', '2');
-INSERT INTO `inv_ego_question` VALUES (3, '是一个比较有惰性的人', '自我差异', '3');
-INSERT INTO `inv_ego_question` VALUES (4, '是一个比较放松，能很好应对压力的人', '自我差异', '4');
-INSERT INTO `inv_ego_question` VALUES (5, '是一个对艺术没有什么兴趣的人', '自我差异', '5');
-INSERT INTO `inv_ego_question` VALUES (6, '是一个外向的，善于交际的人', '自我差异', '1');
-INSERT INTO `inv_ego_question` VALUES (7, '是一个容易对别人吹毛求疵的人', '自我差异', '2');
-INSERT INTO `inv_ego_question` VALUES (8, '是一个做事情比较彻底的人', '自我差异', '3');
-INSERT INTO `inv_ego_question` VALUES (9, '是一个容易紧张的人', '自我差异', '4');
-INSERT INTO `inv_ego_question` VALUES (10, '是一个想象力丰富的人', '自我差异', '5');
+INSERT INTO `inv_ego_question` VALUES (1, '是一个保守的人', '自我差异', 'extravert');
+INSERT INTO `inv_ego_question` VALUES (2, '是一个值得信赖的人', '自我差异', 'pleasant');
+INSERT INTO `inv_ego_question` VALUES (3, '是一个比较有惰性的人', '自我差异', 'conscientious');
+INSERT INTO `inv_ego_question` VALUES (4, '是一个比较放松，能很好应对压力的人', '自我差异', 'nervous');
+INSERT INTO `inv_ego_question` VALUES (5, '是一个对艺术没有什么兴趣的人', '自我差异', 'open');
+INSERT INTO `inv_ego_question` VALUES (6, '是一个外向的，善于交际的人', '自我差异', 'extravert');
+INSERT INTO `inv_ego_question` VALUES (7, '是一个容易对别人吹毛求疵的人', '自我差异', 'pleasant');
+INSERT INTO `inv_ego_question` VALUES (8, '是一个做事情比较彻底的人', '自我差异', 'conscientious');
+INSERT INTO `inv_ego_question` VALUES (9, '是一个容易紧张的人', '自我差异', 'nervous');
+INSERT INTO `inv_ego_question` VALUES (10, '是一个想象力丰富的人', '自我差异', 'open');
 
 -- ----------------------------
 -- Table structure for inv_emotion_answer
@@ -286,7 +317,7 @@ CREATE TABLE `inv_emotion_answer`  (
   `grades` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of inv_emotion_answer
@@ -407,30 +438,102 @@ CREATE TABLE `inv_emotion_question`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of inv_emotion_question
 -- ----------------------------
-INSERT INTO `inv_emotion_question` VALUES (1, '活跃的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (2, '充满热情的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (3, '快乐的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (4, '兴高采烈的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (5, '兴奋的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (6, '自豪的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (7, '欣喜的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (8, '精神充沛的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (9, '感激的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (10, '难过的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (11, '害怕的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (12, '紧张的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (13, '惊恐的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (14, '内疚的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (15, '战战兢兢的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (16, '恼怒的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (17, '羞愧的', '情绪量化');
-INSERT INTO `inv_emotion_question` VALUES (18, '易怒的', '情绪量化');
+INSERT INTO `inv_emotion_question` VALUES (1, '活跃的', '情绪量化', 'alive');
+INSERT INTO `inv_emotion_question` VALUES (2, '充满热情的', '情绪量化', 'warmth');
+INSERT INTO `inv_emotion_question` VALUES (3, '快乐的', '情绪量化', 'happy');
+INSERT INTO `inv_emotion_question` VALUES (4, '兴高采烈的', '情绪量化', 'jubilant');
+INSERT INTO `inv_emotion_question` VALUES (5, '兴奋的', '情绪量化', 'excited');
+INSERT INTO `inv_emotion_question` VALUES (6, '自豪的', '情绪量化', 'proud');
+INSERT INTO `inv_emotion_question` VALUES (7, '欣喜的', '情绪量化', 'ego_delighted');
+INSERT INTO `inv_emotion_question` VALUES (8, '精神充沛的', '情绪量化', 'energetic');
+INSERT INTO `inv_emotion_question` VALUES (9, '感激的', '情绪量化', 'grateful');
+INSERT INTO `inv_emotion_question` VALUES (10, '难过的', '情绪量化', 'sad');
+INSERT INTO `inv_emotion_question` VALUES (11, '害怕的', '情绪量化', 'scared');
+INSERT INTO `inv_emotion_question` VALUES (12, '紧张的', '情绪量化', 'nervous');
+INSERT INTO `inv_emotion_question` VALUES (13, '惊恐的', '情绪量化', 'terrified');
+INSERT INTO `inv_emotion_question` VALUES (14, '内疚的', '情绪量化', 'guilt');
+INSERT INTO `inv_emotion_question` VALUES (15, '战战兢兢的', '情绪量化', 'trembled');
+INSERT INTO `inv_emotion_question` VALUES (16, '恼怒的', '情绪量化', 'annoyed');
+INSERT INTO `inv_emotion_question` VALUES (17, '羞愧的', '情绪量化', 'ashamed');
+INSERT INTO `inv_emotion_question` VALUES (18, '易怒的', '情绪量化', 'irritable');
+
+-- ----------------------------
+-- Table structure for inv_export
+-- ----------------------------
+DROP TABLE IF EXISTS `inv_export`;
+CREATE TABLE `inv_export`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `round` int(10) NOT NULL DEFAULT 1,
+  `divide_stamp` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `approve_grades` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `immerse_grades` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `extravert_reality1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `extravert_reality2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `pleasant_reality1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `pleasant_reality2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `conscientious_reality1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `conscientious_reality2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `nervous_reality1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `nervous_reality2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `open_reality1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `open_reality2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `extravert_invented1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `extravert_invented2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `pleasant_invented1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `pleasant_invented2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `conscientious_invented1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `conscientious_invented2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `nervous_invented1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `nervous_invented2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `open_invented1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `open_invented2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_alive` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_warmth` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_happy` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_jubilant` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_excited` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_proud` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_delighted` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_energetic` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_grateful` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_sad` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_scared` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_nervous` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_terrified` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_guilt` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_trembled` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_annoyed` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_ashamed` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `ego_irritable` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `brand_attitude_a` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `brand_attitude_b` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `brand_attitude_c` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `brand_attitude_d` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `brand_memory_1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `brand_memory_2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `brand_memory_3` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `user_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `gender` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `age` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `identify_stamp` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `difference_size` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `difference_direction` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `association_strength` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `divide_stamp`(`divide_stamp`) USING BTREE,
+  INDEX `round`(`round`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of inv_export
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for inv_file
@@ -506,7 +609,7 @@ CREATE TABLE `inv_immerse`  (
   `incarnation_id` int(11) NOT NULL COMMENT '化身id',
   `grades` int(1) NULL DEFAULT NULL COMMENT '得分',
   PRIMARY KEY (`id`, `user_id`, `incarnation_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 359 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of inv_immerse
@@ -524,7 +627,7 @@ CREATE TABLE `inv_incarnation`  (
   `gender` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '性别',
   `grade` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '化身分值',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 27 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of inv_incarnation
@@ -559,8 +662,35 @@ CREATE TABLE `inv_log`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
--- Records of inv_log
+-- Table structure for inv_round_mean
 -- ----------------------------
+DROP TABLE IF EXISTS `inv_round_mean`;
+CREATE TABLE `inv_round_mean`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `round` int(10) NOT NULL COMMENT '分组轮次',
+  `positive_mean` int(2) NOT NULL COMMENT '正大小分组中间数',
+  `negative_mean` int(2) NOT NULL COMMENT '父大小分组中间数',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of inv_round_mean
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for inv_system_db_migration
+-- ----------------------------
+DROP TABLE IF EXISTS `inv_system_db_migration`;
+CREATE TABLE `inv_system_db_migration`  (
+  `version` varchar(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `apply_time` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`version`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of inv_system_db_migration
+-- ----------------------------
+INSERT INTO `inv_system_db_migration` VALUES ('m000000_000000_base', 1564033015);
 
 -- ----------------------------
 -- Table structure for inv_token
@@ -586,7 +716,7 @@ CREATE TABLE `inv_type`  (
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '问题调查类型',
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of inv_type
@@ -601,29 +731,37 @@ INSERT INTO `inv_type` VALUES (3, '情绪量化', '当您在使用该化身时�
 DROP TABLE IF EXISTS `inv_user`;
 CREATE TABLE `inv_user`  (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id',
-  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '用户名',
+  `username` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '用户名',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '密码',
   `auth_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `mobile` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机',
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `mobile` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
   `gender` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '性别',
   `department` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '单位',
   `age` int(3) NULL DEFAULT NULL COMMENT '年龄',
-  `role` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1' COMMENT '用户角色，1测试人员，2系统管理员',
+  `role` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1' COMMENT '用户角色，1测试人员，2系统管理员',
   `created_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `updated_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `logged_at` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `stage` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1' COMMENT '用户所处调查阶段',
-  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1',
-  `step` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '用户问卷步骤',
-  `round` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '用户属于第几轮调查',
-  `incarnation_divide` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '化身认同分组，1大，2小',
+  `stage` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1' COMMENT '用户所处调查阶段',
+  `status` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1',
+  `step` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '用户问卷步骤',
+  `round` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '用户属于第几轮调查',
+  `identify_divide` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '化身认同分组，1大，2小',
+  `identify_incarnation` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '化身认同分组落在的化身ID',
   `ego_divide` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自我差异分组，1大正，2小正，3大负，4小负',
-  `advertisement_divide` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '广告分组，1有广告，2无广告',
-  `incarnation_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '广告答题落在的化身id',
-  `advertisement_grades` int(2) NULL DEFAULT NULL COMMENT '品牌记忆得分',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 943 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+  `ego_incarnation` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自我差异分组落在的化身id',
+  `advertisement_divide` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '广告分组，1强广告，2弱广告',
+  `advertisement_grades` int(10) NULL DEFAULT NULL COMMENT '品牌记忆得分',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `username`(`username`) USING BTREE,
+  INDEX `mobile`(`mobile`) USING BTREE,
+  INDEX `email`(`email`) USING BTREE,
+  INDEX `role`(`role`) USING BTREE,
+  INDEX `stage`(`stage`) USING BTREE,
+  INDEX `step`(`step`) USING BTREE,
+  INDEX `round`(`round`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of inv_user
@@ -636,9 +774,13 @@ DROP TABLE IF EXISTS `inv_user_incarnation_grades`;
 CREATE TABLE `inv_user_incarnation_grades`  (
   `user_id` int(11) NOT NULL,
   `incarnation_id` int(11) NOT NULL,
-  `grades` float(255, 0) NOT NULL,
+  `grades` float(10, 0) NOT NULL,
   PRIMARY KEY (`user_id`, `incarnation_id`) USING BTREE,
   INDEX `user_id`(`user_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of inv_user_incarnation_grades
+-- ----------------------------
 
 SET FOREIGN_KEY_CHECKS = 1;

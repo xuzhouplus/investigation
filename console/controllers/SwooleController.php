@@ -639,9 +639,6 @@ class SwooleController extends Controller
 			//分组轮次
 			$exportData->round = $round;
 			//总分组标识
-			Yii::error($identifyDivide);
-			Yii::error($egoDivide);
-			Yii::error($advDivide);
 			$exportData->divide_stamp = ArrayHelper::getValue($identifyLevelList, $identifyDivide) . ArrayHelper::getValue($egoLevelList, $egoDivide) . ArrayHelper::getValue($advLevelList, $advDivide);
 			//用户的化身认同答题得分
 			if ($identifyIncarnation) {
