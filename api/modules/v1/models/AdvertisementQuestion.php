@@ -23,6 +23,7 @@ class AdvertisementQuestion extends CommonAdvertisementQuestion
 		$query->andFilterWhere(['like', self::tableName() . '.description', ArrayHelper::getValue($data, 'description')]);
 		$query->andFilterWhere(['like', self::tableName() . '.title', ArrayHelper::getValue($data, 'title')]);
 		$query->andFilterWhere([self::tableName() . '.type' => ArrayHelper::getValue($data, 'type')]);
+		$query->andFilterWhere([self::tableName() . '.status' => self::STATUS_ACTIVE]);
 		$query->groupBy([self::tableName() . '.id']);
 		$page = ArrayHelper::getValue($data, 'page') ?: 1;
 		$dataProvider = Yii::createObject([
@@ -44,25 +45,31 @@ class AdvertisementQuestion extends CommonAdvertisementQuestion
 		if ($records) {
 			foreach ($records as $record) {
 				$options = [];
-				foreach ($record->option as $option) {
-					/**
-					 * @var $option AdvertisementOption
-					 */
-					if ($option->file_id) {
-						$file = $option->file->fileUrl();
-					} else {
-						$file = '';
+				if ($record->kind == self::KIND_CHOICE) {
+					foreach ($record->option as $option) {
+						/**
+						 * @var $option AdvertisementOption
+						 */
+						if ($option->file_id) {
+							$file = $option->file->fileUrl();
+						} else {
+							$file = '';
+						}
+						$options[] = [
+							'id' => $option->id,
+							'name' => $option->name,
+							'file' => $file
+						];
 					}
-					$options[] = [
-						'id' => $option->id,
-						'name' => $option->name,
-						'file' => $file
-					];
+				} else {
+					$options = [];
 				}
 				$questions[] = [
 					'id' => $record->id,
 					'title' => $record->title,
 					'description' => $record->description,
+					'type' => $record->type,
+					'kind' => $record->kind,
 					'options' => $options
 				];
 			}

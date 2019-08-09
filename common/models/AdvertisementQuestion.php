@@ -13,12 +13,19 @@ use yii\db\ActiveRecord;
  * @property string $title
  * @property string $description
  * @property string $type
+ * @property string $kind
+ * @property int $status
  * @property AdvertisementOption[] $option
  */
 class AdvertisementQuestion extends ActiveRecord
 {
-	const TYPE_BRAND_ATTITUDE='brandAttitude';
-	const TYPE_BRAND_MEMORY='brandMemory';
+	const TYPE_BRAND_ATTITUDE = 'brandAttitude';
+	const TYPE_BRAND_MEMORY = 'brandMemory';
+	const KIND_COMPLETION = 'completion';
+	const KIND_CHOICE = 'choice';
+	const STATUS_ACTIVE = 1;
+	const STATUS_INVALID = 2;
+
 	public static function tableName()
 	{
 		return '{{%advertisement_question}}';

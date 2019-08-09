@@ -165,6 +165,8 @@ class SwooleController extends Controller
 				case 'divideIntoGroups':
 					$result = self::divideIntoGroups($data);
 					break;
+				case 'brandExport':
+					break;
 				case 'mailer':
 					$result = self::mailer($data);
 					break;
@@ -411,8 +413,8 @@ class SwooleController extends Controller
 					Yii::$app->cache->set('EGO_DIVIDE_SIGN_' . $egoDifferenceGrades->user_id, 1);
 					Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE', json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
 				}
+				$loopIndex++;
 			}
-			$loopIndex++;
 			if ($loopIndex == $userCount) {
 				break;
 			}
@@ -635,6 +637,7 @@ class SwooleController extends Controller
 	}
 
 	/**
+	 * 保存分组数据到导出数据表，广告品牌问题需单独处理
 	 * @param $users User[]
 	 * @param $round
 	 */
