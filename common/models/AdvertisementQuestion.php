@@ -15,6 +15,8 @@ use yii\db\ActiveRecord;
  * @property string $type
  * @property string $kind
  * @property int $status
+ * @property int $file_id
+ * @property File $file
  * @property AdvertisementOption[] $option
  */
 class AdvertisementQuestion extends ActiveRecord

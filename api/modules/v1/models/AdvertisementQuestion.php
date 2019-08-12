@@ -64,12 +64,18 @@ class AdvertisementQuestion extends CommonAdvertisementQuestion
 				} else {
 					$options = [];
 				}
+				if ($record->file_id) {
+					$file = $record->file->fileUrl();
+				} else {
+					$file = '';
+				}
 				$questions[] = [
 					'id' => $record->id,
 					'title' => $record->title,
 					'description' => $record->description,
 					'type' => $record->type,
 					'kind' => $record->kind,
+					'file' => $file,
 					'options' => $options
 				];
 			}

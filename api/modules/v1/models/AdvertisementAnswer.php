@@ -5,6 +5,7 @@ namespace api\modules\v1\models;
 
 use common\models\AdvertisementAnswer as CommonAdvertisementAnswer;
 use Yii;
+use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 
 class AdvertisementAnswer extends CommonAdvertisementAnswer
@@ -56,5 +57,18 @@ class AdvertisementAnswer extends CommonAdvertisementAnswer
 			$transaction->rollBack();
 			throw $exception;
 		}
+	}
+
+	/**
+	 * @param $answerData
+	 * @throws Exception
+	 */
+	public static function batchInsert($answerData)
+	{
+		if (empty($answerData)) {
+			return;
+		}
+		$first = reset($answerData);
+		self::getDb()->createCommand()->batchInsert(self::tableName(), array_keys($first), $answerData)->execute();
 	}
 }

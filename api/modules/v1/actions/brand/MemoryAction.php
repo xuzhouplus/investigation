@@ -14,12 +14,12 @@ use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 
 /**
- * 品牌态度答题提交
- * Class AttitudeAction
+ * 品牌记忆答题
+ * Class MemoryAction
  * @package api\modules\v1\actions\brand
  * @property AdvertisementAnswer $modelClass
  */
-class AttitudeAction extends Action
+class MemoryAction extends Action
 {
 	public function run()
 	{
@@ -29,16 +29,18 @@ class AttitudeAction extends Action
 			 */
 			$loginUser = Yii::$app->getUser()->getIdentity();
 			$questionOptions = [];
-			$options = AdvertisementOption::find()->joinWith(['question'])->where([AdvertisementQuestion::tableName() . '.type' => AdvertisementQuestion::TYPE_BRAND_ATTITUDE])->all();
+			/**
+			 * @var $options AdvertisementOption[]
+			 */
+			$options = AdvertisementOption::find()->joinWith(['question'])->where([AdvertisementQuestion::tableName() . '.type' => AdvertisementQuestion::TYPE_BRAND_MEMORY])->all();
 			foreach ($options as $option) {
 				if (!isset($questionOptions[$option->question_id])) {
 					$questionOptions[$option->question_id] = [];
 				}
-				$questionOptions[$option->question_id][$option->id] = $option->grades;
+				$questionOptions[$option->question_id][$option->name] = $option->grades;
 			}
 
 			$data = \Yii::$app->request->getBodyParams();
-
 			$deleteCondition = [
 				'user_id' => $loginUser->getId()
 			];
@@ -52,13 +54,24 @@ class AttitudeAction extends Action
 			$deleteCondition['question_id'] = array_keys($answers);
 			call_user_func_array([$this->modelClass, 'deleteAll'], ['deleteCondition' => $deleteCondition]);
 			$userAnswer = [];
-			foreach ($answers as $questionID => $option) {
-				$userAnswer[] = [
-					'question_id' => $questionID,
-					'user_id' => $loginUser->getId(),
-					'option_id' => $option,
-					'grades' => ArrayHelper::getValue($questionOptions, [$questionID, $option])
-				];
+			foreach ($answers as $questionID => $answer) {
+				if (is_string($answer)) {
+					if (strpos($answer, ',') > 0) {
+						$blankValue = explode(',', $answer);
+					} else {
+						$blankValue = json_decode($answer, true);
+					}
+				} else {
+					$blankValue = $answer;
+				}
+				foreach ($blankValue as $item) {
+					$userAnswer[] = [
+						'question_id' => $questionID,
+						'user_id' => $loginUser->getId(),
+						'answer' => $item,
+						'grades' => ArrayHelper::getValue($questionOptions, [$questionID, $item])
+					];
+				}
 			}
 			$result = call_user_func_array([$this->modelClass, 'batchInsert'], ['answerData' => $userAnswer]);
 			if ($result) {

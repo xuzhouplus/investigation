@@ -58,7 +58,7 @@ class SwooleController extends Controller
 
 	public function actionMigrate()
 	{
-		$struct='$this->createTable($this->tableName, [
+		$struct = '$this->createTable($this->tableName, [
 			$attribute
 		], $tableOptions);';
 		$tmp = '$this->batchInsert($this->tableName,[$attribute],
@@ -73,7 +73,7 @@ class SwooleController extends Controller
 			foreach ($attributes as $attribute) {
 				$single[] = '\'' . $attribute . '\'=>\'' . ArrayHelper::getValue($record, $attribute) . '\'';
 			}
-			$data[] = '[' . implode(',', $single) . '],'.PHP_EOL;
+			$data[] = '[' . implode(',', $single) . '],' . PHP_EOL;
 		}
 		$attr = [];
 		foreach ($attributes as $attribute) {
@@ -165,7 +165,11 @@ class SwooleController extends Controller
 				case 'divideIntoGroups':
 					$result = self::divideIntoGroups($data);
 					break;
-				case 'brandExport':
+				case 'brandAttitude':
+					$result = self::brandAttitude($data);
+					break;
+				case 'brandMemory':
+					$result = self::brandMemory($data);
 					break;
 				case 'mailer':
 					$result = self::mailer($data);
@@ -789,25 +793,10 @@ class SwooleController extends Controller
 			//易怒
 			$exportData->ego_irritable = ArrayHelper::getValue($emotionTypeAnswers, 'irritable') ?: 0;
 			//品牌态度
-			$brandAttitudeAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandAttitude'])->all();
-			if ($brandAttitudeAnswer) {
-				/**
-				 * @var $brandAttitude AdvertisementAnswer
-				 */
-				$brandAttitude = array_shift($brandAttitudeAnswer);
-				$exportData->brand_attitude_a = $brandAttitude->grades;
-				$brandAttitude = array_shift($brandAttitudeAnswer);
-				$exportData->brand_attitude_b = $brandAttitude->grades;
-				$brandAttitude = array_shift($brandAttitudeAnswer);
-				$exportData->brand_attitude_c = $brandAttitude->grades;
-				$brandAttitude = array_shift($brandAttitudeAnswer);
-				$exportData->brand_attitude_d = $brandAttitude->grades;
-			} else {
-				$exportData->brand_attitude_a = 0;
-				$exportData->brand_attitude_b = 0;
-				$exportData->brand_attitude_c = 0;
-				$exportData->brand_attitude_d = 0;
-			}
+			$exportData->brand_attitude_a = 0;
+			$exportData->brand_attitude_b = 0;
+			$exportData->brand_attitude_c = 0;
+			$exportData->brand_attitude_d = 0;
 			//品牌记忆
 			$brandMemoryAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandMemory'])->all();
 			if ($brandMemoryAnswer) {
@@ -871,5 +860,72 @@ class SwooleController extends Controller
 		$mail->setTo(static::$user->email);
 		$mail->setSubject(ArrayHelper::getValue($data, 'params.topic'));
 		return $mail->send();
+	}
+
+	/**
+	 * @param $data
+	 * User $user
+	 * @throws
+	 */
+	public static function brandAttitude($data)
+	{
+		/**
+		 * @var User $user
+		 */
+		$user = ArrayHelper::getValue($data, 'user');
+		//品牌态度
+		$brandAttitudeAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandAttitude'])->all();
+		if (empty($brandAttitudeAnswer)) {
+			throw new \Exception('用户没有品牌态度答题信息');
+		}
+		$exportData = Export::find()->where(['user_id' => $user->id])->limit(1)->one();
+		if (empty($exportData)) {
+			throw new \Exception('没有用户导出数据实例');
+		}
+		/**
+		 * @var $brandAttitude AdvertisementAnswer
+		 */
+		$brandAttitude = array_shift($brandAttitudeAnswer);
+		$exportData->brand_attitude_a = $brandAttitude->grades;
+		$brandAttitude = array_shift($brandAttitudeAnswer);
+		$exportData->brand_attitude_b = $brandAttitude->grades;
+		$brandAttitude = array_shift($brandAttitudeAnswer);
+		$exportData->brand_attitude_c = $brandAttitude->grades;
+		$brandAttitude = array_shift($brandAttitudeAnswer);
+		$exportData->brand_attitude_d = $brandAttitude->grades;
+		$exportData->save();
+	}
+
+	/**
+	 * @param $data
+	 * User $user
+	 * @throws
+	 */
+	public static function brandMemory($data)
+	{
+		/**
+		 * @var User $user
+		 */
+		$user = ArrayHelper::getValue($data, 'user');
+
+		//品牌记忆
+		$brandMemoryAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandMemory'])->all();
+		if (empty($brandMemoryAnswer)) {
+			throw new \Exception('用户没有品牌记忆答题信息');
+		}
+		$exportData = Export::find()->where(['user_id' => $user->id])->limit(1)->one();
+		if (empty($exportData)) {
+			throw new \Exception('没有用户导出数据实例');
+		}
+		/**
+		 * @var $brandMemory AdvertisementAnswer
+		 */
+		$brandMemory = array_shift($brandMemoryAnswer);
+		$exportData->brand_memory_1 = $brandMemory->grades;
+		$brandMemory = array_shift($brandMemoryAnswer);
+		$exportData->brand_memory_2 = $brandMemory->grades;
+		$brandMemory = array_shift($brandMemoryAnswer);
+		$exportData->brand_memory_3 = $brandMemory->grades;
+		$exportData->save();
 	}
 }

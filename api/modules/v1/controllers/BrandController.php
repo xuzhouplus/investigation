@@ -7,6 +7,7 @@ namespace api\modules\v1\controllers;
 use api\modules\v1\actions\brand\AttitudeAction;
 use api\modules\v1\actions\brand\CreateAction;
 use api\modules\v1\actions\brand\DeleteAction;
+use api\modules\v1\actions\brand\MemoryAction;
 use api\modules\v1\actions\brand\QuestionAction;
 use api\modules\v1\actions\brand\SubmitAction;
 use api\modules\v1\actions\brand\UpdateAction;
@@ -62,6 +63,10 @@ class BrandController extends ActiveController
 			],
 			'attitude' => [
 				'class' => AttitudeAction::class,
+				'modelClass' => AdvertisementAnswer::class
+			],
+			'memory'=>[
+				'class' => MemoryAction::class,
 				'modelClass' => AdvertisementAnswer::class
 			],
 			'delete' => [

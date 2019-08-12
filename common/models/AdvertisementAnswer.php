@@ -15,6 +15,7 @@ use yii\db\ActiveRecord;
  * @property int $question_id
  * @property int $option_id
  * @property int $grades
+ * @property string $answer
  * @property User $user
  * @property AdvertisementQuestion $question
  * @property AdvertisementOption $option
@@ -29,8 +30,14 @@ class AdvertisementAnswer extends ActiveRecord
 	public function rules()
 	{
 		return [
-			[['user_id', 'question_id', 'option_id', 'grades'], 'required', 'on' => ['create', 'update']],
+			[['user_id', 'question_id', 'grades'], 'required', 'on' => ['create', 'update']],
 			['id', 'required', 'on' => ['update']],
+			['option_id', 'required', 'when' => function ($model) {
+				return $model->answer;
+			}],
+			['grades', 'required', 'when' => function ($model) {
+				return $model->option_id;
+			}],
 			['grades', 'default', 'value' => 0],
 			['grades', 'integer', 'min' => 0]
 		];
