@@ -36,6 +36,7 @@ class User extends CommonUser
 		$query->andFilterWhere([self::tableName() . '.stage' => ArrayHelper::getValue($data, 'stage')]);
 		$query->andFilterWhere([self::tableName() . '.round' => ArrayHelper::getValue($data, 'round')]);
 		$query->andFilterWhere([self::tableName() . '.age' => ArrayHelper::getValue($data, 'age')]);
+		$query->andFilterWhere([self::tableName() . '.advertisement_status' => ArrayHelper::getValue($data, 'advertisement_status')]);
 		if (ArrayHelper::getValue($data, 'role')) {
 			$query->andFilterWhere([self::tableName() . '.role' => self::ROLE_USER]);
 		} else {
@@ -68,6 +69,7 @@ class User extends CommonUser
 				$query->andFilterWhere([self::tableName() . '.status' => $queryStatus]);
 			}
 		}
+		$waitCountQuery = clone $query;
 		if (!empty($data['order'])) {
 			if (is_string($data['order'])) {
 				$data['order'] = json_decode($data['order'], true);
@@ -121,6 +123,12 @@ class User extends CommonUser
 			}
 			$users[$index] = $user;
 		}
+		/**
+		 * 获取答题没有完成的人员总数
+		 */
+		$waitCountQuery->andWhere([self::tableName() . '.advertisement_status' => self::ADVERTISEMENT_STATUS_WAIT]);
+		$waitCountQuery->select(self::tableName() . '.id');
+		$wait = (int)$waitCountQuery->count(self::tableName() . '.id');
 		$pagination = $dataProvider->getPagination();
 		return [
 			'size' => $pagination->getPageSize(),
@@ -128,6 +136,8 @@ class User extends CommonUser
 			'page' => ($pagination->getPage() + 1),
 			'total' => $pagination->totalCount,
 			'offset' => $pagination->getOffset(),
+			'ongoing' => $wait,
+			'finished' => ($pagination->totalCount - $wait),
 			'users' => $users,
 		];
 	}

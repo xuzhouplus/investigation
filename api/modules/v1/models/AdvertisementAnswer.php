@@ -61,14 +61,15 @@ class AdvertisementAnswer extends CommonAdvertisementAnswer
 
 	/**
 	 * @param $answerData
+	 * @return bool|int
 	 * @throws Exception
 	 */
 	public static function batchInsert($answerData)
 	{
 		if (empty($answerData)) {
-			return;
+			return false;
 		}
 		$first = reset($answerData);
-		self::getDb()->createCommand()->batchInsert(self::tableName(), array_keys($first), $answerData)->execute();
+		return self::getDb()->createCommand()->batchInsert(self::tableName(), array_keys($first), $answerData)->execute();
 	}
 }

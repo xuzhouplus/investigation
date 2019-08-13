@@ -69,18 +69,18 @@ class MemoryAction extends Action
 						'question_id' => $questionID,
 						'user_id' => $loginUser->getId(),
 						'answer' => $item,
-						'grades' => ArrayHelper::getValue($questionOptions, [$questionID, $item])
+						'grades' => ArrayHelper::getValue($questionOptions, [$questionID, $item]) ?: 0
 					];
 				}
 			}
-			$result = call_user_func_array([$this->modelClass, 'batchInsert'], ['answerData' => $userAnswer]);
+			$result= call_user_func_array([$this->modelClass, 'batchInsert'], ['answerData' => $userAnswer]);
 			if ($result) {
 				/**
 				 * @var $loginUser User
 				 */
 				$loginUser = Yii::$app->getUser()->getIdentity();
 				Client::request([
-					'action' => 'brandAttitude',
+					'action' => 'brandMemory',
 					'access_token' => $loginUser->generateAccessToken(),
 					'callback' => ArrayHelper::getValue(Yii::$app->params, 'backendBaseUrl') . '/v1/swoole/callback',
 				]);
@@ -90,6 +90,11 @@ class MemoryAction extends Action
 					'data' => $result
 				];
 			}
+			return [
+				'code' => 200,
+				'message' => '提交失败',
+				'data' => $result
+			];
 		} catch (\Exception $exception) {
 			return [
 				'code' => 300,

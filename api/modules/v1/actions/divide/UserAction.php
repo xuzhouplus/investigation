@@ -96,25 +96,46 @@ class UserAction extends Action
 				];
 			}
 			//品牌记忆答题
-			$questionCount = AdvertisementQuestion::find()->count('id');
+			$questionCount = AdvertisementQuestion::find()->where(['status' => AdvertisementQuestion::STATUS_ACTIVE])->count('id');
 			/**
 			 * @var $answers AdvertisementAnswer[]
 			 */
 			$answers = AdvertisementAnswer::find()->joinWith(['question', 'option'])->where([AdvertisementAnswer::tableName() . '.user_id' => ArrayHelper::getValue($requestParams, 'user_id')])->limit($questionCount)->cache()->all();
 			foreach ($answers as $answer) {
-				if ($answer->option->file_id) {
-					$optionFile = $answer->option->file->fileUrl();
+				$question = $answer->question;
+				if ($question->kind == AdvertisementQuestion::KIND_CHOICE) {
+					if (!isset($result[$question->type])) {
+						$result[$question->type] = [];
+					}
+					$option = $answer->option;
+					if ($option->file_id) {
+						$optionFile = $option->file->fileUrl();
+					} else {
+						$optionFile = '';
+					}
+					$result[$question->type][] = [
+						'question_title' => $question->title,
+						'question_description' => $question->description,
+						'question_type' => $question->type,
+						'question_kind' => $question->kind,
+						'option_name' => $option->name,
+						'option_file' => $optionFile,
+						'option_answer' => $answer->answer,
+						'grades' => $answer->grades
+					];
 				} else {
-					$optionFile = '';
+					if (!isset($result[$question->type])) {
+						$result[$question->type] = [];
+					}
+					$result[$question->type][] = [
+						'question_title' => $question->title,
+						'question_description' => $question->description,
+						'question_type' => $question->type,
+						'question_kind' => $question->kind,
+						'option_answer' => $answer->answer,
+						'grades' => $answer->grades
+					];
 				}
-				$result['advertisement'][] = [
-					'question_title' => $answer->question->title,
-					'question_description' => $answer->question->description,
-					'question_type' => $answer->question->type,
-					'option_name' => $answer->option->name,
-					'option_file' => $optionFile,
-					'grades' => $answer->grades
-				];
 			}
 			//自我差异分组
 			if ($user->ego_divide) {

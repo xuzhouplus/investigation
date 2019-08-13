@@ -60,6 +60,8 @@ use yii\db\ActiveRecord;
  * @property string $brand_memory_1
  * @property string $brand_memory_2
  * @property string $brand_memory_3
+ * @property string $brand_memory_4
+ * @property string $brand_memory_5
  * @property string $user_id
  * @property string $gender
  * @property string $age

@@ -37,6 +37,7 @@ use yii\web\IdentityInterface;
  * @property string $identify_divide
  * @property string $ego_divide
  * @property string $advertisement_divide
+ * @property int $advertisement_status
  * @property int $ego_incarnation
  * @property int $access_token
  * @property AdvertisementAnswer $advertisementAnswer
@@ -58,6 +59,9 @@ class User extends ActiveRecord implements IdentityInterface
 	const STATUS_NEW = 0;
 	const STATUS_ACTIVE = 1;
 	const STATUS_INACTIVE = 2;
+
+	const ADVERTISEMENT_STATUS_WAIT = 1;
+	const ADVERTISEMENT_STATUS_FINISH = 2;
 
 	//化身分组标识，1大，2小，3不分组
 	const IDENTIFY_DIVIDE_LEVEL = [
@@ -152,13 +156,14 @@ class User extends ActiveRecord implements IdentityInterface
 			['mobile', 'match', 'pattern' => '/^1[3-9][0-9]{9}$/'],
 			['age', 'required', 'on' => ['create']],
 			['age', 'integer', 'min' => 0],
-			['gender', 'default', 'value' => self::GENDER_MALE],
+			['gender', 'default', 'value' => self::GENDER_MALE, 'on' => ['create']],
 			['gender', 'in', 'range' => [self::GENDER_MALE, self::GENDER_FEMALE]],
-			['role', 'default', 'value' => self::ROLE_USER],
+			['role', 'default', 'value' => self::ROLE_USER, 'on' => ['create']],
 			['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMINISTRATOR]],
-			['status', 'default', 'value' => self::STATUS_ACTIVE],
+			['status', 'default', 'value' => self::STATUS_ACTIVE, 'on' => ['create']],
 			['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
-			['round', 'default', 'value' => '0'],
+			['advertisement_status', 'default', 'value' => self::ADVERTISEMENT_STATUS_WAIT, 'on' => ['create']],
+			['round', 'default', 'value' => '0', 'on' => ['create']],
 			[['step', 'round', 'stage'], 'string']
 		];
 	}

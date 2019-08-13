@@ -150,6 +150,9 @@ class SwooleController extends Controller
 		try {
 			Yii::$app->redis->open();
 			Yii::$app->getDb()->open();
+			/**
+			 * @var $user User
+			 */
 			$user = User::findIdentityByAccessToken(ArrayHelper::getValue($data, 'access_token'));
 			if (!$user) {
 				throw new \Exception('access_token校验失败');
@@ -798,22 +801,11 @@ class SwooleController extends Controller
 			$exportData->brand_attitude_c = 0;
 			$exportData->brand_attitude_d = 0;
 			//品牌记忆
-			$brandMemoryAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandMemory'])->all();
-			if ($brandMemoryAnswer) {
-				/**
-				 * @var $brandMemory AdvertisementAnswer
-				 */
-				$brandMemory = array_shift($brandMemoryAnswer);
-				$exportData->brand_memory_1 = $brandMemory->grades;
-				$brandMemory = array_shift($brandMemoryAnswer);
-				$exportData->brand_memory_2 = $brandMemory->grades;
-				$brandMemory = array_shift($brandMemoryAnswer);
-				$exportData->brand_memory_3 = $brandMemory->grades;
-			} else {
-				$exportData->brand_memory_1 = 0;
-				$exportData->brand_memory_2 = 0;
-				$exportData->brand_memory_3 = 0;
-			}
+			$exportData->brand_memory_1 = 0;
+			$exportData->brand_memory_2 = 0;
+			$exportData->brand_memory_3 = 0;
+			$exportData->brand_memory_4 = 0;
+			$exportData->brand_memory_5 = 0;
 			//性别
 			$exportData->gender = $user->gender;
 			//年龄
@@ -869,16 +861,12 @@ class SwooleController extends Controller
 	 */
 	public static function brandAttitude($data)
 	{
-		/**
-		 * @var User $user
-		 */
-		$user = ArrayHelper::getValue($data, 'user');
 		//品牌态度
-		$brandAttitudeAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandAttitude'])->all();
+		$brandAttitudeAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => self::$user->id, AdvertisementQuestion::tableName() . '.type' => 'brandAttitude'])->all();
 		if (empty($brandAttitudeAnswer)) {
 			throw new \Exception('用户没有品牌态度答题信息');
 		}
-		$exportData = Export::find()->where(['user_id' => $user->id])->limit(1)->one();
+		$exportData = Export::find()->where(['user_id' => self::$user->id])->limit(1)->one();
 		if (empty($exportData)) {
 			throw new \Exception('没有用户导出数据实例');
 		}
@@ -894,6 +882,8 @@ class SwooleController extends Controller
 		$brandAttitude = array_shift($brandAttitudeAnswer);
 		$exportData->brand_attitude_d = $brandAttitude->grades;
 		$exportData->save();
+		self::$user->advertisement_status = User::ADVERTISEMENT_STATUS_FINISH;
+		self::$user->save();
 	}
 
 	/**
@@ -903,17 +893,12 @@ class SwooleController extends Controller
 	 */
 	public static function brandMemory($data)
 	{
-		/**
-		 * @var User $user
-		 */
-		$user = ArrayHelper::getValue($data, 'user');
-
 		//品牌记忆
-		$brandMemoryAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => $user->id, AdvertisementQuestion::tableName() . '.type' => 'brandMemory'])->all();
+		$brandMemoryAnswer = AdvertisementAnswer::find()->joinWith(['question'])->where([AdvertisementAnswer::tableName() . '.user_id' => self::$user->id, AdvertisementQuestion::tableName() . '.type' => 'brandMemory'])->all();
 		if (empty($brandMemoryAnswer)) {
 			throw new \Exception('用户没有品牌记忆答题信息');
 		}
-		$exportData = Export::find()->where(['user_id' => $user->id])->limit(1)->one();
+		$exportData = Export::find()->where(['user_id' => self::$user->id])->limit(1)->one();
 		if (empty($exportData)) {
 			throw new \Exception('没有用户导出数据实例');
 		}
@@ -926,6 +911,10 @@ class SwooleController extends Controller
 		$exportData->brand_memory_2 = $brandMemory->grades;
 		$brandMemory = array_shift($brandMemoryAnswer);
 		$exportData->brand_memory_3 = $brandMemory->grades;
+		$brandMemory = array_shift($brandMemoryAnswer);
+		$exportData->brand_memory_4 = $brandMemory->grades;
+		$brandMemory = array_shift($brandMemoryAnswer);
+		$exportData->brand_memory_5 = $brandMemory->grades;
 		$exportData->save();
 	}
 }
