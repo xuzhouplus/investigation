@@ -57,7 +57,7 @@ class AttitudeAction extends Action
 					'question_id' => $questionID,
 					'user_id' => $loginUser->getId(),
 					'option_id' => $option,
-					'grades' => ArrayHelper::getValue($questionOptions, [$questionID, $option])
+					'grades' => ArrayHelper::getValue($questionOptions, [$questionID, $option]) ?: 0
 				];
 			}
 			$result = call_user_func_array([$this->modelClass, 'batchInsert'], ['answerData' => $userAnswer]);
