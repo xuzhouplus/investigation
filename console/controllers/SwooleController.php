@@ -29,10 +29,21 @@ use common\components\swoole\Server;
 
 class SwooleController extends Controller
 {
+	public $daemonize = false;
 	/**
 	 * @var $user User
 	 */
 	protected static $user;
+
+	public function options($actionID)
+	{
+		return ['daemonize'];
+	}
+
+	public function optionAliases()
+	{
+		return ['d' => 'daemonize'];
+	}
 
 	/**
 	 * @throws Exception
@@ -56,35 +67,61 @@ class SwooleController extends Controller
 		return ExitCode::OK;
 	}
 
-	public function actionMigrate()
+	public function actionMigrate($migrateModel, $migrateData = 'true')
 	{
+		$migrateModel = 'common\\models\\' . $migrateModel;
+		if (!class_exists($migrateModel)) {
+			$this->stderr('模型不存在：' . $migrateData);
+			return ExitCode::UNSPECIFIED_ERROR;
+		}
+		$define = file_get_contents(Yii::$app->getRuntimePath() . DIRECTORY_SEPARATOR . 'tmp.php');
 		$struct = '$this->createTable($this->tableName, [
 			$attribute
 		], $tableOptions);';
-		$tmp = '$this->batchInsert($this->tableName,[$attribute],
+		$tableSchema = $migrateModel::getTableSchema();
+		$define = str_replace('$name', str_replace(Yii::$app->getDb()->tablePrefix, '', $tableSchema->name), $define);
+		Yii::error(ArrayHelper::toArray($tableSchema));
+		$columnDefines = [];
+		foreach ($tableSchema->columns as $column) {
+			$columnDefine = '\'' . $column->name . '\'=>$this->' . $column->type . '(' . $column->size . ')';
+			if ($column->comment) {
+				$columnDefine .= '->comment(\'' . $column->comment . '\')';
+			}
+			if (!$column->allowNull) {
+				$columnDefine .= '->notNull()';
+			}
+			$columnDefines[] = $columnDefine;
+		}
+		$columnDefines[] = '\'PRIMARY KEY(' . implode(',', $tableSchema->primaryKey) . ')\'';
+		$attributes = $tableSchema->getColumnNames();
+
+		$struct = str_replace('$attribute', implode(',' . PHP_EOL, $columnDefines), $struct);
+		$tmp = '';
+		$delete = '';
+		if ($migrateData == 'true') {
+			$tmp = '$this->batchInsert($this->tableName,[$attribute],
 			[
 			$data
 		]);';
-		$records = AdvertisementOption::find()->all();
-		$attributes = AdvertisementOption::getTableSchema()->getColumnNames();
-		$data = [];
-		foreach ($records as $record) {
-			$single = [];
-			foreach ($attributes as $attribute) {
-				$single[] = '\'' . $attribute . '\'=>\'' . ArrayHelper::getValue($record, $attribute) . '\'';
+			$tmp = str_replace('$attribute', implode(',', $attributes), $tmp);
+			$data = [];
+			$records = $migrateModel::find()->all();
+			foreach ($records as $record) {
+				$single = [];
+				foreach ($attributes as $attribute) {
+//					if(ArrayHelper::getValue($tableSchema->columns,[$attribute,'']))
+					$single[] = '\'' . $attribute . '\'=>\'' . ArrayHelper::getValue($record, $attribute) . '\'';
+				}
+				$data[] = '[' . implode(',', $single) . '],' . PHP_EOL;
 			}
-			$data[] = '[' . implode(',', $single) . '],' . PHP_EOL;
+			$tmp = str_replace('$data', implode('', $data), $tmp);
+			$delete = '$this->delete($this->tableName);';
 		}
-		$attr = [];
-		foreach ($attributes as $attribute) {
-			$attr[] = '\'' . $attribute . '\'';
-		}
-		$struct = str_replace('$attribute', implode(',', $attr), $struct);
-		$this->stdout($struct);
+		$define = str_replace('$schema', $struct, $define);
+		$define = str_replace('$data', $tmp, $define);
+		$define = str_replace('$delete', $delete, $define);
+		$this->stdout($define);
 		$this->stdout(PHP_EOL);
-		$tmp = str_replace('$attribute', implode(',', $attr), $tmp);
-		$tmp = str_replace('$data', implode('', $data), $tmp);
-		$this->stdout($tmp);
 		return ExitCode::OK;
 	}
 
@@ -272,7 +309,7 @@ class SwooleController extends Controller
 		//计算虚拟自我每种类型得分总和
 		$virtualEgoGrades = [];
 		foreach ($virtualEgos as $virtualEgo) {
-			$incarnationID = $virtualEgo->ego_incarnation;
+			$incarnationID = $virtualEgo->incarnation_id;
 			if (!isset($virtualEgoGrades[$incarnationID])) {
 				$virtualEgoGrades[$incarnationID] = [];
 			}

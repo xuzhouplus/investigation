@@ -7,7 +7,7 @@ use yii\db\Migration;
  */
 class m190726_073211_advertisement_option extends Migration
 {
-	public $tableName = '{{%}}';
+	public $tableName = '{{%advertisement_option}}';
 
 	/**
 	 * {@inheritdoc}
@@ -19,11 +19,11 @@ class m190726_073211_advertisement_option extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="品牌广告"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->primaryKey(11)->notNull(),
+			'id' => $this->primaryKey(11),
 			'question_id' => $this->integer(11)->notNull(),
 			'name' => $this->string(255),
 			'file_id' => $this->integer(11),
-			'grades' => $this->integer(2),
+			'grades' => $this->integer(1)
 		], $tableOptions);
 		$this->batchInsert($this->tableName, ['id', 'question_id', 'name', 'file_id', 'grades'],
 			[
@@ -62,6 +62,15 @@ class m190726_073211_advertisement_option extends Migration
 				['id' => '33', 'question_id' => '7', 'name' => '3分', 'file_id' => '', 'grades' => '3'],
 				['id' => '34', 'question_id' => '7', 'name' => '4分', 'file_id' => '', 'grades' => '4'],
 				['id' => '35', 'question_id' => '7', 'name' => '5分', 'file_id' => '', 'grades' => '5'],
+				['id' => '36', 'question_id' => '8', 'name' => 'E', 'file_id' => '', 'grades' => '1'],
+				['id' => '37', 'question_id' => '8', 'name' => 'e', 'file_id' => '', 'grades' => '1'],
+				['id' => '38', 'question_id' => '8', 'name' => 'M', 'file_id' => '', 'grades' => '1'],
+				['id' => '39', 'question_id' => '8', 'name' => 'm', 'file_id' => '', 'grades' => '1'],
+				['id' => '40', 'question_id' => '8', 'name' => 'A', 'file_id' => '', 'grades' => '1'],
+				['id' => '41', 'question_id' => '8', 'name' => 'a', 'file_id' => '', 'grades' => '1'],
+				['id' => '42', 'question_id' => '8', 'name' => '运动', 'file_id' => '', 'grades' => '1'],
+				['id' => '43', 'question_id' => '8', 'name' => '简单', 'file_id' => '', 'grades' => '1'],
+
 			]);
 	}
 
@@ -70,6 +79,7 @@ class m190726_073211_advertisement_option extends Migration
 	 */
 	public function safeDown()
 	{
+		$this->delete($this->tableName);
 		$this->dropTable($this->tableName);
 	}
 

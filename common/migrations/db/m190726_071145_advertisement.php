@@ -119,6 +119,7 @@ class m190726_071145_advertisement extends Migration
 	 */
 	public function safeDown()
 	{
+		$this->delete($this->tableName);
 		$this->dropTable($this->tableName);
 	}
 
