@@ -25,22 +25,10 @@ class EmotionQuestion extends CommonEmotionQuestion
 		$query->andFilterWhere(['like', self::tableName() . '.description', ArrayHelper::getValue($data, 'description')]);
 		$query->andFilterWhere(['like', self::tableName() . '.title', ArrayHelper::getValue($data, 'title')]);
 		$query->groupBy([self::tableName() . '.id']);
-		$page = ArrayHelper::getValue($data, 'page') ?: 1;
-		$dataProvider = Yii::createObject([
-			'class' => ActiveDataProvider::class,
-			'query' => $query,
-			'pagination' => [
-				'page' => $page - 1,
-				'pageSize' => ArrayHelper::getValue($data, 'size', 10)
-			],
-			'sort' => [
-				'params' => $data,
-			],
-		]);
 		/**
 		 * @var $records EmotionQuestion[]
 		 */
-		$records = $dataProvider->getModels();
+		$records = $query->all();
 		$questions = [];
 		if ($records) {
 			foreach ($records as $record) {
@@ -64,13 +52,7 @@ class EmotionQuestion extends CommonEmotionQuestion
 				];
 			}
 		}
-		$pagination = $dataProvider->getPagination();
 		return [
-			'size' => $pagination->getPageSize(),
-			'count' => $pagination->getPageCount(),
-			'page' => ($pagination->getPage() + 1),
-			'total' => $pagination->totalCount,
-			'offset' => $pagination->getOffset(),
 			'questions' => $questions,
 		];
 	}

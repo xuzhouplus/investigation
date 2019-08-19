@@ -12,7 +12,7 @@ use yii\db\ActiveRecord;
  * @package common\models
  * @property int $user_id
  * @property int $incarnation_id
- * @property int $type 1外倾性，2宜人性，3尽责性，4神经质，5开放性
+ * @property string $type 1外倾性，2宜人性，3尽责性，4神经质，5开放性
  * @property int $grades
  * @property int $sign 1正，2负，3零
  */

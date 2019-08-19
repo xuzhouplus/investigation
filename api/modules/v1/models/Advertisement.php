@@ -60,6 +60,11 @@ class Advertisement extends CommonAdvertisement
 		];
 	}
 
+	/**
+	 * @param $data
+	 * @return Advertisement
+	 * @throws \Exception
+	 */
 	public static function create($data)
 	{
 		$advertisement = new Advertisement();
@@ -82,11 +87,19 @@ class Advertisement extends CommonAdvertisement
 		throw new \Exception($error);
 	}
 
+	/**
+	 * @param $data
+	 * @return Advertisement|array|\yii\db\ActiveRecord|null
+	 * @throws \Exception
+	 */
 	public static function modify($data)
 	{
-		$advertisement = self::find()->where([self::tableName() . '.id' => ArrayHelper::getValue($data, 'id')])->one();
+		$advertisement = self::find()->where([self::tableName() . '.id' => ArrayHelper::getValue($data, 'id')])->limit(1)->one();
 		if (!$advertisement) {
-			throw new \Exception('广告不存在');
+			$advertisement = self::find()->where([self::tableName() . '.incarnation_id' => ArrayHelper::getValue($data, 'incarnation_id')])->limit(1)->one();
+		}
+		if (!$advertisement) {
+			throw new \Exception('化身广告不存在');
 		}
 		$advertisement->setScenario('update');
 		$advertisement->load($data, '');

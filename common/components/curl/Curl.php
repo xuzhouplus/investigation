@@ -7,6 +7,8 @@
  */
 
 namespace common\components\curl;
+use Yii;
+
 class Curl
 {
 	public static function takeCurl($type, $url, $data = array())
@@ -53,7 +55,7 @@ class Curl
 			throw new \Exception($curlError);
 		};
 		curl_close($ch);
-		var_dump(compact('uri', 'data', 'output'));
+		Yii::debug(compact('uri', 'data', 'output'));
 		return $output;
 	}
 }

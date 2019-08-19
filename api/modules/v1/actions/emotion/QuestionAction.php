@@ -4,14 +4,14 @@
 namespace api\modules\v1\actions\emotion;
 
 
-use api\modules\v1\models\EgoQuestion;
+use api\modules\v1\models\EmotionQuestion;
 use Yii;
 use yii\rest\Action;
 
 /**
  * Class QuestionAction
  * @package api\modules\v1\actions\question
- * @property  EgoQuestion $modelClass
+ * @property  EmotionQuestion $modelClass
  */
 class QuestionAction extends Action
 {

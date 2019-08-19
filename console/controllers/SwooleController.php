@@ -183,7 +183,6 @@ class SwooleController extends Controller
 	 */
 	public function onTask($server, $task_id, $from_id, $data)
 	{
-		echo 'task id:' . $task_id . PHP_EOL;
 		try {
 			Yii::$app->redis->open();
 			Yii::$app->getDb()->open();
@@ -195,6 +194,7 @@ class SwooleController extends Controller
 				throw new \Exception('access_token校验失败');
 			}
 			static::$user = $user;
+			echo 'task id:' . $task_id . ',action:' . ArrayHelper::getValue($data, 'action') . PHP_EOL;
 			switch (ArrayHelper::getValue($data, 'action')) {
 				case 'userIncarnation':
 					$result = self::userIncarnationTask($data);
@@ -226,9 +226,8 @@ class SwooleController extends Controller
 			$taskData['status'] = 'fail';
 			$taskData['message'] = $throwable->getMessage();
 		}
-		if (ArrayHelper::getValue($data, 'data.callback')) {
-			$callback = ArrayHelper::getValue($data, 'data');
-			Curl::takeCurl('post', ArrayHelper::getValue($data, 'data.callback'), array_merge($callback, $taskData));
+		if (ArrayHelper::getValue($data, 'callback')) {
+			Curl::takeCurl('post', ArrayHelper::getValue($data, 'callback'), array_merge($data, $taskData));
 		}
 		$server->finish(json_encode($taskData));
 		Yii::$app->getDb()->close();
@@ -356,6 +355,9 @@ class SwooleController extends Controller
 		$transaction = Yii::$app->getDb()->beginTransaction();
 		try {
 			$users = User::find()->select(['id', 'username', 'email', 'gender', 'age'])->where(['stage' => '1', 'step' => 3, 'role' => User::ROLE_USER])->all();
+			if(empty($users)){
+				throw new \Exception('没有可以分组的用户');
+			}
 			$userID = ArrayHelper::getColumn($users, 'id');
 			$systemRound = Config::find()->where(['name' => Config::CONFIG_ROUND_KEY])->limit(1)->one();
 			self::divideIncarnationGroup($userID);
@@ -864,6 +866,7 @@ class SwooleController extends Controller
 			}
 			//广告强弱分组
 			$exportData->association_strength = ArrayHelper::getValue($advLevelList, $advDivide) ?: 0;
+			Yii::error($exportData);
 			$exportData->save();
 		}
 	}
