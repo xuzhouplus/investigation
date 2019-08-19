@@ -29,7 +29,7 @@ use common\components\swoole\Server;
 
 class SwooleController extends Controller
 {
-	public $daemonize = false;
+	public $daemonize = true;
 	/**
 	 * @var $user User
 	 */
@@ -205,6 +205,9 @@ class SwooleController extends Controller
 				case 'divideIntoGroups':
 					$result = self::divideIntoGroups($data);
 					break;
+				case 'emotion':
+					$result = self::emotion($data);
+					break;
 				case 'brandAttitude':
 					$result = self::brandAttitude($data);
 					break;
@@ -355,7 +358,7 @@ class SwooleController extends Controller
 		$transaction = Yii::$app->getDb()->beginTransaction();
 		try {
 			$users = User::find()->select(['id', 'username', 'email', 'gender', 'age'])->where(['stage' => '1', 'step' => 3, 'role' => User::ROLE_USER])->all();
-			if(empty($users)){
+			if (empty($users)) {
 				throw new \Exception('没有可以分组的用户');
 			}
 			$userID = ArrayHelper::getColumn($users, 'id');
@@ -683,7 +686,7 @@ class SwooleController extends Controller
 	}
 
 	/**
-	 * 保存分组数据到导出数据表，广告品牌问题需单独处理
+	 * 保存分组数据到导出数据表，情绪量化、广告品牌问题需单独处理
 	 * @param $users User[]
 	 * @param $round
 	 */
@@ -691,8 +694,6 @@ class SwooleController extends Controller
 	{
 		//自我差异问题总数
 		$egoQuestionCount = EgoQuestion::find()->count('id');
-		//情绪量化问题总数
-		$emotionQuestionCount = EmotionQuestion::find()->count('id');
 		//化身认同分组设置
 		$identifyLevelList = ArrayHelper::map(User::IDENTIFY_DIVIDE_LEVEL, 'value', 'key');
 		//自我差异分组设置
@@ -789,51 +790,42 @@ class SwooleController extends Controller
 			$exportData->open_invented1 = reset($openInvented);
 			$exportData->open_invented2 = end($openInvented);
 			//情绪量化
-			$emotionTypeAnswers = [];
-			//有广告强弱化身的才有情绪量化答题
-			if ($advIncarnation) {
-				$emotionAnswers = EmotionAnswer::find()->where(['user_id' => $user->id])->limit($emotionQuestionCount)->all();
-				//把答题得分按照问题类型组装数据
-				foreach ($emotionAnswers as $emotionAnswer) {
-					$emotionTypeAnswers[$emotionAnswer->question->type] = $emotionAnswer->grades;
-				}
-			}
 			//活跃
-			$exportData->ego_alive = ArrayHelper::getValue($emotionTypeAnswers, 'alive') ?: 0;
+			$exportData->emotion_alive = 0;
 			//热情
-			$exportData->ego_warmth = ArrayHelper::getValue($emotionTypeAnswers, 'warmth') ?: 0;
+			$exportData->emotion_warmth = 0;
 			//快乐
-			$exportData->ego_happy = ArrayHelper::getValue($emotionTypeAnswers, 'happy') ?: 0;
+			$exportData->emotion_happy = 0;
 			//兴高采烈
-			$exportData->ego_jubilant = ArrayHelper::getValue($emotionTypeAnswers, 'jubilant') ?: 0;
+			$exportData->emotion_jubilant = 0;
 			//兴奋
-			$exportData->ego_excited = ArrayHelper::getValue($emotionTypeAnswers, 'excited') ?: 0;
+			$exportData->emotion_excited = 0;
 			//自豪
-			$exportData->ego_proud = ArrayHelper::getValue($emotionTypeAnswers, 'proud') ?: 0;
+			$exportData->emotion_proud = 0;
 			//欣喜
-			$exportData->ego_delighted = ArrayHelper::getValue($emotionTypeAnswers, 'delighted') ?: 0;
+			$exportData->emotion_delighted = 0;
 			//精神充沛
-			$exportData->ego_energetic = ArrayHelper::getValue($emotionTypeAnswers, 'energetic') ?: 0;
+			$exportData->emotion_energetic = 0;
 			//感激
-			$exportData->ego_grateful = ArrayHelper::getValue($emotionTypeAnswers, 'grateful') ?: 0;
+			$exportData->emotion_grateful = 0;
 			//难过
-			$exportData->ego_sad = ArrayHelper::getValue($emotionTypeAnswers, 'sad') ?: 0;
+			$exportData->emotion_sad = 0;
 			//害怕
-			$exportData->ego_scared = ArrayHelper::getValue($emotionTypeAnswers, 'scared') ?: 0;
+			$exportData->emotion_scared = 0;
 			//紧张
-			$exportData->ego_nervous = ArrayHelper::getValue($emotionTypeAnswers, 'nervous') ?: 0;
+			$exportData->emotion_nervous = 0;
 			//惊恐
-			$exportData->ego_terrified = ArrayHelper::getValue($emotionTypeAnswers, 'terrified') ?: 0;
+			$exportData->emotion_terrified = 0;
 			//内疚
-			$exportData->ego_guilt = ArrayHelper::getValue($emotionTypeAnswers, 'guilt') ?: 0;
+			$exportData->emotion_guilt = 0;
 			//战战兢兢
-			$exportData->ego_trembled = ArrayHelper::getValue($emotionTypeAnswers, 'trembled') ?: 0;
+			$exportData->emotion_trembled = 0;
 			//恼怒
-			$exportData->ego_annoyed = ArrayHelper::getValue($emotionTypeAnswers, 'annoyed') ?: 0;
+			$exportData->emotion_annoyed = 0;
 			//羞愧
-			$exportData->ego_ashamed = ArrayHelper::getValue($emotionTypeAnswers, 'ashamed') ?: 0;
+			$exportData->emotion_ashamed = 0;
 			//易怒
-			$exportData->ego_irritable = ArrayHelper::getValue($emotionTypeAnswers, 'irritable') ?: 0;
+			$exportData->emotion_irritable = 0;
 			//品牌态度
 			$exportData->brand_attitude_a = 0;
 			$exportData->brand_attitude_b = 0;
@@ -955,6 +947,68 @@ class SwooleController extends Controller
 		$exportData->brand_memory_4 = $brandMemory->grades;
 		$brandMemory = array_shift($brandMemoryAnswer);
 		$exportData->brand_memory_5 = $brandMemory->grades;
+		$exportData->save();
+	}
+
+	/**
+	 * 情绪量化导出数据
+	 * @param $data
+	 * @throws \Exception
+	 */
+	public static function emotion($data)
+	{
+		$exportData = Export::find()->where(['user_id' => self::$user->id])->limit(1)->one();
+		if (empty($exportData)) {
+			throw new \Exception('没有用户导出数据实例');
+		}
+		//情绪量化问题总数
+		$emotionQuestionCount = EmotionQuestion::find()->count('id');
+		//情绪量化
+		$emotionTypeAnswers = [];
+		//有广告强弱化身的才有情绪量化答题
+		if (self::$user->ego_incarnation) {
+			$emotionAnswers = EmotionAnswer::find()->where(['user_id' => self::$user->id])->limit($emotionQuestionCount)->all();
+			//把答题得分按照问题类型组装数据
+			foreach ($emotionAnswers as $emotionAnswer) {
+				$emotionTypeAnswers[$emotionAnswer->question->type] = $emotionAnswer->grades;
+			}
+		}
+		//活跃
+		$exportData->emotion_alive = ArrayHelper::getValue($emotionTypeAnswers, 'alive') ?: 0;
+		//热情
+		$exportData->emotion_warmth = ArrayHelper::getValue($emotionTypeAnswers, 'warmth') ?: 0;
+		//快乐
+		$exportData->emotion_happy = ArrayHelper::getValue($emotionTypeAnswers, 'happy') ?: 0;
+		//兴高采烈
+		$exportData->emotion_jubilant = ArrayHelper::getValue($emotionTypeAnswers, 'jubilant') ?: 0;
+		//兴奋
+		$exportData->emotion_excited = ArrayHelper::getValue($emotionTypeAnswers, 'excited') ?: 0;
+		//自豪
+		$exportData->emotion_proud = ArrayHelper::getValue($emotionTypeAnswers, 'proud') ?: 0;
+		//欣喜
+		$exportData->emotion_delighted = ArrayHelper::getValue($emotionTypeAnswers, 'delighted') ?: 0;
+		//精神充沛
+		$exportData->emotion_energetic = ArrayHelper::getValue($emotionTypeAnswers, 'energetic') ?: 0;
+		//感激
+		$exportData->emotion_grateful = ArrayHelper::getValue($emotionTypeAnswers, 'grateful') ?: 0;
+		//难过
+		$exportData->emotion_sad = ArrayHelper::getValue($emotionTypeAnswers, 'sad') ?: 0;
+		//害怕
+		$exportData->emotion_scared = ArrayHelper::getValue($emotionTypeAnswers, 'scared') ?: 0;
+		//紧张
+		$exportData->emotion_nervous = ArrayHelper::getValue($emotionTypeAnswers, 'nervous') ?: 0;
+		//惊恐
+		$exportData->emotion_terrified = ArrayHelper::getValue($emotionTypeAnswers, 'terrified') ?: 0;
+		//内疚
+		$exportData->emotion_guilt = ArrayHelper::getValue($emotionTypeAnswers, 'guilt') ?: 0;
+		//战战兢兢
+		$exportData->emotion_trembled = ArrayHelper::getValue($emotionTypeAnswers, 'trembled') ?: 0;
+		//恼怒
+		$exportData->emotion_annoyed = ArrayHelper::getValue($emotionTypeAnswers, 'annoyed') ?: 0;
+		//羞愧
+		$exportData->emotion_ashamed = ArrayHelper::getValue($emotionTypeAnswers, 'ashamed') ?: 0;
+		//易怒
+		$exportData->emotion_irritable = ArrayHelper::getValue($emotionTypeAnswers, 'irritable') ?: 0;
 		$exportData->save();
 	}
 }

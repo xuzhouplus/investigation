@@ -5,7 +5,10 @@ namespace api\modules\v1\actions\emotion;
 
 
 use api\modules\v1\models\EmotionAnswer;
+use api\modules\v1\models\User;
+use common\components\swoole\Client;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\rest\Action;
 
 /**
@@ -20,6 +23,15 @@ class SubmitAction extends Action
 		try {
 			$request = Yii::$app->request;
 			$result = call_user_func_array([$this->modelClass, 'submit'], ['data' => $request->getBodyParams()]);
+			/**
+			 * @var $loginUser User
+			 */
+			$loginUser = Yii::$app->getUser()->getIdentity();
+			Client::request([
+				'action' => 'emotion',
+				'access_token' => $loginUser->generateAccessToken(),
+				'callback' => ArrayHelper::getValue(Yii::$app->params, 'backendBaseUrl') . '/v1/swoole/callback',
+			]);
 			return [
 				'code' => 200,
 				'message' => '提交成功',

@@ -62,10 +62,6 @@ class AttitudeAction extends Action
 			}
 			$result = call_user_func_array([$this->modelClass, 'batchInsert'], ['answerData' => $userAnswer]);
 			if ($result) {
-				/**
-				 * @var $loginUser User
-				 */
-				$loginUser = Yii::$app->getUser()->getIdentity();
 				Client::request([
 					'action' => 'brandAttitude',
 					'access_token' => $loginUser->generateAccessToken(),

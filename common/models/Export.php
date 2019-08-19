@@ -35,24 +35,24 @@ use yii\db\ActiveRecord;
  * @property string $nervous_invented2
  * @property string $open_invented1
  * @property string $open_invented2
- * @property string $ego_alive
- * @property string $ego_warmth
- * @property string $ego_happy
- * @property string $ego_jubilant
- * @property string $ego_excited
- * @property string $ego_proud
- * @property string $ego_delighted
- * @property string $ego_energetic
- * @property string $ego_grateful
- * @property string $ego_sad
- * @property string $ego_scared
- * @property string $ego_nervous
- * @property string $ego_terrified
- * @property string $ego_guilt
- * @property string $ego_trembled
- * @property string $ego_annoyed
- * @property string $ego_ashamed
- * @property string $ego_irritable
+ * @property string $emotion_alive
+ * @property string $emotion_warmth
+ * @property string $emotion_happy
+ * @property string $emotion_jubilant
+ * @property string $emotion_excited
+ * @property string $emotion_proud
+ * @property string $emotion_delighted
+ * @property string $emotion_energetic
+ * @property string $emotion_grateful
+ * @property string $emotion_sad
+ * @property string $emotion_scared
+ * @property string $emotion_nervous
+ * @property string $emotion_terrified
+ * @property string $emotion_guilt
+ * @property string $emotion_trembled
+ * @property string $emotion_annoyed
+ * @property string $emotion_ashamed
+ * @property string $emotion_irritable
  * @property string $brand_attitude_a
  * @property string $brand_attitude_b
  * @property string $brand_attitude_c

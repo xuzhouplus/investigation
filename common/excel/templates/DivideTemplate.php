@@ -248,28 +248,28 @@ class DivideTemplate extends ExcelTemplate
 			['content' => 'egoMultiplyIdentify', 'text' => function ($column, $row) {
 				return '=ABS(AO' . $row . ')*E' . $row;
 			}],
-			['content' => 'egoAlive'],
-			['content' => 'egoWarmth'],
-			['content' => 'egoHappy'],
-			['content' => 'egoJubilant'],
-			['content' => 'egoExcited'],
-			['content' => 'egoProud'],
-			['content' => 'egoDelighted'],
-			['content' => 'egoEnergetic'],
-			['content' => 'egoGrateful'],
-			['content' => 'egoPositiveMean', 'text' => function ($column, $row) {
+			['content' => 'emotionAlive'],
+			['content' => 'emotionWarmth'],
+			['content' => 'emotionHappy'],
+			['content' => 'emotionJubilant'],
+			['content' => 'emotionExcited'],
+			['content' => 'emotionProud'],
+			['content' => 'emotionDelighted'],
+			['content' => 'emotionEnergetic'],
+			['content' => 'emotionGrateful'],
+			['content' => 'emotionPositiveMean', 'text' => function ($column, $row) {
 				return '=(AQ' . $row . '+AR' . $row . '+AS' . $row . '+AT' . $row . '+AU' . $row . '+AV' . $row . '+AW' . $row . '+AX' . $row . '+AY' . $row . ')/9';
 			}],
-			['content' => 'egoSad'],
-			['content' => 'egoScared'],
-			['content' => 'egoNervous'],
-			['content' => 'egoTerrified'],
-			['content' => 'egoGuilt'],
-			['content' => 'egoTrembled'],
-			['content' => 'egoAnnoyed'],
-			['content' => 'egoAshamed'],
-			['content' => 'egoIrritable'],
-			['content' => 'egoNegativeMean', 'text' => function ($column, $row) {
+			['content' => 'emotionSad'],
+			['content' => 'emotionScared'],
+			['content' => 'emotionNervous'],
+			['content' => 'emotionTerrified'],
+			['content' => 'emotionGuilt'],
+			['content' => 'emotionTrembled'],
+			['content' => 'emotionAnnoyed'],
+			['content' => 'emotionAshamed'],
+			['content' => 'emotionIrritable'],
+			['content' => 'emotionNegativeMean', 'text' => function ($column, $row) {
 				return '=(BA' . $row . '+BB' . $row . '+BC' . $row . '+BD' . $row . '+BE' . $row . '+BF' . $row . '+BG' . $row . '+BH' . $row . '+BI' . $row . ')/9';
 			}],
 			['content' => 'brandAttitudeA'],
