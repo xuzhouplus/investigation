@@ -85,7 +85,7 @@ class User extends CommonUser
 			$query->orderBy($order);
 		}
 		$query->groupBy([self::tableName() . '.id']);
-		Yii::error($query->createCommand()->getRawSql());
+		Yii::debug($query->createCommand()->getRawSql());
 		$page = ArrayHelper::getValue($data, 'page') ?: 1;
 		$pagination = new Pagination(['totalCount' => $query->count(), 'pageSize' => ArrayHelper::getValue($data, 'size', 10), 'page' => $page - 1]);
 		$dataProvider = new ActiveDataProvider([
