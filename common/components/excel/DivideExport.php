@@ -7,6 +7,7 @@ namespace common\components\excel;
 use common\excel\helper\Helper;
 use common\excel\templates\DivideTemplate;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -36,6 +37,10 @@ class DivideExport extends Component
 	 * @var $rowOffset int
 	 */
 	private $rowOffset;
+	/**
+	 * @var $rows array 要写入excel的数据
+	 */
+	private $rows;
 
 	/**
 	 * @throws \Exception
@@ -105,6 +110,44 @@ class DivideExport extends Component
 		$this->rowOffset++;
 	}
 
+	public function addRow($data)
+	{
+		//填充数据
+		$row = [];
+		foreach ($this->templateObj->getBodyContent() as $bodyIndex => $bodyDefinition) {
+			$columnIndex = $bodyIndex + 1;
+			$cellText = ArrayHelper::getValue($bodyDefinition, 'text');
+			if (is_callable($cellText)) {
+				$row[] = call_user_func($cellText, $columnIndex, $this->rowOffset);
+			} else {
+				$row[] = ArrayHelper::getValue($data, ArrayHelper::getValue($bodyDefinition, 'content'));
+			}
+		}
+		$this->rows[] = $row;
+		$this->rowOffset++;
+	}
+
+	/**
+	 * @param $beginColumn
+	 * @param $beginRow
+	 * @throws Exception
+	 */
+	public function fillRows($beginColumn = 1, $beginRow = null)
+	{
+		if (!empty($this->rows)) {
+			if (is_null($beginRow)) {
+				$beginRow = 0;
+				if ($this->templateObj->getTitleContent()) {
+					$beginRow++;
+				}
+				if ($this->templateObj->getHeadContent()) {
+					$beginRow++;
+				}
+			}
+			$this->sheet->fromArray($this->rows, null, Coordinate::stringFromColumnIndex($beginColumn) . $beginRow);
+		}
+	}
+
 	public function renderBody($data)
 	{
 		//填充数据
@@ -156,5 +199,15 @@ class DivideExport extends Component
 
 		$writer = IOFactory::createWriter($this->spreadsheet, 'Xlsx');
 		$writer->save('php://output');
+	}
+
+	/**
+	 * @param $file
+	 * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+	 */
+	public function file($file)
+	{
+		$writer = IOFactory::createWriter($this->spreadsheet, 'Xlsx');
+		$writer->save($file);
 	}
 }

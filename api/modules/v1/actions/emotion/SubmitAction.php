@@ -44,6 +44,13 @@ class SubmitAction extends Action
 				'message' => $exception->getMessage(),
 				'data' => new \stdClass()
 			];
+		} catch (\Throwable $throwable) {
+			Yii::error($throwable->__toString());
+			return [
+				'code' => 300,
+				'message' => $throwable->getMessage(),
+				'data' => new \stdClass()
+			];
 		}
 	}
 }

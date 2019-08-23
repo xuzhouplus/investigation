@@ -92,11 +92,13 @@ class Export extends CommonExport
 							'differenceDirection' => $export->difference_direction,
 							'associationStrength' => $export->association_strength
 						];
+//						\Yii::$app->divideExport->addRow($exportData);
 						\Yii::$app->divideExport->renderBody($exportData);
 					}
 				}
 			}
 		}
+//		\Yii::$app->divideExport->fillRows();
 		\Yii::$app->divideExport->setBodyStyle();
 		\Yii::$app->divideExport->save($round ?: 'all');
 		exit();

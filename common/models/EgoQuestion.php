@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  * @property int $id
  * @property int $title string 题目
  * @property int $description string 说明
- * @property int $type 类型,1外倾性，2宜人性，3尽责性，4神经质，5开放性
+ * @property string $type 类型,1外倾性，2宜人性，3尽责性，4神经质，5开放性
  * @property Incarnation $incarnation 化身
  * @property EgoOption $option 选项
  * @property EgoAnswer $answer 回答

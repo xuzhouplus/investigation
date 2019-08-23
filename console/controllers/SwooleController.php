@@ -4,6 +4,8 @@
 namespace console\controllers;
 
 use common\components\curl\Curl;
+use common\components\swoole\Client;
+use common\models\Advertisement;
 use common\models\AdvertisementAnswer;
 use common\models\AdvertisementOption;
 use common\models\AdvertisementQuestion;
@@ -11,18 +13,26 @@ use common\models\Approve;
 use common\models\Config;
 use common\models\EgoAnswer;
 use common\models\EgoDifferenceGrades;
+use common\models\EgoOption;
 use common\models\EgoQuestion;
 use common\models\EmotionAnswer;
+use common\models\EmotionOption;
 use common\models\EmotionQuestion;
 use common\models\Export;
+use common\models\File;
 use common\models\Immerse;
+use common\models\Incarnation;
 use common\models\RoundMean;
+use common\models\Type;
 use common\models\User;
 use common\models\UserIncarnationGrades;
 use Yii;
+use yii\base\Model;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\console\ExitCode;
+use yii\db\ActiveRecord;
+use yii\db\TableSchema;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use common\components\swoole\Server;
@@ -67,61 +77,225 @@ class SwooleController extends Controller
 		return ExitCode::OK;
 	}
 
-	public function actionMigrate($migrateModel, $migrateData = 'true')
+	public function actionRedivide($round)
 	{
-		$migrateModel = 'common\\models\\' . $migrateModel;
-		if (!class_exists($migrateModel)) {
-			$this->stderr('模型不存在：' . $migrateData);
+		if (!$round) {
+			$this->stderr('no parameter "round"' . PHP_EOL);
+			return ExitCode::DATAERR;
+		}
+		try {
+			$round = intval($round);
+			$this->stdout('redivide groups ' . $round . PHP_EOL);
+			self::divideIntoGroups(['round' => $round]);
+			foreach (Export::find()->where(['round' => $round])->each() as $item) {
+				try {
+					/**
+					 * @var $item Export
+					 */
+					$this->stdout('preparing export data for ' . $item->user_id . PHP_EOL);
+					self::$user = User::find()->where(['id' => $item->user_id])->limit(1)->one();
+					self::emotion(['round' => $round]);
+					self::brandAttitude(['round' => $round]);
+					self::brandMemory(['round' => $round]);
+				} catch (\Exception $exception) {
+					$this->stderr($exception->getMessage() . PHP_EOL);
+					$this->stdout($exception->__toString() . PHP_EOL);
+				}
+			}
+			return ExitCode::OK;
+		} catch (\Exception $exception) {
+			$this->stderr($exception->getMessage() . PHP_EOL);
+			$this->stdout($exception->__toString() . PHP_EOL);
 			return ExitCode::UNSPECIFIED_ERROR;
 		}
-		$define = file_get_contents(Yii::$app->getRuntimePath() . DIRECTORY_SEPARATOR . 'tmp.php');
-		$struct = '$this->createTable($this->tableName, [
+	}
+
+	public function actionDivideExport($round = null)
+	{
+		try {
+			ini_set('memory_limit', '100M');
+			\Yii::$app->divideExport->createExcel();
+			\Yii::$app->divideExport->setTitle();
+			\Yii::$app->divideExport->renderTitle();
+			\Yii::$app->divideExport->renderHead();
+			foreach (User::IDENTIFY_DIVIDE_LEVEL as $identifyDivideLevel) {
+				foreach (User::EGO_DIVIDE_LEVEL as $egoDivideLevel) {
+					foreach (User::ADVERTISEMENT_DIVIDE_LEVEL as $advertisementDivideLevel) {
+						$query = Export::find()->where(['divide_stamp' => $identifyDivideLevel['key'] . $egoDivideLevel['key'] . $advertisementDivideLevel['key']]);
+						$query->andFilterWhere(['round' => $round]);
+						//每次循环取100个
+						$divideIndex = 0;
+						foreach ($query->each() as $export) {
+							/**
+							 * @var $export Export
+							 */
+							$divideIndex++;
+							$exportData = [
+								'divideIndex' => $divideIndex,
+								'divideStamp' => $export->divide_stamp,
+								'approveGrades' => $export->approve_grades,
+								'immerseGrades' => $export->immerse_grades,
+								'extravertReality1' => $export->extravert_reality1,
+								'extravertReality2' => $export->extravert_reality2,
+								'pleasantReality1' => $export->pleasant_reality1,
+								'pleasantReality2' => $export->pleasant_reality2,
+								'conscientiousReality1' => $export->conscientious_reality1,
+								'conscientiousReality2' => $export->conscientious_reality2,
+								'nervousReality1' => $export->nervous_reality1,
+								'nervousReality2' => $export->nervous_reality2,
+								'openReality1' => $export->open_reality1,
+								'openReality2' => $export->open_reality2,
+								'extravertInvented1' => $export->extravert_invented1,
+								'extravertInvented2' => $export->extravert_invented2,
+								'pleasantInvented1' => $export->pleasant_invented1,
+								'pleasantInvented2' => $export->pleasant_invented2,
+								'conscientiousInvented1' => $export->conscientious_invented1,
+								'conscientiousInvented2' => $export->conscientious_invented2,
+								'nervousInvented1' => $export->nervous_invented1,
+								'nervousInvented2' => $export->nervous_invented2,
+								'openInvented1' => $export->open_invented1,
+								'openInvented2' => $export->open_invented2,
+								'emotionAlive' => $export->emotion_alive,
+								'emotionHappy' => $export->emotion_happy,
+								'emotionJubilant' => $export->emotion_excited,
+								'emotionExcited' => $export->emotion_excited,
+								'emotionProud' => $export->emotion_proud,
+								'emotionDelighted' => $export->emotion_delighted,
+								'emotionEnergetic' => $export->emotion_energetic,
+								'emotionGrateful' => $export->emotion_grateful,
+								'emotionSad' => $export->emotion_sad,
+								'emotionScared' => $export->emotion_scared,
+								'emotionNervous' => $export->emotion_nervous,
+								'emotionTerrified' => $export->emotion_terrified,
+								'emotionGuilt' => $export->emotion_guilt,
+								'emotionTrembled' => $export->emotion_trembled,
+								'emotionAnnoyed' => $export->emotion_annoyed,
+								'emotionAshamed' => $export->emotion_ashamed,
+								'emotionIrritable' => $export->emotion_irritable,
+								'brandAttitudeA' => $export->brand_attitude_a,
+								'brandAttitudeB' => $export->brand_attitude_b,
+								'brandAttitudeC' => $export->brand_attitude_c,
+								'brandAttitudeD' => $export->brand_attitude_d,
+								'brandMemory1' => $export->brand_memory_1,
+								'brandMemory2' => $export->brand_memory_2,
+								'brandMemory3' => $export->brand_memory_3,
+								'userID' => $export->user_id,
+								'gender' => $export->gender,
+								'age' => $export->age,
+								'identifyStamp' => $export->identify_stamp,
+								'differenceSize' => $export->difference_size,
+								'differenceDirection' => $export->difference_direction,
+								'associationStrength' => $export->association_strength
+							];
+							\Yii::$app->divideExport->renderBody($exportData);
+						}
+					}
+				}
+			}
+			\Yii::$app->divideExport->setBodyStyle();
+			$exportFile = Yii::$app->runtimePath . DIRECTORY_SEPARATOR . 'export' . DIRECTORY_SEPARATOR . date('Y-m-d') . DIRECTORY_SEPARATOR . $round ?: 'all' . time() . '.xlsx';
+			\Yii::$app->divideExport->save($exportFile);
+			$this->stdout('file saved as ' . $exportFile . PHP_EOL);
+			$this->stdout('done' . PHP_EOL);
+			return ExitCode::OK;
+		} catch (\Exception $exception) {
+			$this->stderr($exception->getMessage() . PHP_EOL);
+			$this->stdout($exception->__toString() . PHP_EOL);
+			return ExitCode::UNSPECIFIED_ERROR;
+		}
+	}
+
+	public function actionMigrate($migrateModel = null, $migrateData = 'true')
+	{
+		if ($migrateModel) {
+			$migrateModel = 'common\\models\\' . $migrateModel;
+			if (!class_exists($migrateModel)) {
+				$this->stderr('模型不存在：' . $migrateData . PHP_EOL);
+				return ExitCode::UNSPECIFIED_ERROR;
+			}
+			$modelList = [
+				$migrateModel
+			];
+		} else {
+			$modelList = [
+				Advertisement::class,
+				AdvertisementAnswer::class,
+				AdvertisementOption::class,
+				AdvertisementQuestion::class,
+				Approve::class,
+				Config::class,
+				EgoAnswer::class,
+				EgoDifferenceGrades::class,
+				EgoOption::class,
+				EgoQuestion::class,
+				EmotionAnswer::class,
+				EmotionOption::class,
+				EmotionQuestion::class,
+				Export::class,
+				File::class,
+				Immerse::class,
+				Incarnation::class,
+				RoundMean::class,
+				Type::class,
+				User::class,
+				UserIncarnationGrades::class
+			];
+		}
+		foreach ($modelList as $migrateModel) {
+			$this->stdout($migrateModel . PHP_EOL);
+			$define = file_get_contents(Yii::$app->getRuntimePath() . DIRECTORY_SEPARATOR . 'tmp.php');
+			$struct = '$this->createTable($this->tableName, [
 			$attribute
 		], $tableOptions);';
-		$tableSchema = $migrateModel::getTableSchema();
-		$define = str_replace('$name', str_replace(Yii::$app->getDb()->tablePrefix, '', $tableSchema->name), $define);
-		Yii::error(ArrayHelper::toArray($tableSchema));
-		$columnDefines = [];
-		foreach ($tableSchema->columns as $column) {
-			$columnDefine = '\'' . $column->name . '\'=>$this->' . $column->type . '(' . $column->size . ')';
-			if ($column->comment) {
-				$columnDefine .= '->comment(\'' . $column->comment . '\')';
+			/**
+			 * @var $migrateModel ActiveRecord
+			 * @var $tableSchema TableSchema
+			 */
+			$tableSchema = call_user_func([$migrateModel, 'getTableSchema']);
+			$define = str_replace('$name', str_replace(Yii::$app->getDb()->tablePrefix, '', $tableSchema->name), $define);
+			Yii::error(ArrayHelper::toArray($tableSchema));
+			$columnDefines = [];
+			foreach ($tableSchema->columns as $column) {
+				$columnDefine = '\'' . $column->name . '\'=>$this->' . $column->type . '(' . $column->size . ')';
+				if ($column->comment) {
+					$columnDefine .= '->comment(\'' . $column->comment . '\')';
+				}
+				if (!$column->allowNull) {
+					$columnDefine .= '->notNull()';
+				}
+				$columnDefines[] = $columnDefine;
 			}
-			if (!$column->allowNull) {
-				$columnDefine .= '->notNull()';
-			}
-			$columnDefines[] = $columnDefine;
-		}
-		$columnDefines[] = '\'PRIMARY KEY(' . implode(',', $tableSchema->primaryKey) . ')\'';
-		$attributes = $tableSchema->getColumnNames();
+			$columnDefines[] = '\'PRIMARY KEY(' . implode(',', $tableSchema->primaryKey) . ')\'';
+			$attributes = $tableSchema->getColumnNames();
 
-		$struct = str_replace('$attribute', implode(',' . PHP_EOL, $columnDefines), $struct);
-		$tmp = '';
-		$delete = '';
-		if ($migrateData == 'true') {
-			$tmp = '$this->batchInsert($this->tableName,[$attribute],
+			$struct = str_replace('$attribute', implode(',' . PHP_EOL, $columnDefines), $struct);
+			$tmp = '';
+			$delete = '';
+			if ($migrateData == 'true') {
+				$tmp = '$this->batchInsert($this->tableName,[$attribute],
 			[
 			$data
 		]);';
-			$tmp = str_replace('$attribute', implode(',', $attributes), $tmp);
-			$data = [];
-			$records = $migrateModel::find()->all();
-			foreach ($records as $record) {
-				$single = [];
-				foreach ($attributes as $attribute) {
+				$tmp = str_replace('$attribute', implode(',', $attributes), $tmp);
+				$data = [];
+				$records = $migrateModel::find()->all();
+				foreach ($records as $record) {
+					$single = [];
+					foreach ($attributes as $attribute) {
 //					if(ArrayHelper::getValue($tableSchema->columns,[$attribute,'']))
-					$single[] = '\'' . $attribute . '\'=>\'' . ArrayHelper::getValue($record, $attribute) . '\'';
+						$single[] = '\'' . $attribute . '\'=>\'' . ArrayHelper::getValue($record, $attribute) . '\'';
+					}
+					$data[] = '[' . implode(',', $single) . '],' . PHP_EOL;
 				}
-				$data[] = '[' . implode(',', $single) . '],' . PHP_EOL;
+				$tmp = str_replace('$data', implode('', $data), $tmp);
+				$delete = '$this->delete($this->tableName);';
 			}
-			$tmp = str_replace('$data', implode('', $data), $tmp);
-			$delete = '$this->delete($this->tableName);';
+			$define = str_replace('$schema', $struct, $define);
+			$define = str_replace('$data', $tmp, $define);
+			$define = str_replace('$delete', $delete, $define);
+			file_put_contents(call_user_func([$migrateModel, 'tableName']), $define);
+			$this->stdout('done' . PHP_EOL);
 		}
-		$define = str_replace('$schema', $struct, $define);
-		$define = str_replace('$data', $tmp, $define);
-		$define = str_replace('$delete', $delete, $define);
-		$this->stdout($define);
-		$this->stdout(PHP_EOL);
 		return ExitCode::OK;
 	}
 
@@ -357,20 +531,31 @@ class SwooleController extends Controller
 	{
 		$transaction = Yii::$app->getDb()->beginTransaction();
 		try {
-			$users = User::find()->select(['id', 'username', 'email', 'gender', 'age'])->where(['stage' => '1', 'step' => 3, 'role' => User::ROLE_USER])->all();
-			if (empty($users)) {
-				throw new \Exception('没有可以分组的用户');
+			//当传递了round时，表示是重新分组
+			$round = ArrayHelper::getValue($data, 'round');
+			if ($round) {
+				$users = User::find()->select(['id', 'username', 'email', 'gender', 'age'])->where(['round' => $round])->all();
+				if (empty($users)) {
+					throw new \Exception('没有可以分组的用户');
+				}
+				$userID = ArrayHelper::getColumn($users, 'id');
+			} else {
+				$users = User::find()->select(['id', 'username', 'email', 'gender', 'age'])->where(['stage' => '1', 'step' => 3, 'role' => User::ROLE_USER])->all();
+				if (empty($users)) {
+					throw new \Exception('没有可以分组的用户');
+				}
+				$userID = ArrayHelper::getColumn($users, 'id');
+				User::updateAll(['round' => $round, 'step' => 4, 'stage' => 2], ['id' => $userID]);
+				$systemRound = Config::find()->where(['name' => Config::CONFIG_ROUND_KEY])->limit(1)->one();
+				$systemRound->value = $systemRound->value + 1;
+				$systemRound->save();
+				$round = $systemRound->value;
 			}
-			$userID = ArrayHelper::getColumn($users, 'id');
-			$systemRound = Config::find()->where(['name' => Config::CONFIG_ROUND_KEY])->limit(1)->one();
 			self::divideIncarnationGroup($userID);
 			self::divideEgoGroup($userID);
 			self::divideAdvertisement();
-			self::saveDivideToDatabase($systemRound->value + 1);
-			self::saveExportDivide($users, $systemRound->value + 1);
-			$systemRound->value = $systemRound->value + 1;
-			$systemRound->save();
-			User::updateAll(['round' => $systemRound->value, 'step' => 4, 'stage' => 2], ['id' => $userID]);
+			self::saveDivideToDatabase($round);
+			self::saveExportDivide($users, $round);
 			$transaction->commit();
 			//发送通知邮件
 			if (ArrayHelper::getValue(Yii::$app->params, 'emailNotify')) {
@@ -847,7 +1032,7 @@ class SwooleController extends Controller
 			if ($egoDivide) {
 				$egoDivideKey = ArrayHelper::getValue($egoLevelList, $egoDivide);
 				//差异大小
-				$exportData->difference_size = mb_substr($egoDivideKey, -1, 1, 'utf-8');
+				$exportData->difference_size = mb_substr($egoDivideKey, 0, 1, 'utf-8');
 				//差异正负
 				$exportData->difference_direction = mb_substr($egoDivideKey, -1, 1, 'utf-8');
 			} else {
