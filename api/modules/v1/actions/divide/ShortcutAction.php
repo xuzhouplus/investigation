@@ -28,12 +28,17 @@ class ShortcutAction extends Action
 			}
 			$requestParams['role'] = User::ROLE_USER;
 
+			$countParams = $requestParams;
+			$total = intval(call_user_func_array([$this->modelClass, 'count'], ['data' => $countParams]));
+			$countParams['advertisement_status'] = User::ADVERTISEMENT_STATUS_WAIT;
+			$ongoing = intval(call_user_func_array([$this->modelClass, 'count'], ['data' => $countParams]));
 			$identifyDivide = [];
+			$identifyParams = $requestParams;
 			foreach (User::IDENTIFY_DIVIDE_LEVEL as $divide) {
-				$requestParams['identify_divide'] = ArrayHelper::getValue($divide, 'value');
+				$identifyParams['identify_divide'] = ArrayHelper::getValue($divide, 'value');
 				$identifyDivide[] = [
 					'name' => ArrayHelper::getValue($divide, 'key'),
-					'count' => intval(call_user_func_array([$this->modelClass, 'count'], ['data' => $requestParams]))
+					'count' => intval(call_user_func_array([$this->modelClass, 'count'], ['data' => $identifyParams])),
 				];
 			}
 			unset($requestParams['identify_divide']);
@@ -57,7 +62,7 @@ class ShortcutAction extends Action
 			return [
 				'code' => 200,
 				'message' => '获取成功',
-				'data' => compact('identifyDivide', 'egoDivide', 'advertisementDivide')
+				'data' => compact('identifyDivide', 'egoDivide', 'advertisementDivide', 'total', 'ongoing')
 			];
 		} catch (\Exception $exception) {
 			Yii::error($exception->__toString());

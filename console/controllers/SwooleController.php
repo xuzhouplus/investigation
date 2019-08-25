@@ -180,6 +180,8 @@ class SwooleController extends Controller
 								'brandMemory2' => $export->brand_memory_2,
 								'brandMemory3' => $export->brand_memory_3,
 								'userID' => $export->user_id,
+								'userName' => $export->user_name,
+								'userEmail' => $export->user_email,
 								'gender' => $export->gender,
 								'age' => $export->age,
 								'identifyStamp' => $export->identify_stamp,
@@ -904,6 +906,8 @@ class SwooleController extends Controller
 			}
 			//用户id
 			$exportData->user_id = $user->id;
+			$exportData->user_name = $user->username;
+			$exportData->user_email = $user->email;
 			//分组轮次
 			$exportData->round = $round;
 			//总分组标识

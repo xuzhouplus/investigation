@@ -156,7 +156,8 @@ class User extends CommonUser
 		$query->andFilterWhere(['advertisement_divide' => ArrayHelper::getValue($data, 'advertisement_divide')]);
 		$query->andFilterWhere(['round' => ArrayHelper::getValue($data, 'round')]);
 		$query->andFilterWhere(['age' => ArrayHelper::getValue($data, 'age')]);
-		if (ArrayHelper::getValue($data, 'role')) {
+		$query->andFilterWhere(['advertisement_status'=>ArrayHelper::getValue($data,'advertisement_status')]);
+		if (!ArrayHelper::getValue($data, 'role')) {
 			$query->andFilterWhere(['role' => self::ROLE_USER]);
 		} else {
 			$queryRoles = ArrayHelper::getValue($data, 'role');
@@ -172,7 +173,7 @@ class User extends CommonUser
 				$query->andFilterWhere(['role' => $queryRoles]);
 			}
 		}
-		if (ArrayHelper::getValue($data, 'status')) {
+		if (!ArrayHelper::getValue($data, 'status')) {
 			$query->andFilterWhere(['status' => self::STATUS_ACTIVE]);
 		} else {
 			$queryStatus = ArrayHelper::getValue($data, 'status');
