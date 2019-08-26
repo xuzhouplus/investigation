@@ -3,11 +3,11 @@
 use yii\db\Migration;
 
 /**
- * Class m190726_072751_advertisement_answer
+ * Class m190826_085730_ego_answer
  */
-class m190726_072751_advertisement_answer extends Migration
+class m190826_085730_ego_answer extends Migration
 {
-	public $tableName = '{{%advertisement_answer}}';
+	public $tableName = '{{%ego_answer}}';
 
 	/**
 	 * {@inheritdoc}
@@ -16,17 +16,19 @@ class m190726_072751_advertisement_answer extends Migration
 	{
 		$tableOptions = null;
 		if ($this->db->driverName === 'mysql') {
-			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="品牌答题"';
+			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="自我差异答题"';
 		}
 		$this->createTable($this->tableName, [
 			'id' => $this->integer(11)->notNull(),
-			'user_id' => $this->integer(11)->notNull(),
 			'question_id' => $this->integer(11)->notNull(),
-			'option_id' => $this->integer(11),
-			'grades' => $this->integer(2)->notNull(),
-			'answer' => $this->string(255)->comment('填空题答题')
+			'option_id' => $this->integer(11)->notNull(),
+			'user_id' => $this->integer(11)->notNull(),
+			'incarnation_id' => $this->integer(11)->notNull(),
+			'grades' => $this->integer(1)->notNull()
 		], $tableOptions);
 		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
+		$this->createIndex('user_id', $this->tableName, 'user_id');
+		$this->createIndex('incarnation_id', $this->tableName, 'incarnation_id');
 	}
 
 	/**
@@ -34,9 +36,9 @@ class m190726_072751_advertisement_answer extends Migration
 	 */
 	public function safeDown()
 	{
+
 		$this->dropTable($this->tableName);
 	}
-
 
 	/*
 	// Use up()/down() to run migration code without a transaction.
@@ -47,7 +49,7 @@ class m190726_072751_advertisement_answer extends Migration
 
 	public function down()
 	{
-		echo "m190726_072751_advertisement_answer cannot be reverted.\n";
+		echo "m190826_085730_ego_answer cannot be reverted.\n";
 
 		return false;
 	}

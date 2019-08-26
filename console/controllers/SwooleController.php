@@ -4,7 +4,6 @@
 namespace console\controllers;
 
 use common\components\curl\Curl;
-use common\components\swoole\Client;
 use common\models\Advertisement;
 use common\models\AdvertisementAnswer;
 use common\models\AdvertisementOption;
@@ -27,7 +26,6 @@ use common\models\Type;
 use common\models\User;
 use common\models\UserIncarnationGrades;
 use Yii;
-use yii\base\Model;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\console\ExitCode;
@@ -210,40 +208,40 @@ class SwooleController extends Controller
 	public function actionMigrate($migrateModel = null, $migrateData = 'true')
 	{
 		if ($migrateModel) {
-			$migrateModel = 'common\\models\\' . $migrateModel;
+			$migrateModel = 'common\\models\\' . ucfirst($migrateModel);
 			if (!class_exists($migrateModel)) {
 				$this->stderr('模型不存在：' . $migrateData . PHP_EOL);
 				return ExitCode::UNSPECIFIED_ERROR;
 			}
 			$modelList = [
-				$migrateModel
+				$migrateModel => $migrateData
 			];
 		} else {
 			$modelList = [
-				Advertisement::class,
-				AdvertisementAnswer::class,
-				AdvertisementOption::class,
-				AdvertisementQuestion::class,
-				Approve::class,
-				Config::class,
-				EgoAnswer::class,
-				EgoDifferenceGrades::class,
-				EgoOption::class,
-				EgoQuestion::class,
-				EmotionAnswer::class,
-				EmotionOption::class,
-				EmotionQuestion::class,
-				Export::class,
-				File::class,
-				Immerse::class,
-				Incarnation::class,
-				RoundMean::class,
-				Type::class,
-				User::class,
-				UserIncarnationGrades::class
+				Advertisement::class => true,
+				AdvertisementAnswer::class => false,
+				AdvertisementOption::class => true,
+				AdvertisementQuestion::class => true,
+				Approve::class => false,
+				Config::class => true,
+				EgoAnswer::class => false,
+				EgoDifferenceGrades::class => false,
+				EgoOption::class => true,
+				EgoQuestion::class => true,
+				EmotionAnswer::class => false,
+				EmotionOption::class => true,
+				EmotionQuestion::class => true,
+				Export::class => false,
+				File::class => true,
+				Immerse::class => false,
+				Incarnation::class => true,
+				RoundMean::class => false,
+				Type::class => true,
+				User::class => false,
+				UserIncarnationGrades::class => false
 			];
 		}
-		foreach ($modelList as $migrateModel) {
+		foreach ($modelList as $migrateModel => $migrateData) {
 			$this->stdout($migrateModel . PHP_EOL);
 			$define = file_get_contents(Yii::$app->getRuntimePath() . DIRECTORY_SEPARATOR . 'tmp.php');
 			$struct = '$this->createTable($this->tableName, [
@@ -267,36 +265,55 @@ class SwooleController extends Controller
 				}
 				$columnDefines[] = $columnDefine;
 			}
-			$columnDefines[] = '\'PRIMARY KEY(' . implode(',', $tableSchema->primaryKey) . ')\'';
 			$attributes = $tableSchema->getColumnNames();
-
 			$struct = str_replace('$attribute', implode(',' . PHP_EOL, $columnDefines), $struct);
+			if ($tableSchema->primaryKey) {
+				$struct = $struct . PHP_EOL . '$this->addPrimaryKey(\'primaryKey\', $this->tableName, [\'' . implode('\',\'', $tableSchema->primaryKey) . '\']);';
+			}
 			$tmp = '';
 			$delete = '';
 			if ($migrateData == 'true') {
-				$tmp = '$this->batchInsert($this->tableName,[$attribute],
+				$tmp = PHP_EOL . '$this->batchInsert($this->tableName,[\'$attribute\'],
 			[
 			$data
 		]);';
-				$tmp = str_replace('$attribute', implode(',', $attributes), $tmp);
+				$tmp = str_replace('$attribute', implode('\',\'', $attributes), $tmp);
 				$data = [];
 				$records = $migrateModel::find()->all();
 				foreach ($records as $record) {
 					$single = [];
 					foreach ($attributes as $attribute) {
-//					if(ArrayHelper::getValue($tableSchema->columns,[$attribute,'']))
-						$single[] = '\'' . $attribute . '\'=>\'' . ArrayHelper::getValue($record, $attribute) . '\'';
+						if (is_null(ArrayHelper::getValue($record, $attribute))) {
+							$single[] = '\'' . $attribute . '\'=>null';
+						} else {
+							$single[] = '\'' . $attribute . '\'=>\'' . ArrayHelper::getValue($record, $attribute) . '\'';
+						}
 					}
-					$data[] = '[' . implode(',', $single) . '],' . PHP_EOL;
+					$data[] = '[' . implode(',', $single) . '],';
 				}
-				$tmp = str_replace('$data', implode('', $data), $tmp);
-				$delete = '$this->delete($this->tableName);';
+				$tmp = str_replace('$data', implode(PHP_EOL, $data), $tmp);
+				$delete = '$this->delete($this->tableName);' . PHP_EOL;
 			}
 			$define = str_replace('$schema', $struct, $define);
 			$define = str_replace('$data', $tmp, $define);
 			$define = str_replace('$delete', $delete, $define);
 			file_put_contents(call_user_func([$migrateModel, 'tableName']), $define);
 			$this->stdout('done' . PHP_EOL);
+		}
+		return ExitCode::OK;
+	}
+
+	public function actionTest()
+	{
+		/**
+		 * @var $each Export
+		 */
+		foreach (Export::find()->each() as $each) {
+			if (!$each->brand_attitude_a && !$each->brand_attitude_b && !$each->brand_attitude_c && !$each->brand_attitude_d) {
+				if (AdvertisementAnswer::find()->where(['user_id' => $each->user_id])->exists()) {
+					$this->stdout($each->user_id . PHP_EOL);
+				}
+			}
 		}
 		return ExitCode::OK;
 	}
@@ -709,10 +726,16 @@ class SwooleController extends Controller
 		$query->andFilterWhere(['user_id' => $users]);
 		$query->andFilterWhere(['grades' => 0]);
 		foreach ($query->each() as $egoDifferenceGrades) {
+			//保存答题结果，用于随机分配到化身
+			Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $egoDifferenceGrades->user_id, json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
+			//用户分组结果
 			$userEgoDivide = Yii::$app->cache->get('EGO_DIVIDE_' . $egoDifferenceGrades->user_id);
 			if (!$userEgoDivide) {
 				Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 5);
-				Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
+				//保存为middle的用户到临时数据
+				Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_TMP', $egoDifferenceGrades->user_id);
+				//当自我差异得分为0的用户不用随机到化身上时，注释上边的代码，取消下边的注释
+				//Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
 			}
 		}
 	}
@@ -722,17 +745,26 @@ class SwooleController extends Controller
 	 */
 	public static function divideAdvertisement()
 	{
+		//为自我差异得分为0的用户随机一个化身,当自我差异得分为0的用户不用随机到化身上时，注释下边的注释
+		$middleListLength = Yii::$app->redis->llen('EGO_DIVIDE_NEGATIVE_MIDDLE_TMP');
+		if ($middleListLength > 0) {
+			$middleUser = Yii::$app->redis->lpop('EGO_DIVIDE_NEGATIVE_MIDDLE_TMP');
+			$middleUserEgoGrades = Yii::$app->redis->lrange('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $middleUser, 0, Yii::$app->redis->llen('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $middleUser));
+			$randIndex = mt_rand(1, count($middleUserEgoGrades));
+			Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', ArrayHelper::getValue($middleUserEgoGrades, $randIndex - 1));
+		}
 		/**
 		 * @var $userIncarnationGrades UserIncarnationGrades
 		 */
-		$divides = ['INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_POSITIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_SMALLER'];
+		//当自我差异得分为0的用户不用随机到化身上时，把INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE从数组中删除
+		$divides = ['INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_POSITIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE'];
 		foreach ($divides as $divide) {
 			$listLength = Yii::$app->redis->llen($divide);
 			$popIndex = 0;
 			while ($popIndex < $listLength) {
 				$leftItem = Yii::$app->redis->lindex($divide, $popIndex);
 				$popIndex++;
-				var_dump($popIndex . '//' . $leftItem);
+				Console::stdout($popIndex . '//' . $leftItem);
 				if ($leftItem) {
 					if ($popIndex % 2 == 1) {
 						$userIncarnationGrades = json_decode($leftItem);
@@ -1047,8 +1079,8 @@ class SwooleController extends Controller
 			}
 			//广告强弱分组
 			$exportData->association_strength = ArrayHelper::getValue($advLevelList, $advDivide) ?: 0;
-			Yii::error($exportData);
 			$exportData->save();
+			Console::stdout(print_r($exportData, true) . PHP_EOL);
 		}
 	}
 

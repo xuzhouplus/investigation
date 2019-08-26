@@ -3,11 +3,11 @@
 use yii\db\Migration;
 
 /**
- * Class m190726_072751_advertisement_answer
+ * Class m190826_093043_round_mean
  */
-class m190726_072751_advertisement_answer extends Migration
+class m190826_093043_round_mean extends Migration
 {
-	public $tableName = '{{%advertisement_answer}}';
+	public $tableName = '{{%round_mean}}';
 
 	/**
 	 * {@inheritdoc}
@@ -16,15 +16,13 @@ class m190726_072751_advertisement_answer extends Migration
 	{
 		$tableOptions = null;
 		if ($this->db->driverName === 'mysql') {
-			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="品牌答题"';
+			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="每轮分组的中值"';
 		}
 		$this->createTable($this->tableName, [
 			'id' => $this->integer(11)->notNull(),
-			'user_id' => $this->integer(11)->notNull(),
-			'question_id' => $this->integer(11)->notNull(),
-			'option_id' => $this->integer(11),
-			'grades' => $this->integer(2)->notNull(),
-			'answer' => $this->string(255)->comment('填空题答题')
+			'round' => $this->integer(10)->comment('分组轮次')->notNull(),
+			'positive_mean' => $this->integer(2)->comment('正大小分组中间数')->notNull(),
+			'negative_mean' => $this->integer(2)->comment('父大小分组中间数')->notNull()
 		], $tableOptions);
 		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 	}
@@ -47,7 +45,7 @@ class m190726_072751_advertisement_answer extends Migration
 
 	public function down()
 	{
-		echo "m190726_072751_advertisement_answer cannot be reverted.\n";
+		echo "m190826_093043_round_mean cannot be reverted.\n";
 
 		return false;
 	}

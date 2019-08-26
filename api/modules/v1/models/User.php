@@ -37,7 +37,7 @@ class User extends CommonUser
 		$query->andFilterWhere([self::tableName() . '.round' => ArrayHelper::getValue($data, 'round')]);
 		$query->andFilterWhere([self::tableName() . '.age' => ArrayHelper::getValue($data, 'age')]);
 		$query->andFilterWhere([self::tableName() . '.advertisement_status' => ArrayHelper::getValue($data, 'advertisement_status')]);
-		if (ArrayHelper::getValue($data, 'role')) {
+		if (!ArrayHelper::getValue($data, 'role')) {
 			$query->andFilterWhere([self::tableName() . '.role' => self::ROLE_USER]);
 		} else {
 			$queryRoles = ArrayHelper::getValue($data, 'role');
@@ -53,7 +53,7 @@ class User extends CommonUser
 				$query->andFilterWhere([self::tableName() . '.role' => $queryRoles]);
 			}
 		}
-		if (ArrayHelper::getValue($data, 'status')) {
+		if (!ArrayHelper::getValue($data, 'status')) {
 			$query->andFilterWhere([self::tableName() . '.status' => self::STATUS_ACTIVE]);
 		} else {
 			$queryStatus = ArrayHelper::getValue($data, 'status');
