@@ -164,7 +164,7 @@ class User extends ActiveRecord implements IdentityInterface
 			['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
 			['advertisement_status', 'default', 'value' => self::ADVERTISEMENT_STATUS_WAIT, 'on' => ['create']],
 			['round', 'default', 'value' => '0', 'on' => ['create']],
-			[['step', 'round', 'stage'], 'string']
+			[['step', 'round', 'stage'], 'integer']
 		];
 	}
 

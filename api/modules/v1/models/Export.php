@@ -62,6 +62,7 @@ class Export extends CommonExport
 							'openInvented2' => $export->open_invented2,
 							'emotionAlive' => $export->emotion_alive,
 							'emotionHappy' => $export->emotion_happy,
+							'emotionWarmth' => $export->emotion_warmth,
 							'emotionJubilant' => $export->emotion_excited,
 							'emotionExcited' => $export->emotion_excited,
 							'emotionProud' => $export->emotion_proud,

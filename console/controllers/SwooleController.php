@@ -154,6 +154,7 @@ class SwooleController extends Controller
 								'openInvented1' => $export->open_invented1,
 								'openInvented2' => $export->open_invented2,
 								'emotionAlive' => $export->emotion_alive,
+								'emotionWarmth' => $export->emotion_warmth,
 								'emotionHappy' => $export->emotion_happy,
 								'emotionJubilant' => $export->emotion_excited,
 								'emotionExcited' => $export->emotion_excited,
@@ -308,10 +309,30 @@ class SwooleController extends Controller
 		/**
 		 * @var $each Export
 		 */
+		$mobile = 13222222222;
 		foreach (Export::find()->each() as $each) {
-			if (!$each->brand_attitude_a && !$each->brand_attitude_b && !$each->brand_attitude_c && !$each->brand_attitude_d) {
-				if (AdvertisementAnswer::find()->where(['user_id' => $each->user_id])->exists()) {
-					$this->stdout($each->user_id . PHP_EOL);
+			$user = User::find()->where(['id' => $each->user_id])->one();
+			if (!$user) {
+				$user = new User();
+				$user->setScenario('create');
+				$user->id = $each->user_id;
+				$user->email = $each->user_email;
+				$user->mobile = (string)(++$mobile);
+				$user->age = 21;
+				$user->username = $each->user_name;
+				$user->role = User::ROLE_USER;
+				$user->status = User::STATUS_ACTIVE;
+				$user->stage = 2;
+				$user->step = 4;
+				$user->round = $each->round;
+				$user->setPassword(md5('123456'));
+				if ($user->validate() && $user->save()) {
+//				$each->delete();
+					$this->stdout($each->id . PHP_EOL);
+				} else {
+					$errors = $user->getFirstErrors();
+					$error = reset($errors);
+					$this->stdout($error . PHP_EOL);
 				}
 			}
 		}
@@ -727,15 +748,15 @@ class SwooleController extends Controller
 		$query->andFilterWhere(['grades' => 0]);
 		foreach ($query->each() as $egoDifferenceGrades) {
 			//保存答题结果，用于随机分配到化身
-			Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $egoDifferenceGrades->user_id, json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
+//			Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $egoDifferenceGrades->user_id, json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
 			//用户分组结果
 			$userEgoDivide = Yii::$app->cache->get('EGO_DIVIDE_' . $egoDifferenceGrades->user_id);
 			if (!$userEgoDivide) {
 				Yii::$app->cache->set('EGO_DIVIDE_' . $egoDifferenceGrades->user_id, 5);
 				//保存为middle的用户到临时数据
-				Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_TMP', $egoDifferenceGrades->user_id);
+//				Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_TMP', $egoDifferenceGrades->user_id);
 				//当自我差异得分为0的用户不用随机到化身上时，注释上边的代码，取消下边的注释
-				//Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
+				Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', json_encode(ArrayHelper::toArray($egoDifferenceGrades)));
 			}
 		}
 	}
@@ -746,18 +767,19 @@ class SwooleController extends Controller
 	public static function divideAdvertisement()
 	{
 		//为自我差异得分为0的用户随机一个化身,当自我差异得分为0的用户不用随机到化身上时，注释下边的注释
-		$middleListLength = Yii::$app->redis->llen('EGO_DIVIDE_NEGATIVE_MIDDLE_TMP');
-		if ($middleListLength > 0) {
-			$middleUser = Yii::$app->redis->lpop('EGO_DIVIDE_NEGATIVE_MIDDLE_TMP');
-			$middleUserEgoGrades = Yii::$app->redis->lrange('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $middleUser, 0, Yii::$app->redis->llen('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $middleUser));
-			$randIndex = mt_rand(1, count($middleUserEgoGrades));
-			Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', ArrayHelper::getValue($middleUserEgoGrades, $randIndex - 1));
-		}
+//		$middleListLength = Yii::$app->redis->llen('EGO_DIVIDE_NEGATIVE_MIDDLE_TMP');
+//		if ($middleListLength > 0) {
+//			$middleUser = Yii::$app->redis->lpop('EGO_DIVIDE_NEGATIVE_MIDDLE_TMP');
+//			$middleUserEgoGrades = Yii::$app->redis->lrange('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $middleUser, 0, Yii::$app->redis->llen('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE_' . $middleUser));
+//			$randIndex = mt_rand(1, count($middleUserEgoGrades));
+//			Yii::$app->redis->rpush('INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE', ArrayHelper::getValue($middleUserEgoGrades, $randIndex - 1));
+//		}
 		/**
 		 * @var $userIncarnationGrades UserIncarnationGrades
 		 */
 		//当自我差异得分为0的用户不用随机到化身上时，把INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE从数组中删除
-		$divides = ['INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_POSITIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE'];
+		$divides = ['INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_POSITIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_SMALLER',];
+//		$divides = ['INV_CACHE:EGO_DIVIDE_POSITIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_POSITIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_LARGER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_SMALLER', 'INV_CACHE:EGO_DIVIDE_NEGATIVE_MIDDLE'];
 		foreach ($divides as $divide) {
 			$listLength = Yii::$app->redis->llen($divide);
 			$popIndex = 0;
