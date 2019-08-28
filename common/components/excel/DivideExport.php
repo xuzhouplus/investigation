@@ -6,6 +6,7 @@ namespace common\components\excel;
 
 use common\excel\helper\Helper;
 use common\excel\templates\DivideTemplate;
+use common\models\File;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -128,15 +129,16 @@ class DivideExport extends Component
 	}
 
 	/**
-	 * @param $beginColumn
-	 * @param $beginRow
+	 * @param int $beginColumn
+	 * @param null $beginRow
+	 * @param null $nullValue
 	 * @throws Exception
 	 */
-	public function fillRows($beginColumn = 1, $beginRow = null)
+	public function fillRows($beginColumn = 1, $beginRow = null, $nullValue = null)
 	{
 		if (!empty($this->rows)) {
 			if (is_null($beginRow)) {
-				$beginRow = 0;
+				$beginRow = 1;
 				if ($this->templateObj->getTitleContent()) {
 					$beginRow++;
 				}
@@ -144,7 +146,7 @@ class DivideExport extends Component
 					$beginRow++;
 				}
 			}
-			$this->sheet->fromArray($this->rows, null, Coordinate::stringFromColumnIndex($beginColumn) . $beginRow);
+			$this->sheet->fromArray($this->rows, $nullValue, Coordinate::stringFromColumnIndex($beginColumn) . $beginRow);
 		}
 	}
 
@@ -207,6 +209,10 @@ class DivideExport extends Component
 	 */
 	public function file($file)
 	{
+		$fileDir = dirname($file);
+		if (!file_exists($fileDir)) {
+			mkdir($fileDir);
+		}
 		$writer = IOFactory::createWriter($this->spreadsheet, 'Xlsx');
 		$writer->save($file);
 	}

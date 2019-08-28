@@ -19,8 +19,8 @@ class m190826_091200_export extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="导出数据"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
-			'round' => $this->integer(2)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
+			'round' => $this->integer(2)->defaultValue(1)->notNull(),
 			'divide_stamp' => $this->string(10),
 			'approve_grades' => $this->string(255),
 			'immerse_grades' => $this->string(255),
@@ -79,12 +79,13 @@ class m190826_091200_export extends Migration
 			'identify_stamp' => $this->string(255),
 			'difference_size' => $this->string(255),
 			'difference_direction' => $this->string(255),
-			'association_strength' => $this->string(255)
+			'association_strength' => $this->string(255),
+			'divide_mark'=>$this->integer(1)->comment('分组类型标识')
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->createIndex('divide_stamp', $this->tableName, 'divide_stamp');
 		$this->createIndex('round', $this->tableName, 'round');
 		$this->createIndex('user_id', $this->tableName, 'user_id');
+		$this->createIndex('divide_mark', $this->tableName, 'divide_mark');
 	}
 
 	/**

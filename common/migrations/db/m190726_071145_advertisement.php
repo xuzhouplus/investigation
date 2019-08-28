@@ -19,13 +19,12 @@ class m190726_071145_advertisement extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="品牌广告"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->comment('广告id')->notNull(),
+			'id' => $this->primaryKey(11)->comment('广告id')->notNull(),
 			'incarnation_id' => $this->integer(11)->comment('化身id')->notNull(),
 			'on_file_id' => $this->integer(11)->comment('广告在化身上的图片文件id')->notNull(),
 			'side_file_id' => $this->integer(11)->comment('广告在化身旁边的图片文件id')->notNull(),
 			'description' => $this->string(255)->comment('广告描述')->notNull()
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->createIndex($this->tableName, $this->tableName, 'incarnation_id');
 		$this->batchInsert($this->tableName, ['id', 'incarnation_id', 'on_file_id', 'side_file_id', 'description'],
 			[

@@ -19,11 +19,10 @@ class m190826_093142_type extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="问题调查类型"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
 			'name' => $this->string(255)->comment('问题调查类型')->notNull(),
 			'description' => $this->string(255)->comment('描述')
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->batchInsert($this->tableName, ['id', 'name', 'description'],
 			[
 				['id' => '1', 'name' => '现实自我', 'description' => '我认为现实中的自己'],

@@ -48,7 +48,7 @@ class Server
 		self::$server->set(array(
 			'worker_num' => 8,
 			'task_worker_num' => 8,
-			'daemonize' => YII_ENV_DEV ? 0 : ($class->daemonize),
+			'daemonize' => $class->daemonize,
 			'max_request' => 10000,
 			'dispatch_mode' => 3,
 			'debug_mode' => 1,

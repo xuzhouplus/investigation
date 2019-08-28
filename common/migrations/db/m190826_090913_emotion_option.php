@@ -19,13 +19,12 @@ class m190826_090913_emotion_option extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="情绪量化问题选项"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
 			'question_id' => $this->integer(11)->notNull(),
 			'name' => $this->string(255)->notNull(),
 			'grades' => $this->integer(2)->notNull(),
 			'description' => $this->string(255)
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->batchInsert($this->tableName, ['id', 'question_id', 'name', 'grades', 'description'],
 			[
 				['id' => '1', 'question_id' => '1', 'name' => '非常少或完全没有', 'grades' => '1', 'description' => null],

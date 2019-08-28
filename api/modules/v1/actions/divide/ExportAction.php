@@ -25,7 +25,11 @@ class ExportAction extends Action
 			if (empty($requestParams)) {
 				$requestParams = Yii::$app->getRequest()->getQueryParams();
 			}
-			call_user_func_array([$this->modelClass, 'export'], ['data' => $requestParams]);
+			$tmpFile=call_user_func_array([$this->modelClass, 'export'], ['data' => $requestParams]);
+			if($tmpFile){
+				Yii::$app->response->sendFile($tmpFile);
+				return Yii::$app->response;
+			}
 		} catch (\Exception $exception) {
 			Yii::error($exception->__toString());
 			return [

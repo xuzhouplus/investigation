@@ -37,7 +37,7 @@ use common\components\swoole\Server;
 
 class SwooleController extends Controller
 {
-	public $daemonize = true;
+	public $daemonize = YII_ENV_PROD;
 	/**
 	 * @var $user User
 	 */
@@ -72,6 +72,15 @@ class SwooleController extends Controller
 	public function actionIndex()
 	{
 		Server::run($this);
+		return ExitCode::OK;
+	}
+
+	public function actionDivide()
+	{
+		$user = User::find()->where(['role' => User::ROLE_ADMINISTRATOR])->limit(1)->one();
+		Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/user/divide', [
+			'access_token' => $user->generateAccessToken()
+		]);
 		return ExitCode::OK;
 	}
 
@@ -116,85 +125,83 @@ class SwooleController extends Controller
 			\Yii::$app->divideExport->setTitle();
 			\Yii::$app->divideExport->renderTitle();
 			\Yii::$app->divideExport->renderHead();
-			foreach (User::IDENTIFY_DIVIDE_LEVEL as $identifyDivideLevel) {
-				foreach (User::EGO_DIVIDE_LEVEL as $egoDivideLevel) {
-					foreach (User::ADVERTISEMENT_DIVIDE_LEVEL as $advertisementDivideLevel) {
-						$query = Export::find()->where(['divide_stamp' => $identifyDivideLevel['key'] . $egoDivideLevel['key'] . $advertisementDivideLevel['key']]);
-						$query->andFilterWhere(['round' => $round]);
-						//每次循环取100个
-						$divideIndex = 0;
-						foreach ($query->each() as $export) {
-							/**
-							 * @var $export Export
-							 */
-							$divideIndex++;
-							$exportData = [
-								'divideIndex' => $divideIndex,
-								'divideStamp' => $export->divide_stamp,
-								'approveGrades' => $export->approve_grades,
-								'immerseGrades' => $export->immerse_grades,
-								'extravertReality1' => $export->extravert_reality1,
-								'extravertReality2' => $export->extravert_reality2,
-								'pleasantReality1' => $export->pleasant_reality1,
-								'pleasantReality2' => $export->pleasant_reality2,
-								'conscientiousReality1' => $export->conscientious_reality1,
-								'conscientiousReality2' => $export->conscientious_reality2,
-								'nervousReality1' => $export->nervous_reality1,
-								'nervousReality2' => $export->nervous_reality2,
-								'openReality1' => $export->open_reality1,
-								'openReality2' => $export->open_reality2,
-								'extravertInvented1' => $export->extravert_invented1,
-								'extravertInvented2' => $export->extravert_invented2,
-								'pleasantInvented1' => $export->pleasant_invented1,
-								'pleasantInvented2' => $export->pleasant_invented2,
-								'conscientiousInvented1' => $export->conscientious_invented1,
-								'conscientiousInvented2' => $export->conscientious_invented2,
-								'nervousInvented1' => $export->nervous_invented1,
-								'nervousInvented2' => $export->nervous_invented2,
-								'openInvented1' => $export->open_invented1,
-								'openInvented2' => $export->open_invented2,
-								'emotionAlive' => $export->emotion_alive,
-								'emotionWarmth' => $export->emotion_warmth,
-								'emotionHappy' => $export->emotion_happy,
-								'emotionJubilant' => $export->emotion_excited,
-								'emotionExcited' => $export->emotion_excited,
-								'emotionProud' => $export->emotion_proud,
-								'emotionDelighted' => $export->emotion_delighted,
-								'emotionEnergetic' => $export->emotion_energetic,
-								'emotionGrateful' => $export->emotion_grateful,
-								'emotionSad' => $export->emotion_sad,
-								'emotionScared' => $export->emotion_scared,
-								'emotionNervous' => $export->emotion_nervous,
-								'emotionTerrified' => $export->emotion_terrified,
-								'emotionGuilt' => $export->emotion_guilt,
-								'emotionTrembled' => $export->emotion_trembled,
-								'emotionAnnoyed' => $export->emotion_annoyed,
-								'emotionAshamed' => $export->emotion_ashamed,
-								'emotionIrritable' => $export->emotion_irritable,
-								'brandAttitudeA' => $export->brand_attitude_a,
-								'brandAttitudeB' => $export->brand_attitude_b,
-								'brandAttitudeC' => $export->brand_attitude_c,
-								'brandAttitudeD' => $export->brand_attitude_d,
-								'brandMemory1' => $export->brand_memory_1,
-								'brandMemory2' => $export->brand_memory_2,
-								'brandMemory3' => $export->brand_memory_3,
-								'userID' => $export->user_id,
-								'userName' => $export->user_name,
-								'userEmail' => $export->user_email,
-								'gender' => $export->gender,
-								'age' => $export->age,
-								'identifyStamp' => $export->identify_stamp,
-								'differenceSize' => $export->difference_size,
-								'differenceDirection' => $export->difference_direction,
-								'associationStrength' => $export->association_strength
-							];
-							\Yii::$app->divideExport->renderBody($exportData);
-						}
-					}
-				}
+			$query = Export::find();
+			$query->andFilterWhere(['round' => $round]);
+			$query->orderBy(['divide_mark' => SORT_ASC]);
+			//每次循环取100个
+			$divideIndex = 0;
+			foreach ($query->each() as $export) {
+				/**
+				 * @var $export Export
+				 */
+				$divideIndex++;
+				$exportData = [
+					'divideIndex' => $divideIndex,
+					'divideStamp' => $export->divide_stamp,
+					'approveGrades' => $export->approve_grades,
+					'immerseGrades' => $export->immerse_grades,
+					'extravertReality1' => $export->extravert_reality1,
+					'extravertReality2' => $export->extravert_reality2,
+					'pleasantReality1' => $export->pleasant_reality1,
+					'pleasantReality2' => $export->pleasant_reality2,
+					'conscientiousReality1' => $export->conscientious_reality1,
+					'conscientiousReality2' => $export->conscientious_reality2,
+					'nervousReality1' => $export->nervous_reality1,
+					'nervousReality2' => $export->nervous_reality2,
+					'openReality1' => $export->open_reality1,
+					'openReality2' => $export->open_reality2,
+					'extravertInvented1' => $export->extravert_invented1,
+					'extravertInvented2' => $export->extravert_invented2,
+					'pleasantInvented1' => $export->pleasant_invented1,
+					'pleasantInvented2' => $export->pleasant_invented2,
+					'conscientiousInvented1' => $export->conscientious_invented1,
+					'conscientiousInvented2' => $export->conscientious_invented2,
+					'nervousInvented1' => $export->nervous_invented1,
+					'nervousInvented2' => $export->nervous_invented2,
+					'openInvented1' => $export->open_invented1,
+					'openInvented2' => $export->open_invented2,
+					'emotionAlive' => $export->emotion_alive,
+					'emotionWarmth' => $export->emotion_warmth,
+					'emotionHappy' => $export->emotion_happy,
+					'emotionJubilant' => $export->emotion_excited,
+					'emotionExcited' => $export->emotion_excited,
+					'emotionProud' => $export->emotion_proud,
+					'emotionDelighted' => $export->emotion_delighted,
+					'emotionEnergetic' => $export->emotion_energetic,
+					'emotionGrateful' => $export->emotion_grateful,
+					'emotionSad' => $export->emotion_sad,
+					'emotionScared' => $export->emotion_scared,
+					'emotionNervous' => $export->emotion_nervous,
+					'emotionTerrified' => $export->emotion_terrified,
+					'emotionGuilt' => $export->emotion_guilt,
+					'emotionTrembled' => $export->emotion_trembled,
+					'emotionAnnoyed' => $export->emotion_annoyed,
+					'emotionAshamed' => $export->emotion_ashamed,
+					'emotionIrritable' => $export->emotion_irritable,
+					'brandAttitudeA' => $export->brand_attitude_a,
+					'brandAttitudeB' => $export->brand_attitude_b,
+					'brandAttitudeC' => $export->brand_attitude_c,
+					'brandAttitudeD' => $export->brand_attitude_d,
+					'brandMemory1' => $export->brand_memory_1,
+					'brandMemory2' => $export->brand_memory_2,
+					'brandMemory3' => $export->brand_memory_3,
+					'brandMemory4' => $export->brand_memory_4,
+					'brandMemory5' => $export->brand_memory_5,
+					'userID' => $export->user_id,
+					'userName' => $export->user_name,
+					'userEmail' => $export->user_email,
+					'gender' => $export->gender,
+					'age' => $export->age,
+					'identifyStamp' => $export->identify_stamp,
+					'differenceSize' => $export->difference_size,
+					'differenceDirection' => $export->difference_direction,
+					'associationStrength' => $export->association_strength
+				];
+				\Yii::$app->divideExport->addRow($exportData);
+
 			}
+			$exportFile = Yii::$app->getRuntimePath() . DIRECTORY_SEPARATOR . 'export' . DIRECTORY_SEPARATOR . date('Y-m-d') . DIRECTORY_SEPARATOR . $round ?: 'all' . time() . '.xlsx';
 			\Yii::$app->divideExport->setBodyStyle();
-			$exportFile = Yii::$app->runtimePath . DIRECTORY_SEPARATOR . 'export' . DIRECTORY_SEPARATOR . date('Y-m-d') . DIRECTORY_SEPARATOR . $round ?: 'all' . time() . '.xlsx';
 			\Yii::$app->divideExport->save($exportFile);
 			$this->stdout('file saved as ' . $exportFile . PHP_EOL);
 			$this->stdout('done' . PHP_EOL);
@@ -256,8 +263,21 @@ class SwooleController extends Controller
 			$define = str_replace('$name', str_replace(Yii::$app->getDb()->tablePrefix, '', $tableSchema->name), $define);
 			Yii::error(ArrayHelper::toArray($tableSchema));
 			$columnDefines = [];
+			$primaryKey = [];
 			foreach ($tableSchema->columns as $column) {
-				$columnDefine = '\'' . $column->name . '\'=>$this->' . $column->type . '(' . $column->size . ')';
+				$columnDefine = '\'' . $column->name . '\'=>$this';
+				if ($column->isPrimaryKey && $column->autoIncrement) {
+					$primaryKey[] = $column->name;
+					$columnDefine .= '->primaryKey(' . $column->size . ')';
+				} else {
+					$columnDefine .= '->' . $column->type . '(' . $column->size . ')';
+				}
+				if ($column->defaultValue) {
+					if (is_string($column->defaultValue)) {
+						$column->defaultValue = '\'' . $column->defaultValue . '\'';
+					}
+					$columnDefine .= '->defaultValue(' . $column->defaultValue . ')';
+				}
 				if ($column->comment) {
 					$columnDefine .= '->comment(\'' . $column->comment . '\')';
 				}
@@ -269,6 +289,7 @@ class SwooleController extends Controller
 			$attributes = $tableSchema->getColumnNames();
 			$struct = str_replace('$attribute', implode(',' . PHP_EOL, $columnDefines), $struct);
 			if ($tableSchema->primaryKey) {
+				$tableSchema->primaryKey = array_diff($tableSchema->primaryKey, $primaryKey);
 				$struct = $struct . PHP_EOL . '$this->addPrimaryKey(\'primaryKey\', $this->tableName, [\'' . implode('\',\'', $tableSchema->primaryKey) . '\']);';
 			}
 			$tmp = '';
@@ -306,35 +327,248 @@ class SwooleController extends Controller
 
 	public function actionTest()
 	{
+		return ExitCode::OK;
+	}
+
+	public function actionFillTest($userOffset = 0, $userCount = 1000)
+	{
+		Yii::$app->getDb()->dsn = env('TEST_DB_DSN');
+		Yii::$app->getDb()->username = env('TEST_DB_USERNAME');
+		Yii::$app->getDb()->password = env('TEST_DB_PASSWORD');
+		$userIndex = $userOffset;
+		$mobile = 13400000000 + $userOffset;
+		$egoQuestions = EgoQuestion::find()->all();
+		$allIncarnations = [
+			User::GENDER_MALE => [],
+			User::GENDER_FEMALE => []
+		];
+		while ($userIndex <= $userCount) {
+			$this->stdout($userIndex . PHP_EOL);
+			$userModel = new User();
+			$userModel->setScenario('create');
+			$userModel->username = 'test_' . $userIndex;
+			$userModel->role = User::ROLE_USER;
+			$userModel->mobile = (string)(++$mobile);
+			$userModel->email = $userIndex . '@t.com';
+			$userModel->department = 'test';
+			$userModel->age = 21;
+			$userModel->stage = 1;
+			$rand = mt_rand(1, 2);
+			if ($rand == 1) {
+				$userModel->gender = User::GENDER_MALE;
+			} else {
+				$userModel->gender = User::GENDER_FEMALE;
+			}
+			$userModel->setPassword(md5('123456'));
+			if ($userModel->validate() && $userModel->save()) {
+				$this->stdout('save ' . $userIndex . PHP_EOL);
+				$incarnations = ArrayHelper::getValue($allIncarnations, $userModel->gender);
+				if (!$incarnations) {
+					$incarnations = Incarnation::find()->where(['gender' => $userModel->gender])->all();
+				}
+				$approve = $immerse = [];
+				foreach ($incarnations as $incarnation) {
+					$approve[$incarnation->id] = mt_rand(1, 5);
+					$immerse[$incarnation->id] = mt_rand(1, 5);
+				}
+				$accessToken = $userModel->generateAccessToken();
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/incarnation/grades', [
+					'access_token' => $accessToken,
+					'grades' => json_encode([
+						'approve' => $approve,
+						'immerse' => $immerse
+					])
+				]);
+				$this->stdout('/incarnation/grades ' . $userIndex . PHP_EOL);
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/user/state', [
+					'access_token' => $accessToken,
+					'states' => json_encode(['step' => 1])
+				]);
+				$this->stdout('/user/state ' . $userIndex . PHP_EOL);
+				$answers = [];
+				foreach ($egoQuestions as $egoQuestion) {
+					$egoQuestionOptions = $egoQuestion->option;
+					$rand = mt_rand(1, count($egoQuestionOptions));
+					/**
+					 * @var $selectOption EgoOption
+					 */
+					$selectOption = ArrayHelper::getValue($egoQuestionOptions, $rand - 1);
+					$answers[$egoQuestion->id] = $selectOption->id;
+				}
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/ego/submit', [
+					'access_token' => $accessToken,
+					'answers' => json_encode($answers)
+				]);
+				$this->stdout('/ego/submit ' . $userIndex . PHP_EOL);
+				foreach ($incarnations as $incarnation) {
+					$answers = [];
+					foreach ($egoQuestions as $egoQuestion) {
+						$egoQuestionOptions = $egoQuestion->option;
+						$rand = mt_rand(1, count($egoQuestionOptions));
+						/**
+						 * @var $selectOption EgoOption
+						 */
+						$selectOption = ArrayHelper::getValue($egoQuestionOptions, $rand - 1);
+						$answers[$egoQuestion->id] = $selectOption->id;
+					}
+					Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/ego/submit', [
+						'access_token' => $accessToken,
+						'incarnation_id' => $incarnation->id,
+						'answers' => json_encode($answers)
+					]);
+					$this->stdout('/ego/submit ' . $userIndex . ' ' . $incarnation->id . PHP_EOL);
+				}
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/user/state', [
+					'access_token' => $accessToken,
+					'states' => json_encode(['step' => 3])
+				]);
+				$this->stdout('/user/state ' . $userIndex . PHP_EOL);
+			}
+			$userIndex++;
+		}
+		return ExitCode::OK;
+	}
+
+	public function actionBrandFixture()
+	{
 		/**
-		 * @var $each Export
+		 * @var $each User
 		 */
-		$mobile = 13222222222;
-		foreach (Export::find()->each() as $each) {
-			$user = User::find()->where(['id' => $each->user_id])->one();
-			if (!$user) {
-				$user = new User();
-				$user->setScenario('create');
-				$user->id = $each->user_id;
-				$user->email = $each->user_email;
-				$user->mobile = (string)(++$mobile);
-				$user->age = 21;
-				$user->username = $each->user_name;
-				$user->role = User::ROLE_USER;
-				$user->status = User::STATUS_ACTIVE;
-				$user->stage = 2;
-				$user->step = 4;
-				$user->round = $each->round;
-				$user->setPassword(md5('123456'));
-				if ($user->validate() && $user->save()) {
-//				$each->delete();
-					$this->stdout($each->id . PHP_EOL);
-				} else {
-					$errors = $user->getFirstErrors();
-					$error = reset($errors);
-					$this->stdout($error . PHP_EOL);
+		$emotionQuestions = EmotionQuestion::find()->joinWith(['option'])->all();
+		$advertisementQuestions = AdvertisementQuestion::find()->joinWith(['option'])->where([AdvertisementQuestion::tableName() . '.status' => AdvertisementQuestion::STATUS_ACTIVE])->all();
+		foreach (User::find()->where(['step' => 4])->each() as $each) {
+			if ($each->advertisement_divide) {
+				$accessToken = $each->generateAccessToken();
+				$answers = [];
+				foreach ($emotionQuestions as $emotionQuestion) {
+					$emotionOptions = $emotionQuestion->option;
+					$rand = mt_rand(1, count($emotionOptions));
+					$emotionOption = ArrayHelper::getValue($emotionOptions, $rand - 1);
+					$answers[$emotionQuestion->id] = $emotionOption->id;
+				}
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/emotion/submit', [
+					'access_token' => $accessToken,
+					'answers' => json_encode($answers)
+				]);
+				$this->stdout('/emotion/submit ' . $each->id . PHP_EOL);
+				$brandMemoryAnswers = $brandAttitudeAnswers = [];
+				foreach ($advertisementQuestions as $advertisementQuestion) {
+					$advertisementOptions = $advertisementQuestion->option;
+					if ($advertisementQuestion->type == 'brandMemory') {
+						$optionIndex = 0;
+						$options = [];
+						while ($optionIndex < count($advertisementOptions)) {
+							$rand = mt_rand(1, 2);
+							if ($rand == 1) {
+								$advertisementOption = ArrayHelper::getValue($advertisementOptions, $optionIndex);
+								$brandMemoryAnswers[$advertisementQuestion->id] = $advertisementOption->name;
+							} else {
+								$brandMemoryAnswers[$advertisementQuestion->id] = 'test';
+							}
+							$optionIndex = $optionIndex + 2;
+						}
+						$brandMemoryAnswers[$advertisementQuestion->id] = $options;
+					} else {
+						$rand = mt_rand(1, count($advertisementOptions));
+						$advertisementOption = ArrayHelper::getValue($advertisementOptions, $rand - 1);
+						$brandAttitudeAnswers[$advertisementQuestion->id] = $advertisementOption->id;
+					}
+				}
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/brand/memory', [
+					'access_token' => $accessToken,
+					'answers' => json_encode($brandMemoryAnswers)
+				]);
+				$this->stdout('/emotion/memory ' . $each->id . PHP_EOL);
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/brand/attitude', [
+					'access_token' => $accessToken,
+					'answers' => json_encode($brandAttitudeAnswers)
+				]);
+				$this->stdout('/emotion/attitude ' . $each->id . PHP_EOL);
+			}
+		}
+		return ExitCode::OK;
+	}
+
+	public function actionCalculateUser($id)
+	{
+		$user = User::find()->where(['id' => $id])->one();
+		if ($user->step > 1) {
+			$accessToken = $user->generateAccessToken();
+			Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/user/state', [
+				'access_token' => $accessToken,
+				'states' => json_encode(['step' => 1])
+			]);
+			$this->stdout('/user/state 1 ' . $user->id . PHP_EOL);
+			if ($user->step > 3) {
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/user/state', [
+					'access_token' => $accessToken,
+					'states' => json_encode(['step' => 3])
+				]);
+				$this->stdout('/user/state 3 ' . $user->id . PHP_EOL);
+			}
+		}
+		return ExitCode::OK;
+	}
+
+	public function actionCalculate($round = null)
+	{
+		/**
+		 * @var $each User
+		 */
+		foreach (User::find()->where(['role' => User::ROLE_USER])->andWhere(['>', 'step', 1])->each() as $each) {
+			if ($each->step > 1) {
+				$accessToken = $each->generateAccessToken();
+				Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/user/state', [
+					'access_token' => $accessToken,
+					'states' => json_encode(['step' => 1])
+				]);
+				$this->stdout('/user/state 1 ' . $each->id . PHP_EOL);
+				if ($each->step > 3) {
+					Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/user/state', [
+						'access_token' => $accessToken,
+						'states' => json_encode(['step' => 3])
+					]);
+					$this->stdout('/user/state 3 ' . $each->id . PHP_EOL);
 				}
 			}
+		}
+		return ExitCode::OK;
+	}
+
+	public function actionFixtures()
+	{
+		$modelList = [
+			AdvertisementAnswer::class,
+			Approve::class,
+			EgoAnswer::class,
+			EgoDifferenceGrades::class,
+			EmotionAnswer::class,
+			Export::class,
+			Immerse::class,
+			RoundMean::class,
+			UserIncarnationGrades::class
+		];
+		$tmp = '<?php
+
+namespace tests\common\fixtures;
+
+use common\models\$modelName;
+use yii\test\ActiveFixture;
+
+/**
+ * $modelName fixture
+ */
+class $modelNameFixture extends ActiveFixture
+{
+    public $modelClass = $modelName::class;
+}
+		';
+		foreach ($modelList as $item) {
+			$explode = explode('\\', $item);
+			$modelName = end($explode);
+			$content = str_replace('$modelName', $modelName, $tmp);
+			$file = str_replace('\\', '/', '/home/vagrant/code/investigation/tests/common/fixtures/' . $modelName . 'Fixture.php');
+			file_put_contents($file, $content);
 		}
 		return ExitCode::OK;
 	}
@@ -492,6 +726,7 @@ class SwooleController extends Controller
 				'grades' => ($approveGrades + $immerseGrades) / 2
 			];
 		}
+		UserIncarnationGrades::deleteAll(['user_id' => array_column($incarnationGrades, 'user_id')]);
 		UserIncarnationGrades::getDb()->createCommand()->batchInsert(UserIncarnationGrades::tableName(), ['user_id', 'incarnation_id', 'grades'], $incarnationGrades)->execute();
 		return $incarnationGrades;
 	}
@@ -557,6 +792,7 @@ class SwooleController extends Controller
 				];
 			}
 		}
+		EgoDifferenceGrades::deleteAll(['user_id' => array_column($egoDifference, 'user_id')]);
 		EgoDifferenceGrades::getDb()->createCommand()->batchInsert(EgoDifferenceGrades::tableName(), ['user_id', 'incarnation_id', 'type', 'sign', 'grades'], $egoDifference)->execute();
 		return $egoDifference;
 	}
@@ -584,12 +820,12 @@ class SwooleController extends Controller
 				if (empty($users)) {
 					throw new \Exception('没有可以分组的用户');
 				}
-				$userID = ArrayHelper::getColumn($users, 'id');
-				User::updateAll(['round' => $round, 'step' => 4, 'stage' => 2], ['id' => $userID]);
 				$systemRound = Config::find()->where(['name' => Config::CONFIG_ROUND_KEY])->limit(1)->one();
 				$systemRound->value = $systemRound->value + 1;
 				$systemRound->save();
 				$round = $systemRound->value;
+				$userID = ArrayHelper::getColumn($users, 'id');
+				User::updateAll(['round' => $round, 'step' => 4, 'stage' => 2], ['id' => $userID]);
 			}
 			self::divideIncarnationGroup($userID);
 			self::divideEgoGroup($userID);
@@ -786,7 +1022,7 @@ class SwooleController extends Controller
 			while ($popIndex < $listLength) {
 				$leftItem = Yii::$app->redis->lindex($divide, $popIndex);
 				$popIndex++;
-				Console::stdout($popIndex . '//' . $leftItem);
+				Console::stdout($popIndex . '//' . $leftItem . PHP_EOL);
 				if ($leftItem) {
 					if ($popIndex % 2 == 1) {
 						$userIncarnationGrades = json_decode($leftItem);
@@ -930,6 +1166,7 @@ class SwooleController extends Controller
 	 * 保存分组数据到导出数据表，情绪量化、广告品牌问题需单独处理
 	 * @param $users User[]
 	 * @param $round
+	 * @throws \yii\db\Exception
 	 */
 	public static function saveExportDivide($users, $round)
 	{
@@ -941,7 +1178,18 @@ class SwooleController extends Controller
 		$egoLevelList = ArrayHelper::map(User::EGO_DIVIDE_LEVEL, 'value', 'key');
 		//广告强弱分组设置
 		$advLevelList = ArrayHelper::map(User::ADVERTISEMENT_DIVIDE_LEVEL, 'value', 'key');
+		//用于保存分组类型标识，方便导出时一次查询所有
+		$divideLevels = [];
+		$divideLevelMark = 0;
+		foreach (User::IDENTIFY_DIVIDE_LEVEL as $identifyDivideLevel) {
+			foreach (User::EGO_DIVIDE_LEVEL as $egoDivideLevel) {
+				foreach (User::ADVERTISEMENT_DIVIDE_LEVEL as $advertisementDivideLevel) {
+					$divideLevels[$identifyDivideLevel['key'] . $egoDivideLevel['key'] . $advertisementDivideLevel['key']] = (++$divideLevelMark);
+				}
+			}
+		}
 		//遍历用户信息
+		$exportDataArray = [];
 		foreach ($users as $user) {
 			//化身认同分组结果标识
 			$identifyDivide = Yii::$app->cache->get('IDENTIFY_DIVIDE_' . $user->id) ?: 3;
@@ -1101,9 +1349,13 @@ class SwooleController extends Controller
 			}
 			//广告强弱分组
 			$exportData->association_strength = ArrayHelper::getValue($advLevelList, $advDivide) ?: 0;
-			$exportData->save();
-			Console::stdout(print_r($exportData, true) . PHP_EOL);
+			$exportData->divide_mark = ArrayHelper::getValue($divideLevels, $exportData->divide_stamp);
+//			$exportData->save();
+			$exportDataArray[] = ArrayHelper::toArray($exportData);
+			Console::stdout($exportData->id . ' ' . $exportData->user_id . PHP_EOL);
 		}
+		Export::deleteAll(['round' => $round]);
+		Export::getDb()->createCommand()->batchInsert(Export::tableName(), array_keys(reset($exportDataArray)), $exportDataArray)->execute();
 	}
 
 	/**

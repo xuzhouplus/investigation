@@ -19,14 +19,13 @@ class m190726_072751_advertisement_answer extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="品牌答题"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
 			'user_id' => $this->integer(11)->notNull(),
 			'question_id' => $this->integer(11)->notNull(),
 			'option_id' => $this->integer(11),
 			'grades' => $this->integer(2)->notNull(),
 			'answer' => $this->string(255)->comment('填空题答题')
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 	}
 
 	/**

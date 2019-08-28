@@ -71,6 +71,7 @@ use yii\db\ActiveRecord;
  * @property string $difference_size
  * @property string $difference_direction
  * @property string $association_strength
+ * @property int $divide_mark
  */
 class Export extends ActiveRecord
 {

@@ -19,14 +19,13 @@ class m190826_092542_file extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="化身、问题、问题选项文件"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
 			'base_url' => $this->string(1024)->notNull(),
 			'file_path' => $this->string(1024)->notNull(),
 			'type' => $this->string(255),
 			'size' => $this->integer(11),
 			'name' => $this->string(255)
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->batchInsert($this->tableName, ['id', 'base_url', 'file_path', 'type', 'size', 'name'],
 			[
 				['id' => '1', 'base_url' => 'http://188.131.207.200:8009/storage', 'file_path' => '/1/yqdb_KNylEGszYIqaXvnQ3v9z6r25AFl.png', 'type' => 'image/png', 'size' => '383797', 'name' => '暗夜男.png'],

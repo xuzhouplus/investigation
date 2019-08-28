@@ -5,17 +5,19 @@ namespace common\components\swoole;
 
 use Yii;
 use Swoole\Process as SwooleProcess;
+
 class Process
 {
-	public $daemon = false;
 	public $masterPid = 0;
 	public $maxPrecess = 1;
 	public $workers = [];
+	public $callable;
 
-	public function execute()
+	public function execute($class)
 	{
 		try {
-			if ($this->daemon) {
+			$this->callable = $class;
+			if ($this->callable->daemon) {
 				SwooleProcess::daemon();
 			}
 			$this->setProcessName(sprintf('php-ps:%s', 'master'));
@@ -135,5 +137,8 @@ class Process
 	/**
 	 * 用户的逻辑
 	 */
-	public function process(){}
+	public function process()
+	{
+		call_user_func([$this->callable, 'run']);
+	}
 }

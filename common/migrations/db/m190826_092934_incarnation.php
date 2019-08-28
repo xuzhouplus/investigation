@@ -19,14 +19,13 @@ class m190826_092934_incarnation extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="化身"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
 			'name' => $this->string(255)->comment('化身名称')->notNull(),
 			'file_id' => $this->string(255)->comment('化身图片id')->notNull(),
 			'description' => $this->string(2000)->comment('说明'),
 			'gender' => $this->string(255)->comment('性别')->notNull(),
 			'grade' => $this->string(255)->comment('化身分值')
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->batchInsert($this->tableName, ['id', 'name', 'file_id', 'description', 'gender', 'grade'],
 			[
 				['id' => '1', 'name' => '暗夜精灵', 'file_id' => '1', 'description' => '一万年前，暗夜精灵就已经建立了一个庞大的帝国，但是他们无节制地滥用魔法，最终导致了帝国的毁灭。幸存的暗夜精灵怀着悲伤重新回到了森林中，过起了与世隔绝的隐居生活，直到他们过去的敌人燃烧军团重新来到这个世界。现在，别无选择的暗夜精灵重新开始和外界接触，为了自己的种族能在这个新的世界中生存下去而战斗着。', 'gender' => 'male', 'grade' => null],

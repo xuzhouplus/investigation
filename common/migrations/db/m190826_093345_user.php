@@ -16,10 +16,10 @@ class m190826_093345_user extends Migration
 	{
 		$tableOptions = null;
 		if ($this->db->driverName === 'mysql') {
-			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="用户"';
+			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="$comment"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->comment('用户id')->notNull(),
+			'id' => $this->primaryKey(11)->comment('用户id')->notNull(),
 			'username' => $this->string(30)->comment('用户名'),
 			'password' => $this->string(255)->comment('密码'),
 			'auth_key' => $this->string(255),
@@ -28,22 +28,21 @@ class m190826_093345_user extends Migration
 			'gender' => $this->string(255)->comment('性别'),
 			'department' => $this->string(255)->comment('单位'),
 			'age' => $this->integer(3)->comment('年龄'),
-			'role' => $this->string(5)->comment('用户角色，1测试人员，2系统管理员')->notNull(),
+			'role' => $this->string(5)->defaultValue('user')->comment('用户角色，1测试人员，2系统管理员')->notNull(),
 			'created_at' => $this->string(255),
 			'updated_at' => $this->string(255),
 			'logged_at' => $this->string(255),
-			'stage' => $this->integer(2)->comment('用户所处调查阶段')->notNull(),
-			'status' => $this->integer(2)->notNull(),
-			'step' => $this->integer(2)->comment('用户问卷步骤')->notNull(),
-			'round' => $this->integer(2)->comment('用户属于第几轮调查')->notNull(),
+			'stage' => $this->integer(2)->defaultValue(1)->comment('用户所处调查阶段')->notNull(),
+			'status' => $this->integer(2)->defaultValue(1)->notNull(),
+			'step' => $this->integer(2)->defaultValue(0)->comment('用户问卷步骤')->notNull(),
+			'round' => $this->integer(2)->defaultValue(0)->comment('用户属于第几轮调查')->notNull(),
 			'identify_divide' => $this->integer(1)->comment('化身认同分组，1大，2小'),
 			'identify_incarnation' => $this->integer(10)->comment('化身认同分组落在的化身ID'),
 			'ego_divide' => $this->integer(1)->comment('自我差异分组，1大正，2小正，3大负，4小负'),
 			'ego_incarnation' => $this->integer(10)->comment('自我差异分组落在的化身id'),
 			'advertisement_divide' => $this->integer(1)->comment('广告分组，1强广告，2弱广告'),
-			'advertisement_status' => $this->integer(1)->comment('品牌广告答题状态，1未答题，2已答题')
+			'advertisement_status' => $this->integer(1)->defaultValue(1)->comment('品牌广告答题状态，1未答题，2已答题')
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->createIndex('username', $this->tableName, 'username');
 		$this->createIndex('mobile', $this->tableName, 'mobile');
 		$this->createIndex('email', $this->tableName, 'email');

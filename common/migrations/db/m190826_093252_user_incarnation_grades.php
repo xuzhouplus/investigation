@@ -23,7 +23,6 @@ class m190826_093252_user_incarnation_grades extends Migration
 			'incarnation_id' => $this->integer(11)->notNull(),
 			'grades' => $this->float(10)->notNull()
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['user_id', 'incarnation_id']);
 		$this->createIndex('user_id', $this->tableName, 'user_id');
 	}
 

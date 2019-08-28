@@ -19,15 +19,14 @@ class m190815_021754_advertisement_question extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="品牌问题"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
 			'title' => $this->string(255)->notNull(),
 			'description' => $this->string(255),
 			'type' => $this->string(255),
-			'kind' => $this->string(255)->comment('问题类型，completion填空题，choice选择题')->notNull(),
-			'status' => $this->integer(1)->comment('1启用，2禁用')->notNull(),
+			'kind' => $this->string(255)->defaultValue('choice')->comment('问题类型，completion填空题，choice选择题')->notNull(),
+			'status' => $this->integer(1)->defaultValue(1)->comment('1启用，2禁用')->notNull(),
 			'file_id' => $this->integer(11)->comment('图片文件id')
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->batchInsert($this->tableName, ['id', 'title', 'description', 'type', 'kind', 'status', 'file_id'],
 			[
 				['id' => '1', 'title' => '在前面虚拟角色界面中，您所看到的是以下哪一个样式的Logo?', 'description' => '图片选择', 'type' => 'brandMemory', 'kind' => 'choice', 'status' => '2', 'file_id' => null],

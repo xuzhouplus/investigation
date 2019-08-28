@@ -19,14 +19,13 @@ class m190826_085730_ego_answer extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="自我差异答题"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
 			'question_id' => $this->integer(11)->notNull(),
 			'option_id' => $this->integer(11)->notNull(),
 			'user_id' => $this->integer(11)->notNull(),
-			'incarnation_id' => $this->integer(11)->notNull(),
+			'incarnation_id' => $this->integer(11)->defaultValue(-1)->notNull(),
 			'grades' => $this->integer(1)->notNull()
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->createIndex('user_id', $this->tableName, 'user_id');
 		$this->createIndex('incarnation_id', $this->tableName, 'incarnation_id');
 	}

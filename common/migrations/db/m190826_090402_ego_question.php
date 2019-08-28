@@ -19,12 +19,11 @@ class m190826_090402_ego_question extends Migration
 			$tableOptions = 'CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE=InnoDB COMMENT="自我差异问题"';
 		}
 		$this->createTable($this->tableName, [
-			'id' => $this->integer(11)->notNull(),
+			'id' => $this->primaryKey(11)->notNull(),
 			'title' => $this->string(255)->notNull(),
 			'description' => $this->string(255),
 			'type' => $this->string(255)->comment('1外倾性，2宜人性，3尽责性，4神经质，5开放性')
 		], $tableOptions);
-		$this->addPrimaryKey('primaryKey', $this->tableName, ['id']);
 		$this->batchInsert($this->tableName, ['id', 'title', 'description', 'type'],
 			[
 				['id' => '1', 'title' => '是一个保守的人', 'description' => '自我差异', 'type' => 'extravert'],

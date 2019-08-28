@@ -32,12 +32,12 @@ class MemoryAction extends Action
 			/**
 			 * @var $options AdvertisementOption[]
 			 */
-			$options = AdvertisementOption::find()->joinWith(['question'])->where([AdvertisementQuestion::tableName() . '.type' => AdvertisementQuestion::TYPE_BRAND_MEMORY])->all();
+			$options = AdvertisementOption::find()->joinWith(['question'])->where([AdvertisementQuestion::tableName() . '.type' => AdvertisementQuestion::TYPE_BRAND_MEMORY, AdvertisementQuestion::tableName() . '.status' => AdvertisementQuestion::STATUS_ACTIVE])->all();
 			foreach ($options as $option) {
 				if (!isset($questionOptions[$option->question_id])) {
 					$questionOptions[$option->question_id] = [];
 				}
-				$questionOptions[$option->question_id][$option->name] = $option->grades;
+				$questionOptions[$option->question_id][$option->blank_index][$option->name] = $option->grades;
 			}
 
 			$data = \Yii::$app->request->getBodyParams();
@@ -64,16 +64,16 @@ class MemoryAction extends Action
 				} else {
 					$blankValue = $answer;
 				}
-				foreach ($blankValue as $item) {
+				foreach ($blankValue as $blankIndex => $item) {
 					$userAnswer[] = [
 						'question_id' => $questionID,
 						'user_id' => $loginUser->getId(),
 						'answer' => $item,
-						'grades' => ArrayHelper::getValue($questionOptions, [$questionID, $item]) ?: 0
+						'grades' => ArrayHelper::getValue($questionOptions, [$questionID, $blankIndex + 1, $item]) ?: 0
 					];
 				}
 			}
-			$result= call_user_func_array([$this->modelClass, 'batchInsert'], ['answerData' => $userAnswer]);
+			$result = call_user_func_array([$this->modelClass, 'batchInsert'], ['answerData' => $userAnswer]);
 			if ($result) {
 				Client::request([
 					'action' => 'brandMemory',

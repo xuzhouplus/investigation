@@ -14,6 +14,7 @@ use yii\db\ActiveRecord;
  * @property string $name
  * @property int $file_id
  * @property int $grades
+ * @property int $blank_index
  * @property File $file
  * @property AdvertisementQuestion $question
  */
@@ -30,7 +31,8 @@ class AdvertisementOption extends ActiveRecord
 			[['question_id', 'name', 'grades'], 'required', 'on' => ['create', 'update']],
 			['id', 'required', 'on' => ['update']],
 			['grades', 'default', 'value' => 0],
-			['grades', 'integer', 'min' => 0]
+			['grades', 'integer', 'min' => 0],
+			['blank_index', 'integer', 'skipOnEmpty' => true]
 		];
 	}
 
