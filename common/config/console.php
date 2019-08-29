@@ -1,2 +1,8 @@
 <?php
-return [];
+return [
+	'components' => [
+		'log' => [
+			'flushInterval' => 1
+		]
+	]
+];

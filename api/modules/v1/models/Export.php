@@ -100,10 +100,10 @@ class Export extends CommonExport
 					'differenceDirection' => $export->difference_direction,
 					'associationStrength' => $export->association_strength
 				];
-				\Yii::$app->divideExport->addRow($exportData);
-//				\Yii::$app->divideExport->renderBody($exportData);
+//				\Yii::$app->divideExport->addRow($exportData);
+				\Yii::$app->divideExport->renderBody($exportData);
 			}
-			\Yii::$app->divideExport->fillRows(1, null, 0);
+//			\Yii::$app->divideExport->fillRows(1, null, 0);
 			\Yii::$app->divideExport->setBodyStyle();
 			\Yii::$app->divideExport->file($tmpFile);
 			\Yii::$app->cache->set('EXPORT_CACHE_SIGN_' . $fileName, $tmpFile, 60);

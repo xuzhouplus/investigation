@@ -325,8 +325,117 @@ class SwooleController extends Controller
 		return ExitCode::OK;
 	}
 
-	public function actionTest()
+	public function actionFillBrand()
 	{
+		/**
+		 * @var $each User
+		 */
+		$emotionQuestions = EmotionQuestion::find()->joinWith(['option'])->all();
+		$advertisementQuestions = AdvertisementQuestion::find()->joinWith(['option'])->where([AdvertisementQuestion::tableName() . '.status' => AdvertisementQuestion::STATUS_ACTIVE])->all();
+		foreach (User::find()->where(['step' => 4])->each() as $each) {
+			$this->stdout($each->id . PHP_EOL);
+			if (AdvertisementAnswer::find()->where(['user_id' => $each->id])->count('id') == 9) {
+				continue;
+			}
+			$accessToken = $each->generateAccessToken();
+			$answers = [];
+			foreach ($emotionQuestions as $emotionQuestion) {
+				$emotionOptions = $emotionQuestion->option;
+				$rand = mt_rand(1, count($emotionOptions));
+				$emotionOption = ArrayHelper::getValue($emotionOptions, $rand - 1);
+				$answers[$emotionQuestion->id] = $emotionOption->id;
+			}
+			Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/emotion/submit', [
+				'access_token' => $accessToken,
+				'answers' => json_encode($answers)
+			]);
+			$this->stdout('/emotion/submit ' . $each->id . PHP_EOL);
+			$brandMemoryAnswers = $brandAttitudeAnswers = [];
+			foreach ($advertisementQuestions as $advertisementQuestion) {
+				$advertisementOptions = $advertisementQuestion->option;
+				if ($advertisementQuestion->type == 'brandMemory') {
+					$options = [];
+					foreach ($advertisementOptions as $advertisementOption) {
+						$rand = mt_rand(1, 2);
+						if ($rand == 1) {
+							$options[$advertisementOption->blank_index] = $advertisementOption->name;
+						} else {
+							$options[$advertisementOption->blank_index] = 'test';
+						}
+					}
+					$brandMemoryAnswers[$advertisementQuestion->id] = array_values($options);
+				} else {
+					$rand = mt_rand(1, count($advertisementOptions));
+					$advertisementOption = ArrayHelper::getValue($advertisementOptions, $rand - 1);
+					$brandAttitudeAnswers[$advertisementQuestion->id] = $advertisementOption->id;
+				}
+			}
+			Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/brand/memory', [
+				'access_token' => $accessToken,
+				'answers' => json_encode($brandMemoryAnswers)
+			]);
+			$this->stdout('/emotion/memory ' . $each->id . PHP_EOL);
+			Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/brand/attitude', [
+				'access_token' => $accessToken,
+				'answers' => json_encode($brandAttitudeAnswers)
+			]);
+			$this->stdout('/emotion/attitude ' . $each->id . PHP_EOL);
+		}
+		return ExitCode::OK;
+	}
+
+	public function actionFillEgo()
+	{
+		$users = User::find()->where(['role' => User::ROLE_USER])->all();
+		foreach ($users as $user) {
+			$this->stdout($user->id . PHP_EOL);
+			if (EgoDifferenceGrades::find()->where(['user_id' => $user->id])->count() == 30) {
+				continue;
+			}
+			$accessToken = $user->generateAccessToken();
+			$egoQuestions = EgoQuestion::find()->all();
+			$answers = [];
+			foreach ($egoQuestions as $egoQuestion) {
+				$egoQuestionOptions = $egoQuestion->option;
+				$rand = mt_rand(1, count($egoQuestionOptions));
+				/**
+				 * @var $selectOption EgoOption
+				 */
+				$selectOption = ArrayHelper::getValue($egoQuestionOptions, $rand - 1);
+				$answers[$egoQuestion->id] = $selectOption->id;
+			}
+			$result = Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/ego/submit', [
+				'access_token' => $accessToken,
+				'answers' => json_encode($answers)
+			]);
+			$this->stdout($result . PHP_EOL);
+			$this->stdout('/ego/submit ' . PHP_EOL);
+			$incarnations = Incarnation::find()->where(['gender' => $user->gender])->all();
+			foreach ($incarnations as $incarnation) {
+				$answers = [];
+				foreach ($egoQuestions as $egoQuestion) {
+					$egoQuestionOptions = $egoQuestion->option;
+					$rand = mt_rand(1, count($egoQuestionOptions));
+					/**
+					 * @var $selectOption EgoOption
+					 */
+					$selectOption = ArrayHelper::getValue($egoQuestionOptions, $rand - 1);
+					$answers[$egoQuestion->id] = $selectOption->id;
+				}
+				$result = Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/ego/submit', [
+					'access_token' => $accessToken,
+					'incarnation_id' => $incarnation->id,
+					'answers' => json_encode($answers)
+				]);
+				$this->stdout('/ego/submit ' . $incarnation->id . PHP_EOL);
+				$this->stdout($result . PHP_EOL);
+			}
+			Curl::takeCurl('post', Yii::$app->params['backendBaseUrl'] . '/v1/user/state', [
+				'access_token' => $accessToken,
+				'states' => json_encode(['step' => 3])
+			]);
+			$this->stdout('/user/state ' . PHP_EOL);
+		}
 		return ExitCode::OK;
 	}
 
@@ -455,19 +564,16 @@ class SwooleController extends Controller
 				foreach ($advertisementQuestions as $advertisementQuestion) {
 					$advertisementOptions = $advertisementQuestion->option;
 					if ($advertisementQuestion->type == 'brandMemory') {
-						$optionIndex = 0;
 						$options = [];
-						while ($optionIndex < count($advertisementOptions)) {
+						foreach ($advertisementOptions as $advertisementOption) {
 							$rand = mt_rand(1, 2);
 							if ($rand == 1) {
-								$advertisementOption = ArrayHelper::getValue($advertisementOptions, $optionIndex);
-								$brandMemoryAnswers[$advertisementQuestion->id] = $advertisementOption->name;
+								$options[$advertisementOption->blank_index] = $advertisementOption->name;
 							} else {
-								$brandMemoryAnswers[$advertisementQuestion->id] = 'test';
+								$options[$advertisementOption->blank_index] = 'test';
 							}
-							$optionIndex = $optionIndex + 2;
 						}
-						$brandMemoryAnswers[$advertisementQuestion->id] = $options;
+						$brandMemoryAnswers[$advertisementQuestion->id] = array_values($options);
 					} else {
 						$rand = mt_rand(1, count($advertisementOptions));
 						$advertisementOption = ArrayHelper::getValue($advertisementOptions, $rand - 1);
@@ -632,6 +738,7 @@ class $modelNameFixture extends ActiveFixture
 	public function onTask($server, $task_id, $from_id, $data)
 	{
 		try {
+			Yii::getLogger()->flushInterval = 1;
 			Yii::$app->redis->open();
 			Yii::$app->getDb()->open();
 			/**
@@ -683,7 +790,6 @@ class $modelNameFixture extends ActiveFixture
 		$server->finish(json_encode($taskData));
 		Yii::$app->getDb()->close();
 		Yii::$app->redis->close();
-		Yii::getLogger()->flush(true);
 	}
 
 	/**
@@ -847,7 +953,6 @@ class $modelNameFixture extends ActiveFixture
 			return true;
 		} catch (\Exception $exception) {
 			Yii::error($exception->__toString());
-			var_dump($exception->__toString());
 			$transaction->rollBack();
 			throw $exception;
 		}
@@ -1201,158 +1306,154 @@ class $modelNameFixture extends ActiveFixture
 			$advDivide = Yii::$app->cache->get('ADVERTISEMENT_DIVIDE_' . $user->id) ?: 3;
 			//广告强弱分组落在的化身id
 			$advIncarnation = Yii::$app->cache->get('ADVERTISEMENT_INCARNATION_' . $user->id);
-			//如果数据已存在则更新，不存在则新建
-			$exportData = Export::find()->where(['user_id' => $user->id, 'round' => $round])->limit(1)->one();
-			if (!$exportData) {
-				$exportData = new Export();
-			}
+			//需要保存的数据
+			$exportData = [];
 			//用户id
-			$exportData->user_id = $user->id;
-			$exportData->user_name = $user->username;
-			$exportData->user_email = $user->email;
+			$exportData['user_id'] = $user->id;
+			$exportData['user_name'] = $user->username;
+			$exportData['user_email'] = $user->email;
 			//分组轮次
-			$exportData->round = $round;
+			$exportData['round'] = $round;
 			//总分组标识
-			$exportData->divide_stamp = ArrayHelper::getValue($identifyLevelList, $identifyDivide) . ArrayHelper::getValue($egoLevelList, $egoDivide) . ArrayHelper::getValue($advLevelList, $advDivide);
+			$exportData['divide_stamp'] = ArrayHelper::getValue($identifyLevelList, $identifyDivide) . ArrayHelper::getValue($egoLevelList, $egoDivide) . ArrayHelper::getValue($advLevelList, $advDivide);
 			//用户的化身认同答题得分
 			if ($identifyIncarnation) {
 				//分组到高、低的用户
 				$approve = Approve::find()->select(['grades'])->where(['user_id' => $user->id, 'incarnation_id' => $identifyIncarnation])->limit(1)->one();
 				$immerse = Immerse::find()->select(['grades'])->where(['user_id' => $user->id, 'incarnation_id' => $identifyIncarnation])->limit(1)->one();
-				$exportData->approve_grades = $approve->grades;
-				$exportData->immerse_grades = $immerse->grades;
+				$exportData['approve_grades'] = $approve->grades;
+				$exportData['immerse_grades'] = $immerse->grades;
 			} else {
 				//分组到中的用户，即得分平均值为3的用户
-				$exportData->approve_grades = 3;
-				$exportData->immerse_grades = 3;
+				$exportData['approve_grades'] = 3;
+				$exportData['immerse_grades'] = 3;
 			}
 			//现实自我
 			$realityEgoTypeAnswers = [];
-			$realityEgoAnswers = EgoAnswer::find()->where(['user_id' => $user->id, 'incarnation_id' => -1])->limit($egoQuestionCount)->all();
+			$realityEgoAnswers = EgoAnswer::find()->joinWith(['question'])->where([EgoAnswer::tableName() . '.user_id' => $user->id, EgoAnswer::tableName() . '.incarnation_id' => -1])->limit($egoQuestionCount)->all();
 			//把答题得分按照问题类型组装数据
 			foreach ($realityEgoAnswers as $egoAnswer) {
 				$realityEgoTypeAnswers[$egoAnswer->question->type][] = $egoAnswer->grades;
 			}
 			//外倾
 			$extravertReality = ArrayHelper::getValue($realityEgoTypeAnswers, 'extravert');
-			$exportData->extravert_reality1 = reset($extravertReality);
-			$exportData->extravert_reality2 = end($extravertReality);
+			$exportData['extravert_reality1'] = reset($extravertReality);
+			$exportData['extravert_reality2'] = end($extravertReality);
 			//宜人
 			$pleasantReality = ArrayHelper::getValue($realityEgoTypeAnswers, 'pleasant');
-			$exportData->pleasant_reality1 = reset($pleasantReality);
-			$exportData->pleasant_reality2 = end($pleasantReality);
+			$exportData['pleasant_reality1'] = reset($pleasantReality);
+			$exportData['pleasant_reality2'] = end($pleasantReality);
 			//尽责
 			$conscientiousReality = ArrayHelper::getValue($realityEgoTypeAnswers, 'conscientious');
-			$exportData->conscientious_reality1 = reset($conscientiousReality);
-			$exportData->conscientious_reality2 = end($conscientiousReality);
+			$exportData['conscientious_reality1'] = reset($conscientiousReality);
+			$exportData['conscientious_reality2'] = end($conscientiousReality);
 			//情稳
 			$nervousReality = ArrayHelper::getValue($realityEgoTypeAnswers, 'nervous');
-			$exportData->nervous_reality1 = reset($nervousReality);
-			$exportData->nervous_reality2 = end($nervousReality);
+			$exportData['nervous_reality1'] = reset($nervousReality);
+			$exportData['nervous_reality2'] = end($nervousReality);
 			//开放
 			$openReality = ArrayHelper::getValue($realityEgoTypeAnswers, 'open');
-			$exportData->open_reality1 = reset($openReality);
-			$exportData->open_reality2 = end($openReality);
+			$exportData['open_reality1'] = reset($openReality);
+			$exportData['open_reality2'] = end($openReality);
 			//虚拟自我
 			$inventedEgoTypeAnswers = [];
-			$inventedEgoAnswers = EgoAnswer::find()->where(['user_id' => $user->id, 'incarnation_id' => $advIncarnation])->limit($egoQuestionCount)->all();
+			$inventedEgoAnswers = EgoAnswer::find()->joinWith(['question'])->where([EgoAnswer::tableName() . '.user_id' => $user->id, EgoAnswer::tableName() . '.incarnation_id' => $advIncarnation])->limit($egoQuestionCount)->all();
 			//把答题得分按照问题类型组装数据
 			foreach ($inventedEgoAnswers as $egoAnswer) {
 				$inventedEgoTypeAnswers[$egoAnswer->question->type][] = $egoAnswer->grades;
 			}
 			//外倾
-			$extravertInvented = ArrayHelper::getValue($realityEgoTypeAnswers, 'extravert');
-			$exportData->extravert_invented1 = reset($extravertInvented);
-			$exportData->extravert_invented2 = end($extravertInvented);
+			$extravertInvented = ArrayHelper::getValue($inventedEgoTypeAnswers, 'extravert');
+			$exportData['extravert_invented1'] = reset($extravertInvented);
+			$exportData['extravert_invented2'] = end($extravertInvented);
 			//宜人
-			$pleasantInvented = ArrayHelper::getValue($realityEgoTypeAnswers, 'pleasant');
-			$exportData->pleasant_invented1 = reset($pleasantInvented);
-			$exportData->pleasant_invented2 = end($pleasantInvented);
+			$pleasantInvented = ArrayHelper::getValue($inventedEgoTypeAnswers, 'pleasant');
+			$exportData['pleasant_invented1'] = reset($pleasantInvented);
+			$exportData['pleasant_invented2'] = end($pleasantInvented);
 			//尽责
-			$conscientiousInvented = ArrayHelper::getValue($realityEgoTypeAnswers, 'conscientious');
-			$exportData->conscientious_invented1 = reset($conscientiousInvented);
-			$exportData->conscientious_invented2 = end($conscientiousInvented);
+			$conscientiousInvented = ArrayHelper::getValue($inventedEgoTypeAnswers, 'conscientious');
+			$exportData['conscientious_invented1'] = reset($conscientiousInvented);
+			$exportData['conscientious_invented2'] = end($conscientiousInvented);
 			//情稳
-			$nervousInvented = ArrayHelper::getValue($realityEgoTypeAnswers, 'nervous');
-			$exportData->nervous_invented1 = reset($nervousInvented);
-			$exportData->nervous_invented2 = end($nervousInvented);
+			$nervousInvented = ArrayHelper::getValue($inventedEgoTypeAnswers, 'nervous');
+			$exportData['nervous_invented1'] = reset($nervousInvented);
+			$exportData['nervous_invented2'] = end($nervousInvented);
 			//开放
-			$openInvented = ArrayHelper::getValue($realityEgoTypeAnswers, 'open');
-			$exportData->open_invented1 = reset($openInvented);
-			$exportData->open_invented2 = end($openInvented);
+			$openInvented = ArrayHelper::getValue($inventedEgoTypeAnswers, 'open');
+			$exportData['open_invented1'] = reset($openInvented);
+			$exportData['open_invented2'] = end($openInvented);
 			//情绪量化
 			//活跃
-			$exportData->emotion_alive = 0;
+			$exportData['emotion_alive'] = 0;
 			//热情
-			$exportData->emotion_warmth = 0;
+			$exportData['emotion_warmth'] = 0;
 			//快乐
-			$exportData->emotion_happy = 0;
+			$exportData['emotion_happy'] = 0;
 			//兴高采烈
-			$exportData->emotion_jubilant = 0;
+			$exportData['emotion_jubilant'] = 0;
 			//兴奋
-			$exportData->emotion_excited = 0;
+			$exportData['emotion_excited'] = 0;
 			//自豪
-			$exportData->emotion_proud = 0;
+			$exportData['emotion_proud'] = 0;
 			//欣喜
-			$exportData->emotion_delighted = 0;
+			$exportData['emotion_delighted'] = 0;
 			//精神充沛
-			$exportData->emotion_energetic = 0;
+			$exportData['emotion_energetic'] = 0;
 			//感激
-			$exportData->emotion_grateful = 0;
+			$exportData['emotion_grateful'] = 0;
 			//难过
-			$exportData->emotion_sad = 0;
+			$exportData['emotion_sad'] = 0;
 			//害怕
-			$exportData->emotion_scared = 0;
+			$exportData['emotion_scared'] = 0;
 			//紧张
-			$exportData->emotion_nervous = 0;
+			$exportData['emotion_nervous'] = 0;
 			//惊恐
-			$exportData->emotion_terrified = 0;
+			$exportData['emotion_terrified'] = 0;
 			//内疚
-			$exportData->emotion_guilt = 0;
+			$exportData['emotion_guilt'] = 0;
 			//战战兢兢
-			$exportData->emotion_trembled = 0;
+			$exportData['emotion_trembled'] = 0;
 			//恼怒
-			$exportData->emotion_annoyed = 0;
+			$exportData['emotion_annoyed'] = 0;
 			//羞愧
-			$exportData->emotion_ashamed = 0;
+			$exportData['emotion_ashamed'] = 0;
 			//易怒
-			$exportData->emotion_irritable = 0;
+			$exportData['emotion_irritable'] = 0;
 			//品牌态度
-			$exportData->brand_attitude_a = 0;
-			$exportData->brand_attitude_b = 0;
-			$exportData->brand_attitude_c = 0;
-			$exportData->brand_attitude_d = 0;
+			$exportData['brand_attitude_a'] = 0;
+			$exportData['brand_attitude_b'] = 0;
+			$exportData['brand_attitude_c'] = 0;
+			$exportData['brand_attitude_d'] = 0;
 			//品牌记忆
-			$exportData->brand_memory_1 = 0;
-			$exportData->brand_memory_2 = 0;
-			$exportData->brand_memory_3 = 0;
-			$exportData->brand_memory_4 = 0;
-			$exportData->brand_memory_5 = 0;
+			$exportData['brand_memory_1'] = 0;
+			$exportData['brand_memory_2'] = 0;
+			$exportData['brand_memory_3'] = 0;
+			$exportData['brand_memory_4'] = 0;
+			$exportData['brand_memory_5'] = 0;
 			//性别
-			$exportData->gender = $user->gender;
+			$exportData['gender'] = $user->gender;
 			//年龄
-			$exportData->age = $user->age;
+			$exportData['age'] = $user->age;
 			//化身认同分组结果标识
-			$exportData->identify_stamp = ArrayHelper::getValue($identifyLevelList, $identifyDivide) ?: 3;
+			$exportData['identify_stamp'] = ArrayHelper::getValue($identifyLevelList, $identifyDivide) ?: 3;
 			//自我差异分组结果，结果标识是放在一起的，需要拆分
 			if ($egoDivide) {
 				$egoDivideKey = ArrayHelper::getValue($egoLevelList, $egoDivide);
 				//差异大小
-				$exportData->difference_size = mb_substr($egoDivideKey, 0, 1, 'utf-8');
+				$exportData['difference_size'] = mb_substr($egoDivideKey, 0, 1, 'utf-8');
 				//差异正负
-				$exportData->difference_direction = mb_substr($egoDivideKey, -1, 1, 'utf-8');
+				$exportData['difference_direction'] = mb_substr($egoDivideKey, -1, 1, 'utf-8');
 			} else {
 				//差异大小
-				$exportData->difference_size = '中';
+				$exportData['difference_size'] = '中';
 				//差异正负
-				$exportData->difference_direction = '零';
+				$exportData['difference_direction'] = '零';
 			}
 			//广告强弱分组
-			$exportData->association_strength = ArrayHelper::getValue($advLevelList, $advDivide) ?: 0;
-			$exportData->divide_mark = ArrayHelper::getValue($divideLevels, $exportData->divide_stamp);
-//			$exportData->save();
-			$exportDataArray[] = ArrayHelper::toArray($exportData);
-			Console::stdout($exportData->id . ' ' . $exportData->user_id . PHP_EOL);
+			$exportData['association_strength'] = ArrayHelper::getValue($advLevelList, $advDivide) ?: 0;
+			$exportData['divide_mark'] = ArrayHelper::getValue($divideLevels, $exportData['divide_stamp']);
+			$exportDataArray[] = $exportData;
+			Console::stdout($exportData['round'] . ' ' . $exportData['user_id'] . PHP_EOL);
 		}
 		Export::deleteAll(['round' => $round]);
 		Export::getDb()->createCommand()->batchInsert(Export::tableName(), array_keys(reset($exportDataArray)), $exportDataArray)->execute();
@@ -1425,6 +1526,7 @@ class $modelNameFixture extends ActiveFixture
 		if (empty($brandMemoryAnswer)) {
 			throw new \Exception('用户没有品牌记忆答题信息');
 		}
+		Yii::error($brandMemoryAnswer);
 		$exportData = Export::find()->where(['user_id' => self::$user->id])->limit(1)->one();
 		if (empty($exportData)) {
 			throw new \Exception('没有用户导出数据实例');

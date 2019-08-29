@@ -290,7 +290,6 @@ class User extends CommonUser
 			$loginUser->round = $round;
 		}
 		$loginUser->save();
-		Yii::error($states);
 		if ($step == 1) {
 			Client::request([
 				'action' => 'userIncarnation',

@@ -56,13 +56,15 @@ class MemoryAction extends Action
 			$userAnswer = [];
 			foreach ($answers as $questionID => $answer) {
 				if (is_string($answer)) {
-					if (strpos($answer, ',') > 0) {
+					$blankValue = json_decode($answer, true);
+					if (empty($blankValue)) {
 						$blankValue = explode(',', $answer);
-					} else {
-						$blankValue = json_decode($answer, true);
 					}
 				} else {
 					$blankValue = $answer;
+				}
+				if (empty($blankValue)) {
+					throw new \Exception('答题内容为空' . $questionID);
 				}
 				foreach ($blankValue as $blankIndex => $item) {
 					$userAnswer[] = [
