@@ -6,6 +6,7 @@ namespace api\modules\v1\controllers;
 use api\modules\v1\actions\user\AuditAction;
 use api\modules\v1\actions\user\DeleteAction;
 use api\modules\v1\actions\user\DivideAction;
+use api\modules\v1\actions\user\DownloadAction;
 use api\modules\v1\actions\user\EmailValidateAction;
 use api\modules\v1\actions\user\ExportAction;
 use api\modules\v1\actions\user\IndexAction;
@@ -14,6 +15,7 @@ use api\modules\v1\actions\user\LogoutAction;
 use api\modules\v1\actions\user\RegisterAction;
 use api\modules\v1\actions\user\ResetPasswordAction;
 use api\modules\v1\actions\user\StateAction;
+use api\modules\v1\actions\user\UploadAction;
 use api\modules\v1\actions\user\ViewAction;
 use api\modules\v1\models\User;
 use common\filters\AccessTokenAuth;
@@ -46,7 +48,9 @@ class UserController extends ActiveController
 			'delete' => ['POST', 'DELETE'],
 			'index' => ['GET', 'POST', 'HEAD'],
 			'export' => ['GET', 'POST', 'HEAD'],
-			'divide' => ['GET', 'POST']
+			'divide' => ['GET', 'POST'],
+			'upload'=>['POST'],
+			'download'=>['GET']
 		];
 	}
 
@@ -113,6 +117,14 @@ class UserController extends ActiveController
 			],
 			'emailValidate' => [
 				'class' => EmailValidateAction::class,
+				'modelClass' => $this->modelClass
+			],
+			'upload'=>[
+				'class' => UploadAction::class,
+				'modelClass' => $this->modelClass
+			],
+			'download'=>[
+				'class' => DownloadAction::class,
 				'modelClass' => $this->modelClass
 			]
 		];

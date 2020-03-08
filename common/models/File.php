@@ -47,7 +47,7 @@ class File extends ActiveRecord
 				throw new \Exception('文件上传失败');
 			}
 		} else {
-			throw new \Exception($this->resolveErrorMessage($uploadedFile->error));
+			throw new \Exception('上传失败');
 		}
 	}
 
