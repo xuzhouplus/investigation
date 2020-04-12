@@ -197,7 +197,9 @@ $config = [
 		'swoolePort' => env('SWOOLE_PORT'),
 		'egoAlgorithm' => env('EGO_ALGORITHM'),
 		'accessPath' => env('UPLOAD_PATH'),
-		'accessUrl' => env('PREVIEW_URL')
+		'accessUrl' => env('PREVIEW_URL'),
+		'previewUrl'=>env('PREVIEW_URL'),
+		'uploadPath'=>env('UPLOAD_PATH'),
 	],
 ];
 
